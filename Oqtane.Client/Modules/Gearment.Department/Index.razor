@@ -1,0 +1,109 @@
+@using Gearment.Department.Services
+@using Gearment.Department.Models
+@using Syncfusion.Blazor.Calendars 
+
+@namespace Gearment.Department
+@inherits ModuleBase
+@inject IDepartmentService DepartmentService
+@inject NavigationManager NavigationManager
+
+@if (Departments == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Department" />
+    <br />
+    <br />
+    @if (@Departments.Count != 0)
+    {
+        <SfGrid DataSource="@Departments">
+            <GridColumns>
+                <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+                        @{ var department = (context as Department);
+            <SfTimePicker TValue="DateTime" Value="department.DailyStartTime" Format="HH:mm" Readonly="true"></SfTimePicker>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+                        @{ var department = (context as Department);
+            <SfTimePicker TValue="DateTime" Value="department.DailyEndTime" Format="HH:mm" Readonly="true"></SfTimePicker>
+                        }
+                    </Template>
+                </GridColumn>
+
+                <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+                        @{ var department = (context as Department);
+            <SfTimePicker TValue="DateTime" Value="department.BreakStartTime" Format="HH:mm" Readonly="true"></SfTimePicker> }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+                        @{ var department = (context as Department);
+            <SfTimePicker TValue="DateTime" Value="department.BreakEndTime" Format="HH:mm" Readonly="true"></SfTimePicker>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+                        @{ var department = (context as Department);
+                            <td><ActionLink Action="Edit" Parameters="@($"id=" + department.DepartmentId.ToString())" /></td>
+                            <td><ActionDialog Header="Delete Department" Message="@("Are You Sure You Wish To Delete The " + department.Name + " Department?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(department))" /></td> 
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    }
+    else
+    {
+        <p>No Departments To Display</p>
+    }
+}
+<br /><br /><br />
+
+@code {
+    public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    public List<Department> Departments { get; set; }    
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Departments = await DepartmentService.GetDepartmentsAsync(ModuleState.ModuleId);
+            
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Department {Error}", ex.Message);
+            AddModuleMessage("Error Loading Department", MessageType.Error);
+        }
+    }
+
+    private async Task Delete(Department Department)
+    {
+        try
+        {
+            await DepartmentService.DeleteDepartmentAsync(Department.DepartmentId, ModuleState.ModuleId);
+            await logger.LogInformation("Department Deleted {Department}", Department);
+            Departments = await DepartmentService.GetDepartmentsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Department {Department} {Error}", Department, ex.Message);
+            AddModuleMessage("Error Deleting Department", MessageType.Error);
+        }
+    }
+}

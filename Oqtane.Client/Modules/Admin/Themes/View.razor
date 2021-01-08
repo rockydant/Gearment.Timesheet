@@ -1,0 +1,102 @@
+@namespace Oqtane.Modules.Admin.Themes
+@using System.Net
+@inherits ModuleBase
+@inject IThemeService ThemeService
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<View> Localizer
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <Label For="name" HelpText="The name of the theme" ResourceKey="Name">Name: </Label>
+        </td>
+        <td>
+            <input id="name" class="form-control" @bind="@_name" disabled />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="themename" HelpText="The internal name of the module" ResourceKey="InternalName">Internal Name: </Label>
+        </td>
+        <td>
+            <input id="themename" class="form-control" @bind="@_themeName" disabled />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="version" HelpText="The version of the thene" ResourceKey="Version">Version: </Label>
+        </td>
+        <td>
+            <input id="version" class="form-control" @bind="@_version" disabled />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="owner" HelpText="The owner or creator of the theme" ResourceKey="Owner">Owner: </Label>
+        </td>
+        <td>
+            <input id="owner" class="form-control" @bind="@_owner" disabled />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="url" HelpText="The reference url of the theme" ResourceKey="ReferenceUrl">Reference Url: </Label>
+        </td>
+        <td>
+            <input id="url" class="form-control" @bind="@_url" disabled />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="contact" HelpText="The contact for the theme" ResourceKey="Contact">Contact: </Label>
+        </td>
+        <td>
+            <input id="contact" class="form-control" @bind="@_contact" disabled />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="license" HelpText="The license of the theme" ResourceKey="License">License: </Label>
+        </td>
+        <td>
+            <textarea id="license" class="form-control" @bind="@_license" rows="5" disabled></textarea>
+        </td>
+    </tr>
+</table>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">@Localizer["Cancel"]</NavLink>
+
+@code {
+    private string _themeName = "";
+    private string _name;
+    private string _version;
+    private string _owner = "";
+    private string _url = "";
+    private string _contact = "";
+    private string _license = "";
+
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Host;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _themeName = WebUtility.UrlDecode(PageState.QueryString["name"]);
+            var themes = await ThemeService.GetThemesAsync();
+            var theme = themes.FirstOrDefault(item => item.ThemeName == _themeName);
+            if (theme != null)
+            {
+                _name = theme.Name;
+                _version = theme.Version;
+                _owner = theme.Owner;
+                _url = theme.Url;
+                _contact = theme.Contact;
+                _license = theme.License;
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Theme {ThemeName} {Error}", _themeName, ex.Message);
+            AddModuleMessage(Localizer["Error Loading Theme"], MessageType.Error);
+        }
+    }
+}

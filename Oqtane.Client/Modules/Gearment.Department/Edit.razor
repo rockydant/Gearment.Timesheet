@@ -1,0 +1,171 @@
+@using Oqtane.Modules.Controls
+@using Gearment.Department.Services
+@using Gearment.Department.Models
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Inputs
+ 
+@namespace Gearment.Department
+@inherits ModuleBase
+@inject IDepartmentService DepartmentService
+@inject NavigationManager NavigationManager
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Department Name</label>
+    <div class="col-10">
+        <div class="input-group">
+            <input id="name" class="form-control" @bind="@_name" />
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Start Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_dailyStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">End Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime"  @bind-Value="@_dailyEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Break Start Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime"  @bind-Value="@_breakStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Break End Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime"  @bind-Value="@_breakEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Total Rest Hour</label>
+    <div class="col-10">
+        <div class="input-group">            
+            <SfNumericTextBox TValue="int" @bind-Value="@_totalRestHour" Format="###.##" FloatLabelType="@FloatLabelType.Never"></SfNumericTextBox>
+        </div>
+    </div>
+</div>
+
+
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+<br />
+<br />
+@if (PageState.Action == "Edit")
+{
+<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
+
+@code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Actions => "Add,Edit";
+
+    public override string Title => "Manage Department";
+
+    public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
+    };
+
+    int _id;
+    string _name;
+    DateTime _dailyStartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 08, 00, 00);
+    DateTime _dailyEndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 16, 00, 00);
+    DateTime _breakStartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 10, 00, 00);
+    DateTime _breakEndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 12, 00, 00);
+    int _totalRestHour = 1;
+
+    string _createdby;
+    DateTime _createdon;
+    string _modifiedby;
+    DateTime _modifiedon;
+
+    public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
+    public DateTime MaxVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 23, 00, 00);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (PageState.Action == "Edit")
+            {
+                _id = Int32.Parse(PageState.QueryString["id"]);
+                Department Department = await DepartmentService.GetDepartmentAsync(_id, ModuleState.ModuleId);
+                if (Department != null)
+                {
+                    _name = Department.Name;
+                    _dailyStartTime = Department.DailyStartTime;
+                    _dailyEndTime = Department.DailyEndTime;
+                    _breakStartTime = Department.BreakStartTime;
+                    _breakEndTime = Department.BreakEndTime;
+                    _totalRestHour = Department.TotalRestHour;
+
+                    _createdby = Department.CreatedBy;
+                    _createdon = Department.CreatedOn;
+                    _modifiedby = Department.ModifiedBy;
+                    _modifiedon = Department.ModifiedOn;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Department {DepartmentId} {Error}", _id, ex.Message);
+            AddModuleMessage("Error Loading Department", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (PageState.Action == "Add")
+            {
+                Department Department = new Department();
+                Department.ModuleId = ModuleState.ModuleId;
+                Department.Name = _name;
+                Department.DailyStartTime = _dailyStartTime;
+                Department.DailyEndTime = _dailyEndTime;
+                Department.BreakStartTime = _breakStartTime;
+                Department.BreakEndTime = _breakEndTime;
+                Department.TotalRestHour = _totalRestHour;
+
+                Department = await DepartmentService.AddDepartmentAsync(Department);
+                await logger.LogInformation("Department Added {Department}", Department);
+            }
+            else
+            {
+                Department Department = await DepartmentService.GetDepartmentAsync(_id, ModuleState.ModuleId);
+                Department.Name = _name;
+                Department.DailyStartTime = _dailyStartTime;
+                Department.DailyEndTime = _dailyEndTime;
+                Department.BreakStartTime = _breakStartTime;
+                Department.BreakEndTime = _breakEndTime;
+                Department.TotalRestHour = _totalRestHour;
+
+                await DepartmentService.UpdateDepartmentAsync(Department);
+                await logger.LogInformation("Department Updated {Department}", Department);
+            }
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving Department {Error}", ex.Message);
+            AddModuleMessage("Error Saving Department", MessageType.Error);
+        }
+    } }

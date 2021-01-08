@@ -1,0 +1,111 @@
+@namespace Oqtane.Modules.Admin.ModuleDefinitions
+@inherits ModuleBase
+@inject NavigationManager NavigationManager
+@inject IModuleDefinitionService ModuleDefinitionService
+@inject IPackageService PackageService
+@inject IStringLocalizer<Index> Localizer
+
+@if (_moduleDefinitions == null)
+{
+    <p><em>@Localizer["Loading..."]</em></p>
+}
+else
+{
+    <ActionLink Action="Add" Text="Install Module" ResourceKey="InstallModule" />
+
+    <Pager Items="@_moduleDefinitions">
+        <Header>
+            <th style="width: 1px;">&nbsp;</th>
+            <th style="width: 1px;">&nbsp;</th>
+            <th>@Localizer["Name"]</th>
+            <th>@Localizer["Version"]</th>
+            <th style="width: 1px;">&nbsp;</th>
+        </Header>
+        <Row>
+            <td><ActionLink Action="Edit" Parameters="@($"id=" + context.ModuleDefinitionId.ToString())" ResourceKey="EditModule" /></td>
+            <td>
+                @if (context.AssemblyName != "Oqtane.Client")
+                {
+                    <ActionDialog Header="Delete Module" Message="@("Are You Sure You Wish To Delete The " + context.Name + " Module?")" Action="Delete" Security="SecurityAccessLevel.Host" Class="btn btn-danger" OnClick="@(async () => await DeleteModule(context))" ResourceKey="DeleteModule" />
+                }
+            </td>
+            <td>@context.Name</td>
+            <td>@context.Version</td>
+            <td>
+                @if (UpgradeAvailable(context.ModuleDefinitionName, context.Version))
+                {
+                    <button type="button" class="btn btn-success" @onclick=@(async () => await DownloadModule(context.ModuleDefinitionName, context.Version))>@Localizer["Upgrade"]</button>
+                }
+            </td>
+        </Row>
+    </Pager>
+}
+
+@code {
+    private List<ModuleDefinition> _moduleDefinitions;
+    private List<Package> _packages;
+
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Host;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _moduleDefinitions = await ModuleDefinitionService.GetModuleDefinitionsAsync(PageState.Site.SiteId);
+            _packages = await PackageService.GetPackagesAsync("module");
+        }
+        catch (Exception ex)
+        {
+            if (_moduleDefinitions == null)
+            {
+                await logger.LogError(ex, "Error Loading Modules {Error}", ex.Message);
+                AddModuleMessage(Localizer["Error Loading Modules"], MessageType.Error);
+            }
+        }
+    }
+
+    private bool UpgradeAvailable(string moduledefinitionname, string version)
+    {
+        var upgradeavailable = false;
+        if (_packages != null)
+        {
+            var package = _packages.Where(item => item.PackageId == Utilities.GetTypeName(moduledefinitionname)).FirstOrDefault();
+            if (package != null)
+            {
+                upgradeavailable = (Version.Parse(package.Version).CompareTo(Version.Parse(version)) > 0);
+            }
+
+        }
+        return upgradeavailable;
+    }
+
+    private async Task DownloadModule(string moduledefinitionname, string version)
+    {
+        try
+        {
+            await PackageService.DownloadPackageAsync(moduledefinitionname, version, "Modules");
+            await logger.LogInformation("Module Downloaded {ModuleDefinitionName} {Version}", moduledefinitionname, version);
+            await ModuleDefinitionService.InstallModuleDefinitionsAsync();
+            AddModuleMessage(Localizer["Module Installed Successfully. You Must <a href=\"{0}\">Restart</a> Your Application To Apply These Changes.", NavigateUrl("admin/system")], MessageType.Success);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Downloading Module {ModuleDefinitionName} {Version} {Error}", moduledefinitionname, version, ex.Message);
+            AddModuleMessage(Localizer["Error Downloading Module"], MessageType.Error);
+        }
+    }
+
+    private async Task DeleteModule(ModuleDefinition moduleDefinition)
+    {
+        try
+        {
+            await ModuleDefinitionService.DeleteModuleDefinitionAsync(moduleDefinition.ModuleDefinitionId, moduleDefinition.SiteId);
+            AddModuleMessage(Localizer["Module Deleted Successfully. You Must <a href=\"{0}\">Restart</a> Your Application To Apply These Changes.", NavigateUrl("admin/system")], MessageType.Success);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Module {ModuleDefinition} {Error}", moduleDefinition, ex.Message);
+            AddModuleMessage(Localizer["Error Deleting Module"], MessageType.Error);
+        }
+    }
+}

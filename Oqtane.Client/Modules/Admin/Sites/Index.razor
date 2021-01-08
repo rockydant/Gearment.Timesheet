@@ -1,0 +1,81 @@
+@namespace Oqtane.Modules.Admin.Sites
+@inherits ModuleBase
+@inject NavigationManager NavigationManager
+@inject IAliasService AliasService
+@inject ISiteService SiteService
+@inject IStringLocalizer<Index> Localizer
+
+@if (_sites == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ActionLink Action="Add" Text="Add Site" ResourceKey="AddSite" />
+
+    <Pager Items="@_sites">
+        <Header>
+            <th style="width: 1px;">&nbsp;</th>
+            <th style="width: 1px;">&nbsp;</th>
+            <th>@Localizer["Name"]</th>
+        </Header>
+        <Row>
+            <td><ActionLink Action="Edit" Parameters="@($"id=" + context.AliasId.ToString())" ResourceKey="EditSite" /></td>
+            <td><ActionDialog Header="Delete Site" Message="@Localizer["Are You Sure You Wish To Delete The {0} Site?", context.Name]" Action="Delete" Security="SecurityAccessLevel.Admin" Class="btn btn-danger" OnClick="@(async () => await DeleteSite(context))" ResourceKey="DeleteSite" /></td>
+            <td><a href="@(_scheme + context.Name)">@context.Name</a></td>
+        </Row>
+    </Pager>
+}
+
+@code {
+    private List<Alias> _sites;
+    private string _scheme;
+
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Host;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        _scheme = uri.Scheme + "://";
+
+        var aliases = await AliasService.GetAliasesAsync();
+        _sites = new List<Alias>();
+        foreach (Alias alias in aliases)
+        {
+            if (!_sites.Exists(item => item.TenantId == alias.TenantId && item.SiteId == alias.SiteId))
+            {
+                _sites.Add(alias);
+            }
+        }
+    }
+
+    private async Task DeleteSite(Alias alias)
+    {
+        try
+        {
+            if (alias.SiteId != PageState.Site.SiteId || alias.TenantId != PageState.Site.TenantId)
+            {
+                SiteService.SetAlias(alias);
+                await SiteService.DeleteSiteAsync(alias.SiteId);
+                await Log(alias, LogLevel.Information, "", null, "Site Deleted {SiteId}", alias.SiteId);
+
+                var aliases = await AliasService.GetAliasesAsync();
+                foreach (Alias a in aliases.Where(item => item.SiteId == alias.SiteId && item.TenantId == alias.TenantId))
+                {
+                    await AliasService.DeleteAliasAsync(a.AliasId);
+                }
+
+                NavigationManager.NavigateTo(NavigateUrl());
+            }
+            else
+            {
+                AddModuleMessage(Localizer["You Can Not Delete The Current Site"], MessageType.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Log(alias, LogLevel.Error, "", ex, "Error Deleting Site {SiteId} {Error}", alias.SiteId, ex.Message);
+            AddModuleMessage(Localizer["Error Deleting Site"], MessageType.Error);
+        }
+    }
+}

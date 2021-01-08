@@ -1,0 +1,82 @@
+@using Gearment.Employee.Services
+@using Gearment.Employee.Models
+
+@namespace Gearment.Employee
+@inherits ModuleBase
+@inject IEmployeeService EmployeeService
+@inject NavigationManager NavigationManager
+
+@if (Employees == null)
+{
+    <p><em>Loading...</em></p> 
+}
+else
+{
+<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Employee" />
+                <br />
+                <br />
+@if (Employees.Count != 0)
+{
+                <SfGrid DataSource="@Employees">
+                    <GridColumns>
+                        <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Department) HeaderText="Department" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+
+                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                            <Template>
+                                @{ var employee = (context as Employee);
+                    <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
+                                            <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            }
+            else
+            {
+<p>No Employees To Display</p>
+}
+                                    }
+
+@code { public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    public List<Employee> Employees { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Employees = await EmployeeService.GetEmployeesAsync(ModuleState.ModuleId);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Employee {Error}", ex.Message);
+            AddModuleMessage("Error Loading Employee", MessageType.Error);
+        }
+    }
+
+    private async Task Delete(Employee Employee)
+    {
+        try
+        {
+            await EmployeeService.DeleteEmployeeAsync(Employee.EmployeeId, ModuleState.ModuleId);
+            await logger.LogInformation("Employee Deleted {Employee}", Employee);
+            Employees = await EmployeeService.GetEmployeesAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Employee {Employee} {Error}", Employee, ex.Message);
+            AddModuleMessage("Error Deleting Employee", MessageType.Error);
+        }
+    } }

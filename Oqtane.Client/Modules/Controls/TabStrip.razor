@@ -1,0 +1,90 @@
+@namespace Oqtane.Modules.Controls
+@inherits ModuleControlBase
+
+<CascadingValue Value="this">
+    <div class="container-fluid">
+        <div class="form-group">
+            <ul class="nav nav-tabs" role="tablist">
+                @foreach (TabPanel tabPanel in _tabPanels)
+                {
+                    @if (IsAuthorized(tabPanel))
+                    {
+                        <li class="nav-item">
+                            @if (tabPanel.Name == ActiveTab)
+                            {
+                                <a class="nav-link active" data-toggle="tab" href="#@tabPanel.Name" role="tab" @onclick:preventDefault="true">
+                                    @tabPanel.DisplayHeading()
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="nav-link" data-toggle="tab" href="#@tabPanel.Name" role="tab" @onclick:preventDefault="true">
+                                    @tabPanel.DisplayHeading()
+                                </a>
+                            }
+                        </li>
+                    }
+                }
+            </ul>
+            <div class="tab-content">
+                <br />
+                @ChildContent
+            </div>
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    private List<TabPanel> _tabPanels = new List<TabPanel>();
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } // contains the TabPanels
+
+    [Parameter]
+    public string ActiveTab { get; set; } // optional - defaults to first TabPanel if not specified. Can also be set using a "tab=" querystring parameter.
+
+    protected override void OnInitialized()
+    {
+        if (PageState.QueryString.ContainsKey("tab"))
+        {
+            ActiveTab = PageState.QueryString["tab"];
+        }
+    }
+
+    internal void AddTabPanel(TabPanel tabPanel)
+    {
+        _tabPanels.Add(tabPanel);
+        if (string.IsNullOrEmpty(ActiveTab))
+        {
+            ActiveTab = tabPanel.Name;
+        }
+        StateHasChanged();
+    }
+
+    private bool IsAuthorized(TabPanel tabPanel)
+    {
+        var authorized = false;
+        switch (tabPanel.Security)
+        {
+            case null: // security not specified - assume SecurityAccessLevel.Anonymous
+                authorized = true;
+                break;
+            case SecurityAccessLevel.Anonymous:
+                authorized = true;
+                break;
+            case SecurityAccessLevel.View:
+                authorized = UserSecurity.IsAuthorized(PageState.User, PermissionNames.View, ModuleState.Permissions);
+                break;
+            case SecurityAccessLevel.Edit:
+                authorized = UserSecurity.IsAuthorized(PageState.User, PermissionNames.Edit, ModuleState.Permissions);
+                break;
+            case SecurityAccessLevel.Admin:
+                authorized = UserSecurity.IsAuthorized(PageState.User, RoleNames.Admin);
+                break;
+            case SecurityAccessLevel.Host:
+                authorized = UserSecurity.IsAuthorized(PageState.User, RoleNames.Host);
+                break;
+        }
+        return authorized;
+    }
+}

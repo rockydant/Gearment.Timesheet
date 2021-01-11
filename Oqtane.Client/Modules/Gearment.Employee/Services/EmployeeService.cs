@@ -45,5 +45,11 @@ namespace Gearment.Employee.Services
         {
             await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/{EmployeeId}", ModuleId));
         }
+
+        public async Task<List<Department.Models.DepartmentViewModel>> GetDepartmentsAsync(int ModuleId)
+        {
+            return await GetJsonAsync<List<Department.Models.DepartmentViewModel>>(CreateAuthorizationPolicyUrl($"{Apiurl}/departments", ModuleId));
+            
+        }
     }
 }

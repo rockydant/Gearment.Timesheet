@@ -9,9 +9,9 @@ namespace Gearment.Department
         {
             Name = "Department",
             Description = "Department",
-            Version = "1.0.0",
+            Version = "1.0.1",
             ServerManagerType = "Gearment.Department.Manager.DepartmentManager, Oqtane.Server",
-            ReleaseVersions = "1.0.0"
+            ReleaseVersions = "1.0.1"
         };
     }
 }

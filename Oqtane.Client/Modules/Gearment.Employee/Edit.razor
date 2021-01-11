@@ -1,40 +1,91 @@
 @using Oqtane.Modules.Controls
 @using Gearment.Employee.Services
 @using Gearment.Employee.Models
+@using Gearment.Department.Models
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Inputs
 
 @namespace Gearment.Employee
 @inherits ModuleBase
 @inject IEmployeeService EmployeeService
 @inject NavigationManager NavigationManager
 
-<table class="table table-borderless">
-    <tr>
-        <td>
-            <Label For="name" HelpText="Enter a name">Name: </Label>
-        </td>
-        <td>
-            <input id="name" class="form-control" @bind="@_name" />
-        </td>
-    </tr>
-</table>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Employee Name</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTextBox @bind-Value="@_name"></SfTextBox>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Payroll ID</label>
+    <div class="col-10">
+        <div class="input-group">
+            <input id="name" class="form-control" @bind="@_payrollID" />
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Rate</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfNumericTextBox TValue="double" @bind-Value="@_rate" Format="c2" Step="0.5" FloatLabelType="@FloatLabelType.Never"></SfNumericTextBox>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Department</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
+                <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Start Date</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfDatePicker TValue="DateTime" @bind-Value="@_startDate" Placeholder='Choose a Date'></SfDatePicker>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Status</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfDropDownList TValue="string" TItem="string" Placeholder="Select status" @bind-Value="@_status" DataSource="@statusList"></SfDropDownList>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Note</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTextBox Multiline=true Placeholder="Enter your address" @bind-Value="@_note"></SfTextBox>
+        </div>
+    </div>
+</div>
 <button type="button" class="btn btn-success" @onclick="Save">Save</button>
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+
 <br />
 <br />
 @if (PageState.Action == "Edit")
 {
-    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
-}
+<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
 
-@code {
-    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+@code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
     public override string Actions => "Add,Edit";
 
     public override string Title => "Manage Employee";
 
     public override List<Resource> Resources => new List<Resource>()
-    {
+{
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
     };
 
@@ -45,10 +96,22 @@
     string _modifiedby;
     DateTime _modifiedon;
 
+    int _payrollID = 0;
+    double _rate = 14;
+    string _department = "tshirt";
+    string _status = "active";
+    string _note = string.Empty;
+    DateTime _startDate = DateTime.Now.Date;
+
+    List<string> statusList = new List<string> { "Active", "InActive" };
+    List<DepartmentViewModel> departmentList = new List<DepartmentViewModel>();
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            InitData();
+
             if (PageState.Action == "Edit")
             {
                 _id = Int32.Parse(PageState.QueryString["id"]);
@@ -56,6 +119,13 @@
                 if (Employee != null)
                 {
                     _name = Employee.Name;
+                    _payrollID = Employee.PayrollID;
+                    _rate = Employee.Rate;
+                    _department = Employee.Department;
+                    _status = Employee.Status;
+                    _note = Employee.Note;
+                    _startDate = Employee.StartDate;
+
                     _createdby = Employee.CreatedBy;
                     _createdon = Employee.CreatedOn;
                     _modifiedby = Employee.ModifiedBy;
@@ -69,6 +139,10 @@
             AddModuleMessage("Error Loading Employee", MessageType.Error);
         }
     }
+    private async Task InitData()
+    {
+        departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+    }
 
     private async Task Save()
     {
@@ -79,6 +153,13 @@
                 Employee Employee = new Employee();
                 Employee.ModuleId = ModuleState.ModuleId;
                 Employee.Name = _name;
+                Employee.PayrollID = _payrollID;
+                Employee.Rate = _rate;
+                Employee.Department = _department;
+                Employee.Status = _status;
+                Employee.Note = _note;
+                Employee.StartDate = _startDate;
+
                 Employee = await EmployeeService.AddEmployeeAsync(Employee);
                 await logger.LogInformation("Employee Added {Employee}", Employee);
             }
@@ -86,6 +167,13 @@
             {
                 Employee Employee = await EmployeeService.GetEmployeeAsync(_id, ModuleState.ModuleId);
                 Employee.Name = _name;
+                Employee.PayrollID = _payrollID;
+                Employee.Rate = _rate;
+                Employee.Department = _department;
+                Employee.Status = _status;
+                Employee.Note = _note;
+                Employee.StartDate = _startDate;
+
                 await EmployeeService.UpdateEmployeeAsync(Employee);
                 await logger.LogInformation("Employee Updated {Employee}", Employee);
             }
@@ -96,5 +184,4 @@
             await logger.LogError(ex, "Error Saving Employee {Error}", ex.Message);
             AddModuleMessage("Error Saving Employee", MessageType.Error);
         }
-    }
-}
+    } }

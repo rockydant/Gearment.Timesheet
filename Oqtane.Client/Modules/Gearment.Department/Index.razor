@@ -1,6 +1,6 @@
 @using Gearment.Department.Services
 @using Gearment.Department.Models
-@using Syncfusion.Blazor.Calendars 
+@using Syncfusion.Blazor.Navigations
 
 @namespace Gearment.Department
 @inherits ModuleBase
@@ -9,86 +9,91 @@
 
 @if (Departments == null)
 {
-    <p><em>Loading...</em></p>
-}
+<p><em>Loading...</em></p> }
 else
 {
-    <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Department" />
-    <br />
-    <br />
-    @if (@Departments.Count != 0)
-    {
-        <SfGrid DataSource="@Departments">
-            <GridColumns>
-                <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-                        @{ var department = (context as Department);
-            <SfTimePicker TValue="DateTime" Value="department.DailyStartTime" Format="HH:mm" Readonly="true"></SfTimePicker>
-                        }
-                    </Template>
-                </GridColumn>
-                <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-                        @{ var department = (context as Department);
-            <SfTimePicker TValue="DateTime" Value="department.DailyEndTime" Format="HH:mm" Readonly="true"></SfTimePicker>
-                        }
-                    </Template>
-                </GridColumn>
+<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Department" />
+                <br />
+                                <br />
+                                                @if (@Departments.Count != 0)
+                                                {
+                                <SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+                                    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Department"></GridEvents>
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as Department);
+                            <Label class="form-group label">@department.DailyStartTime.ToString("hh:mm tt")</Label> }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as Department);
+                            <Label class="form-group label">@department.DailyEndTime.ToString("hh:mm tt")</Label> }
+                                            </Template>
+                                        </GridColumn>
 
-                <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-                        @{ var department = (context as Department);
-            <SfTimePicker TValue="DateTime" Value="department.BreakStartTime" Format="HH:mm" Readonly="true"></SfTimePicker> }
-                    </Template>
-                </GridColumn>
-                <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-                        @{ var department = (context as Department);
-            <SfTimePicker TValue="DateTime" Value="department.BreakEndTime" Format="HH:mm" Readonly="true"></SfTimePicker>
-                        }
-                    </Template>
-                </GridColumn>
-                <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-                        @{ var department = (context as Department);
+                                        <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as Department);
+                            <Label class="form-group label">@department.BreakStartTime.ToString("hh:mm tt")</Label>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as Department);
+                            <Label class="form-group label">@department.BreakEndTime.ToString("hh:mm tt")</Label> }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as Department);
                             <td><ActionLink Action="Edit" Parameters="@($"id=" + department.DepartmentId.ToString())" /></td>
-                            <td><ActionDialog Header="Delete Department" Message="@("Are You Sure You Wish To Delete The " + department.Name + " Department?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(department))" /></td> 
-                        }
-                    </Template>
-                </GridColumn>
-            </GridColumns>
-        </SfGrid>
-    }
-    else
-    {
-        <p>No Departments To Display</p>
-    }
-}
-<br /><br /><br />
+                                                    <td><ActionDialog Header="Delete Department" Message="@("Are You Sure You Wish To Delete The " + department.Name + " Department?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(department))" /></td>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid> }
+                            else
+                            {
+            <p>No Departments To Display</p>}}
+<br />
+<br />
+<br />
 
-@code {
-    public override List<Resource> Resources => new List<Resource>()
-    {
+@code { public override List<Resource> Resources => new List<Resource>()
+{
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
         new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
     };
 
-    public List<Department> Departments { get; set; }    
+    SfGrid<Department> Grid;
+    private List<Object> Toolbaritems = new List<Object>() { "Search", "ExcelExport", "Print" };
+
+    public List<Department> Departments { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            InitToolbar();
             Departments = await DepartmentService.GetDepartmentsAsync(ModuleState.ModuleId);
-            
+
         }
         catch (Exception ex)
         {
             await logger.LogError(ex, "Error Loading Department {Error}", ex.Message);
             AddModuleMessage("Error Loading Department", MessageType.Error);
         }
+    }
+
+    private void InitToolbar()
+    {
+        //Toolbaritems.Add(new ItemModel() { Text = "New", TooltipText = "New", PrefixIcon = "e-click", Id = "Click" });
     }
 
     private async Task Delete(Department Department)
@@ -104,6 +109,14 @@ else
         {
             await logger.LogError(ex, "Error Deleting Department {Department} {Error}", Department, ex.Message);
             AddModuleMessage("Error Deleting Department", MessageType.Error);
+        }
+    }
+
+    public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Text == "New")
+        {
+            await this.Grid.GroupExpandAll();
         }
     }
 }

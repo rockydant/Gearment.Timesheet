@@ -9,9 +9,9 @@ namespace Gearment.Employee
         {
             Name = "Employee",
             Description = "Employee",
-            Version = "1.0.0",
+            Version = "1.0.1",
             ServerManagerType = "Gearment.Employee.Manager.EmployeeManager, Oqtane.Server",
-            ReleaseVersions = "1.0.0"
+            ReleaseVersions = "1.0.1"
         };
     }
 }

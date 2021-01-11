@@ -6,7 +6,9 @@ using Oqtane.Shared;
 using Oqtane.Enums;
 using Oqtane.Infrastructure;
 using Gearment.Employee.Models;
+using Gearment.Department.Models;
 using Gearment.Employee.Repository;
+using Gearment.Department.Repository;
 
 namespace Gearment.Employee.Controllers
 {
@@ -14,12 +16,14 @@ namespace Gearment.Employee.Controllers
     public class EmployeeController : Controller
     {
         private readonly IEmployeeRepository _EmployeeRepository;
+        private readonly IDepartmentRepository _DepartmentRepository;
         private readonly ILogManager _logger;
         protected int _entityId = -1;
 
-        public EmployeeController(IEmployeeRepository EmployeeRepository, ILogManager logger, IHttpContextAccessor accessor)
+        public EmployeeController(IEmployeeRepository EmployeeRepository, IDepartmentRepository DepartmentRepository, ILogManager logger, IHttpContextAccessor accessor)
         {
             _EmployeeRepository = EmployeeRepository;
+            _DepartmentRepository = DepartmentRepository;
             _logger = logger;
 
             if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
@@ -34,6 +38,13 @@ namespace Gearment.Employee.Controllers
         public IEnumerable<Models.Employee> Get(string moduleid)
         {
             return _EmployeeRepository.GetEmployees(int.Parse(moduleid));
+        }
+
+        [HttpGet("departments")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public IEnumerable<Gearment.Department.Models.DepartmentViewModel> GetDepartment()
+        {
+            return _DepartmentRepository.GetDepartments();
         }
 
         // GET api/<controller>/5

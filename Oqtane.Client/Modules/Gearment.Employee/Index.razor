@@ -8,41 +8,37 @@
 
 @if (Employees == null)
 {
-    <p><em>Loading...</em></p> 
-}
-else
-{
-<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Employee" />
-                <br />
-                <br />
-@if (Employees.Count != 0)
-{
-                <SfGrid DataSource="@Employees">
-                    <GridColumns>
-                        <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Employee.Department) HeaderText="Department" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                        <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-
-                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                            <Template>
-                                @{ var employee = (context as Employee);
-                    <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
-                                            <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
-                                }
-                            </Template>
-                        </GridColumn>
-                    </GridColumns>
-                </SfGrid>
-            }
+<p><em>Loading...</em></p> }
             else
             {
-<p>No Employees To Display</p>
-}
-                                    }
+<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Employee" />
+                <br />
+                                <br />
+                                                @if (Employees.Count != 0)
+                                                {
+                                <SfGrid DataSource="@Employees" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" Format="C2" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.Department) HeaderText="Dept." TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Rate" Format="d" TextAlign="TextAlign.Center" Width="120"></GridColumn>                                       
+                                        <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+
+                                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var employee = (context as Employee);
+                                    <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
+                                                            <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid> }
+                            else
+                            {
+            <p>No Employees To Display</p>}}
 
 @code { public override List<Resource> Resources => new List<Resource>()
 {
@@ -51,6 +47,7 @@ else
     };
 
     public List<Employee> Employees { get; set; }
+    private List<Object> Toolbaritems = new List<Object>() { "Search", "ExcelExport", "Print", "PdfExport" };
 
     protected override async Task OnInitializedAsync()
     {

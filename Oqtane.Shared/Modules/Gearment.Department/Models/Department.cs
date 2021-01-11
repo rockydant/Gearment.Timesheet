@@ -21,4 +21,10 @@ namespace Gearment.Department.Models
         public string ModifiedBy { get; set; }
         public DateTime ModifiedOn { get; set; }
     }
+
+    public class DepartmentViewModel
+    {
+        public int DepartmentId { get; set; }
+        public string Name { get; set; }
+    }
 }

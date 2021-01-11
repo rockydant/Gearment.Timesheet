@@ -15,6 +15,25 @@ namespace Gearment.Department.Repository
             _db = context;
         }
 
+        public IEnumerable<Models.DepartmentViewModel> GetDepartments()
+        {
+            List<DepartmentViewModel> result = new List<DepartmentViewModel>();
+
+            if (_db.Department.Any())
+            {
+                foreach (var item in _db.Department)
+                {
+                    result.Add(new DepartmentViewModel
+                    {
+                        DepartmentId = item.DepartmentId,
+                        Name = item.Name
+                    });
+                }
+            }
+
+            return result;                
+        }
+
         public IEnumerable<Models.Department> GetDepartments(int ModuleId)
         {
             return _db.Department.Where(item => item.ModuleId == ModuleId);

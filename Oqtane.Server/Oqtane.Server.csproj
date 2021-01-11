@@ -25,6 +25,8 @@
     <EmbeddedResource Include="Modules\Gearment.Department\Scripts\Gearment.Department.Uninstall.sql" />
     <EmbeddedResource Include="Modules\Gearment.Employee\Scripts\Gearment.Employee.1.0.0.sql" />
     <EmbeddedResource Include="Modules\Gearment.Employee\Scripts\Gearment.Employee.Uninstall.sql" />
+    <EmbeddedResource Include="Modules\Gearment.Timesheet\Scripts\Gearment.Timesheet.1.0.0.sql" />
+    <EmbeddedResource Include="Modules\Gearment.Timesheet\Scripts\Gearment.Timesheet.Uninstall.sql" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Master.00.00.00.00.sql" />

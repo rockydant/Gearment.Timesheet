@@ -1,5 +1,11 @@
 @using Gearment.Employee.Services
 @using Gearment.Employee.Models
+@using Gearment.Department.Models
+
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.DropDowns
 
 @namespace Gearment.Employee
 @inherits ModuleBase
@@ -8,37 +14,91 @@
 
 @if (Employees == null)
 {
-<p><em>Loading...</em></p> }
-            else
-            {
-<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Employee" />
-                <br />
-                                <br />
-                                                @if (Employees.Count != 0)
-                                                {
-                                <SfGrid DataSource="@Employees" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
-                                    <GridColumns>
-                                        <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" Format="C2" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn Field=@nameof(Employee.Department) HeaderText="Dept." TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Rate" Format="d" TextAlign="TextAlign.Center" Width="120"></GridColumn>                                       
-                                        <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+    <p><em>Loading...</em></p> }
+else
+{
+    <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Employee" />
+    <button class="btn btn-info" @onclick="@OnRateButtonClick">Update Rate</button>
+    <button class="btn btn-success" @onclick="@OnDepartmentButtonClick">Update Department</button>
+    <SfDialog Width="335px" Target="#target" IsModal="true" @bind-Visible="RateDialogEnable">
+        <DialogTemplates>
+            <Header> Rate Update </Header>
+            <Content>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Rate</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfNumericTextBox TValue="double" @bind-Value="@_rate" Format="c2" Step="0.5" FloatLabelType="@FloatLabelType.Never"></SfNumericTextBox>
+                        </div>
+                    </div>
+                </div>
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content="OK" IsPrimary="true" OnClick="@OnRateDialogSaveButtonClick" />
+            <DialogButton Content="Cancel" OnClick="@OnCancelButtonClick" />
+        </DialogButtons>
+        <DialogAnimationSettings Effect="@DialogEffect.None"></DialogAnimationSettings>
+    </SfDialog>
+    <SfDialog Width="335px" Target="#target" IsModal="true" @bind-Visible="DeptDialogEnable">
+        <DialogTemplates>
+            <Header> Department Update </Header>
+            <Content>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Dept.</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
+                                <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                    </div>
+                </div>
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content="OK" IsPrimary="true" OnClick="@OnDeptDialogSaveButtonClick" />
+            <DialogButton Content="Cancel" OnClick="@OnCancelButtonClick" />
+        </DialogButtons>
+        <DialogAnimationSettings Effect="@DialogEffect.None"></DialogAnimationSettings>
+    </SfDialog>
+    <br />
+    <br />
+    @if (Employees.Count != 0)
+    {
+        <div class="col-lg-12 control-section">
+            <div class="content-wrapper">
+                <div class="row">
+                    <SfGrid DataSource="@Employees" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+                        <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+                        <GridEvents RowSelected="GetSelectedRecords" TValue="Employee"></GridEvents>
+                        <GridColumns>
+                            <GridColumn Type="ColumnType.CheckBox" Width="30"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" Format="C2" TextAlign="TextAlign.Center" Width="80"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.Department) HeaderText="Dept." TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" Format="d" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="60"></GridColumn>
+                            <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Center" Width="120"></GridColumn>
 
-                                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                                            <Template>
-                                                @{ var employee = (context as Employee);
-                                    <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
-                                                            <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
-                                                }
-                                            </Template>
-                                        </GridColumn>
-                                    </GridColumns>
-                                </SfGrid> }
-                            else
-                            {
-            <p>No Employees To Display</p>}}
+                            <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                                <Template>
+                                    @{ var employee = (context as Employee);
+                                        <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
+                                        <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>No Employees To Display</p>}}
 
 @code { public override List<Resource> Resources => new List<Resource>()
 {
@@ -47,19 +107,39 @@
     };
 
     public List<Employee> Employees { get; set; }
+    private bool RateDialogEnable { get; set; } = false;
+    private bool DeptDialogEnable { get; set; } = false;
+
     private List<Object> Toolbaritems = new List<Object>() { "Search", "ExcelExport", "Print", "PdfExport" };
+    SfGrid<Employee> Grid;
+    List<Employee> selectedEmployees = new List<Employee>();
+    double _rate = 14;
+    List<DepartmentViewModel> departmentList = new List<DepartmentViewModel>();
+    string _department = "tshirt";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             Employees = await EmployeeService.GetEmployeesAsync(ModuleState.ModuleId);
+            departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
         }
         catch (Exception ex)
         {
             await logger.LogError(ex, "Error Loading Employee {Error}", ex.Message);
             AddModuleMessage("Error Loading Employee", MessageType.Error);
         }
+    }
+
+    public async Task GetSelectedRecords(RowSelectEventArgs<Employee> args)
+    {
+        var selectedRecordIndexes = await Grid.GetSelectedRowIndexes();
+        foreach (var index in selectedRecordIndexes)
+        {
+            selectedEmployees.Add(Grid.DataSource.ToList()[(int)index]);
+        }
+
+        StateHasChanged();
     }
 
     private async Task Delete(Employee Employee)
@@ -76,4 +156,58 @@
             await logger.LogError(ex, "Error Deleting Employee {Employee} {Error}", Employee, ex.Message);
             AddModuleMessage("Error Deleting Employee", MessageType.Error);
         }
-    } }
+    }
+
+    private async Task Update(List<Employee> Employees)
+    {
+        try
+        {
+            //selectedEmployees.ForEach(x => x.Rate = _rate);
+            //await EmployeeService.UpdateEmployeesAsync(selectedEmployees);
+
+            foreach (var employee in Employees)
+            {
+                await EmployeeService.UpdateEmployeeAsync(employee);
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Updating Employee List {Employees} {Error}", Employees, ex.Message);
+            AddModuleMessage("Error Updating Employee", MessageType.Error);
+        }
+    }
+
+    private void OnRateButtonClick()
+    {
+        RateDialogEnable = true;
+    }
+
+    private void OnDepartmentButtonClick()
+    {
+        DeptDialogEnable = true;
+    }
+
+    private void OnCancelButtonClick()
+    {
+        RateDialogEnable = false;
+        DeptDialogEnable = false;
+    }
+
+    private async Task OnRateDialogSaveButtonClick()
+    {
+        selectedEmployees.ForEach(x => x.Rate = _rate);
+        await Update(selectedEmployees);
+        Employees = await EmployeeService.GetEmployeesAsync(ModuleState.ModuleId);
+
+        RateDialogEnable = false;
+    }
+
+    private async Task OnDeptDialogSaveButtonClick()
+    {
+        selectedEmployees.ForEach(x => x.Department = _department);
+        await Update(selectedEmployees);
+        Employees = await EmployeeService.GetEmployeesAsync(ModuleState.ModuleId);
+
+        DeptDialogEnable = false;
+    }
+}

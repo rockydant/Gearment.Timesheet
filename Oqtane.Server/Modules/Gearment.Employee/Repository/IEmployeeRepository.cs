@@ -9,6 +9,7 @@ namespace Gearment.Employee.Repository
         Models.Employee GetEmployee(int EmployeeId);
         Models.Employee AddEmployee(Models.Employee Employee);
         Models.Employee UpdateEmployee(Models.Employee Employee);
+        IEnumerable<Models.Employee> UpdateEmployees(IEnumerable<Models.Employee> Employees);
         void DeleteEmployee(int EmployeeId);
     }
 }

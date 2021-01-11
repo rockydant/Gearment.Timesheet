@@ -86,6 +86,19 @@ namespace Gearment.Employee.Controllers
             return Employee;
         }
 
+        [HttpPut("update")]
+        [Authorize(Policy = PolicyNames.EditModule)]
+        public IEnumerable<Models.Employee> PutEmployees([FromBody] IEnumerable<Models.Employee> Employees)
+        {
+            if (ModelState.IsValid)
+            {
+                Employees = _EmployeeRepository.UpdateEmployees(Employees);
+                _logger.Log(LogLevel.Information, this, LogFunction.Update, "Employee Updated {Employees}", Employees);
+            }
+
+            return Employees;
+        }
+
         // DELETE api/<controller>/5
         [HttpDelete("{id}")]
         [Authorize(Policy = PolicyNames.EditModule)]

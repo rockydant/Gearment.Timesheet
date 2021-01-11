@@ -41,6 +41,11 @@ namespace Gearment.Employee.Services
             return await PutJsonAsync<Models.Employee>(CreateAuthorizationPolicyUrl($"{Apiurl}/{Employee.EmployeeId}", Employee.ModuleId), Employee);
         }
 
+        public async Task<List<Models.Employee>> UpdateEmployeesAsync(List<Models.Employee> Employees)
+        {
+            return await PutJsonAsync<List<Models.Employee>>(CreateAuthorizationPolicyUrl($"{Apiurl}/update",  Employees[0].ModuleId), Employees);
+        }
+
         public async Task DeleteEmployeeAsync(int EmployeeId, int ModuleId)
         {
             await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/{EmployeeId}", ModuleId));

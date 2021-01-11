@@ -39,6 +39,13 @@ namespace Gearment.Employee.Repository
             return Employee;
         }
 
+        public IEnumerable<Models.Employee> UpdateEmployees(IEnumerable<Models.Employee> Employees)
+        {
+            _db.UpdateRange(Employees);
+            _db.SaveChanges();
+            return Employees;
+        }
+
         public void DeleteEmployee(int EmployeeId)
         {
             Models.Employee Employee = _db.Employee.Find(EmployeeId);

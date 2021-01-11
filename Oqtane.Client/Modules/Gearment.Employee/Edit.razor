@@ -39,7 +39,7 @@
     <label for="text" class="col-2 col-form-label">Department</label>
     <div class="col-10">
         <div class="input-group">
-            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
+            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList" >                
                 <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
             </SfDropDownList>
         </div>
@@ -65,7 +65,7 @@
     <label for="text" class="col-2 col-form-label">Note</label>
     <div class="col-10">
         <div class="input-group">
-            <SfTextBox Multiline=true Placeholder="Enter your address" @bind-Value="@_note"></SfTextBox>
+            <SfTextBox Multiline=true Placeholder="Enter note" @bind-Value="@_note"></SfTextBox>
         </div>
     </div>
 </div>
@@ -142,6 +142,7 @@
     private async Task InitData()
     {
         departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+        StateHasChanged();
     }
 
     private async Task Save()

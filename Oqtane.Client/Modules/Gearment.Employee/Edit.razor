@@ -110,7 +110,8 @@
     {
         try
         {
-            InitData();
+            ShowProgressIndicator();
+            await InitData();
 
             if (PageState.Action == "Edit")
             {
@@ -143,6 +144,7 @@
     {
         departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
         StateHasChanged();
+        HideProgressIndicator();
     }
 
     private async Task Save()

@@ -15,7 +15,7 @@
 <p><em>Loading...</em></p> }
 else
 {
-<button class="btn btn-info" @onclick="@OnImportButtonClick">Import Excel</button>
+<ActionLink Action="Upload" class="btn btn-info" Text="Import Excel" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
                 <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Timesheet" />
                                 <br />
                                                 <br />
@@ -33,35 +33,14 @@ else
                                                         <td>@context.Name</td>
                                                     </Row>
                                                 </Pager> }
-                                                                else
-                                                                {
+                                            else
+                                            {
                             <p>No Timesheets To Display</p>}}
 
 <!-- The content below is for informational purposes only and can be safely removed -->
 
 <br />
 <br />
-<SfDialog Width="335px" Target="#target" IsModal="true" @bind-Visible="ImportExcelDialogEnable">
-    <DialogTemplates>
-        <Header> Import Excel </Header>
-        <Content>
-            <div class="form-group row">
-                <td>
-                    <Label For="upload" HelpText="Upload the file you want" ResourceKey="Upload">Upload: </Label>
-                </td>
-                <td>
-                    <InputFile OnChange="@OnFileSelection"></InputFile>
-                </td>
-            </div>
-        </Content>
-    </DialogTemplates>
-    <DialogButtons>
-        <DialogButton Content="OK" IsPrimary="true" OnClick="@OnImportExcelDialogSaveButtonClick" />
-        <DialogButton Content="Cancel" OnClick="@OnCancelButtonClick" />
-    </DialogButtons>
-    <DialogAnimationSettings Effect="@DialogEffect.None"></DialogAnimationSettings>
-</SfDialog>
-
 <!-- The content above is for informational purposes only and can be safely removed -->
 
 @code { public override List<Resource> Resources => new List<Resource>()
@@ -71,7 +50,7 @@ else
     };
 
     List<Timesheet> _Timesheets;
-    private int _folderId = -1;
+    private int _folderId = 1;
 
     private bool ImportExcelDialogEnable { get; set; } = false;
 
@@ -108,27 +87,6 @@ else
         {
             await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", Timesheet, ex.Message);
             AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
-        }
-    }
-    private void OnImportButtonClick()
-    {
-        ImportExcelDialogEnable = true;
-    }
-
-    private void OnImportExcelDialogSaveButtonClick()
-    {
-        ImportExcelDialogEnable = false;
-    }
-    private void OnCancelButtonClick()
-    {
-        ImportExcelDialogEnable = false;
-    }
-
-    private void OnFileSelection(InputFileChangeEventArgs e)
-    {
-        using (var reader = new StreamReader(e.File.OpenReadStream()))
-        {
-
         }
     }
 }

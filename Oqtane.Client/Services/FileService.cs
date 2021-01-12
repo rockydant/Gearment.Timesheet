@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -63,6 +63,11 @@ namespace Oqtane.Services
         public async Task DeleteFileAsync(int fileId)
         {
             await DeleteAsync($"{Apiurl}/{fileId}");
+        }
+
+        public async Task<File> ProcessFileAsync(int fileId)
+        {
+            return await GetJsonAsync<File>($"{Apiurl}/process/{fileId}");
         }
 
         public async Task<File> UploadFileAsync(string url, int folderId)

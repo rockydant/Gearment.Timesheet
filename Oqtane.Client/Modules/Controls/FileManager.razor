@@ -124,6 +124,9 @@
     [Parameter]
     public bool UploadMultiple { get; set; } = false; // optional - enable multiple file uploads - default false
 
+    [Parameter]
+    public EventCallback<bool> OnUploadCompleted { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(Id))
@@ -294,6 +297,7 @@
                         }
                     }
                     StateHasChanged();
+                    await OnUploadCompleted.InvokeAsync(true);
                 }
                 else
                 {

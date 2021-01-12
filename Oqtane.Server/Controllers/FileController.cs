@@ -23,6 +23,7 @@ using Syncfusion.XlsIO.Implementation;
 using System.Data;
 using Gearment.Timesheet.Models;
 using Oqtane.Services;
+using System.Data.SqlClient;
 // ReSharper disable StringIndexOfIsCultureSpecific.1
 
 namespace Oqtane.Controllers
@@ -166,6 +167,18 @@ namespace Oqtane.Controllers
                     string _script = string.Format("select case when exists((select * from information_schema.tables where table_name = '{0}')) then 1 else 0 end", scriptName);
 
                     int isExisted = _sql.ExecuteNonQuery(_tenants.GetTenant(), _script);
+
+                    SqlDataReader dr = _sql.ExecuteReader(_tenants.GetTenant(), _script);
+                    _logger.Log(LogLevel.Information, this, LogFunction.Other, "Sql Query {Query} Executed on Tenant {TenantId}", _script, _tenants.GetTenant().TenantId);
+                    while (dr.Read())
+                    {
+                        //row = new Dictionary<string, string>();
+                        //for (var field = 0; field < dr.FieldCount; field++)
+                        //{
+                        //    row[dr.GetName(field)] = dr.IsDBNull(field) ? "" : dr.GetValue(field).ToString();
+                        //}
+                        //results.Add(row);
+                    }
 
 
 

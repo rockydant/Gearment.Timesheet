@@ -6,6 +6,7 @@ namespace Gearment.Employee.Repository
     public interface IEmployeeRepository
     {
         IEnumerable<Models.Employee> GetEmployees(int ModuleId);
+        IEnumerable<Models.Employee> GetEmployees();
         Models.Employee GetEmployee(int EmployeeId);
         Models.Employee AddEmployee(Models.Employee Employee);
         Models.Employee UpdateEmployee(Models.Employee Employee);

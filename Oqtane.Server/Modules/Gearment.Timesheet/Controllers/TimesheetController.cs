@@ -167,13 +167,20 @@ namespace Gearment.Timesheet.Controllers
                                 if (item.InRecords.Any())
                                 {
                                     timesheetData.DailyStartTime = item.InRecords.Min();
-                                    timesheetData.BreakEndTime = item.InRecords.Max();
+                                    if (item.InRecords.Count > 1)
+                                    {
+                                        timesheetData.BreakEndTime = item.InRecords.Max();
+                                    }                                  
                                 }
 
                                 if (item.OutRecords.Any())
                                 {
                                     timesheetData.DailyEndTime = item.OutRecords.Max();
-                                    timesheetData.BreakStartTime = item.OutRecords.Min();
+                                    if (item.OutRecords.Count > 1)
+                                    {
+                                        timesheetData.BreakStartTime = item.OutRecords.Min();
+                                    }
+                                    
                                 }
 
                                 if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
@@ -195,11 +202,18 @@ namespace Gearment.Timesheet.Controllers
                                 {
                                     Name = item.FirstName + "," + item.LastName,
                                     PayrollID = int.Parse(item.PayrollID),
+                                    Rate = -1,
+                                    Department = string.Empty,
+                                    StartDate = DateTime.UtcNow,
+                                    Status = "Active",
+                                    Note = string.Empty,
+                                    ModuleId = moduleId
                                 };
 
                                 if (!missingEmployeeList.Any(x => x.Name == missing.Name && x.PayrollID == missing.PayrollID))
                                 {
                                     missingEmployeeList.Add(missing);
+                                    _employeeRepository.AddEmployee(missing);
                                 }
                             }
                         }
@@ -242,7 +256,7 @@ namespace Gearment.Timesheet.Controllers
         [Authorize(Policy = PolicyNames.ViewModule)]
         public List<Models.TimesheetData> GetTimesheetData()
         {
-            return _TimesheetRepository.GetAllTimesheetData();            
+            return _TimesheetRepository.GetAllTimesheetData();
         }
 
         // POST api/<controller>

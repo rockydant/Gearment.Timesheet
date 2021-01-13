@@ -8,6 +8,7 @@ namespace Gearment.Employee.Services
     {
         Task<List<Department.Models.DepartmentViewModel>> GetDepartmentsAsync(int ModuleId);
         Task<List<Models.Employee>> GetEmployeesAsync(int ModuleId);
+        Task<List<Models.Employee>> GetAllEmployeesAsync(int ModuleId);
 
         Task<Models.Employee> GetEmployeeAsync(int EmployeeId, int ModuleId);
 

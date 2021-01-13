@@ -18,11 +18,16 @@ namespace Gearment.Employee.Services
             _siteState = siteState;
         }
 
-         private string Apiurl => CreateApiUrl(_siteState.Alias, "Employee");
+        private string Apiurl => CreateApiUrl(_siteState.Alias, "Employee");
 
         public async Task<List<Models.Employee>> GetEmployeesAsync(int ModuleId)
         {
             List<Models.Employee> Employees = await GetJsonAsync<List<Models.Employee>>(CreateAuthorizationPolicyUrl($"{Apiurl}?moduleid={ModuleId}", ModuleId));
+            return Employees.OrderBy(item => item.Name).ToList();
+        }
+        public async Task<List<Models.Employee>> GetAllEmployeesAsync(int ModuleId)
+        {
+            List<Models.Employee> Employees = await GetJsonAsync<List<Models.Employee>>(CreateAuthorizationPolicyUrl($"{Apiurl}/all", ModuleId));
             return Employees.OrderBy(item => item.Name).ToList();
         }
 
@@ -43,7 +48,7 @@ namespace Gearment.Employee.Services
 
         public async Task<List<Models.Employee>> UpdateEmployeesAsync(List<Models.Employee> Employees)
         {
-            return await PutJsonAsync<List<Models.Employee>>(CreateAuthorizationPolicyUrl($"{Apiurl}/update",  Employees[0].ModuleId), Employees);
+            return await PutJsonAsync<List<Models.Employee>>(CreateAuthorizationPolicyUrl($"{Apiurl}/update", Employees[0].ModuleId), Employees);
         }
 
         public async Task DeleteEmployeeAsync(int EmployeeId, int ModuleId)
@@ -54,7 +59,7 @@ namespace Gearment.Employee.Services
         public async Task<List<Department.Models.DepartmentViewModel>> GetDepartmentsAsync(int ModuleId)
         {
             return await GetJsonAsync<List<Department.Models.DepartmentViewModel>>(CreateAuthorizationPolicyUrl($"{Apiurl}/departments", ModuleId));
-            
+
         }
     }
 }

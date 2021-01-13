@@ -40,6 +40,13 @@ namespace Gearment.Employee.Controllers
             return _EmployeeRepository.GetEmployees(int.Parse(moduleid));
         }
 
+        [HttpGet("all")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public IEnumerable<Models.Employee> GetAll()
+        {
+            return _EmployeeRepository.GetEmployees();
+        }
+
         [HttpGet("departments")]
         [Authorize(Policy = PolicyNames.ViewModule)]
         public IEnumerable<Gearment.Department.Models.DepartmentViewModel> GetDepartment()

@@ -20,6 +20,11 @@ namespace Gearment.Employee.Repository
             return _db.Employee.Where(item => item.ModuleId == ModuleId);
         }
 
+        public IEnumerable<Models.Employee> GetEmployees()
+        {
+            return _db.Employee.ToList();
+        }
+
         public List<Models.Employee> GetEmployeeByNameOrPayrollId(Models.Employee Employee)
         {
             List<Models.Employee> result = new List<Models.Employee>();

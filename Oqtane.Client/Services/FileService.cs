@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Gearment.Timesheet.Models;
 using Microsoft.JSInterop;
 using Oqtane.Models;
 using Oqtane.Shared;
@@ -37,11 +38,11 @@ namespace Oqtane.Services
         {
             if (!(folderPath.EndsWith(System.IO.Path.DirectorySeparatorChar) || folderPath.EndsWith(System.IO.Path.AltDirectorySeparatorChar)))
             {
-                folderPath = Utilities.PathCombine(folderPath,"\\");
+                folderPath = Utilities.PathCombine(folderPath, "\\");
             }
-            
+
             var path = WebUtility.UrlEncode(folderPath);
-            
+
             return await GetJsonAsync<List<File>>($"{Apiurl}/{siteId}/{path}");
         }
 
@@ -63,12 +64,7 @@ namespace Oqtane.Services
         public async Task DeleteFileAsync(int fileId)
         {
             await DeleteAsync($"{Apiurl}/{fileId}");
-        }
-
-        public async Task<File> ProcessFileAsync(int fileId)
-        {
-            return await GetJsonAsync<File>($"{Apiurl}/process/{fileId}");
-        }
+        }       
 
         public async Task<File> UploadFileAsync(string url, int folderId)
         {

@@ -23,7 +23,7 @@ namespace Gearment.Timesheet.Services
         public async Task<List<Models.Timesheet>> GetTimesheetsAsync(int ModuleId)
         {
             List<Models.Timesheet> Timesheets = await GetJsonAsync<List<Models.Timesheet>>(CreateAuthorizationPolicyUrl($"{Apiurl}?moduleid={ModuleId}", ModuleId));
-            return Timesheets.OrderBy(item => item.Name).ToList();
+            return Timesheets.OrderBy(item => item.FirstName).ToList();
         }
 
         public async Task<Models.Timesheet> GetTimesheetAsync(int TimesheetId, int ModuleId)
@@ -44,6 +44,16 @@ namespace Gearment.Timesheet.Services
         public async Task DeleteTimesheetAsync(int TimesheetId, int ModuleId)
         {
             await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/{TimesheetId}", ModuleId));
+        }
+
+        public async Task<Models.TimesheetViewModel> ProcessFileAsync(int moduleId, int fileId)
+        {
+            return await GetJsonAsync<Models.TimesheetViewModel>($"{Apiurl}/process/{moduleId}/{fileId}");
+        }
+        public async Task<List<Models.TimesheetData>> GetTimesheetDataAsync(int ModuleId)
+        {
+            List<Models.TimesheetData> Timesheets = await GetJsonAsync<List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId));
+            return Timesheets.OrderBy(item => item.Date).ToList();
         }
     }
 }

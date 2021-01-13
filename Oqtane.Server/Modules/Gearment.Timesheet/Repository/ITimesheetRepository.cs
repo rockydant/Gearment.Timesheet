@@ -10,5 +10,11 @@ namespace Gearment.Timesheet.Repository
         Models.Timesheet AddTimesheet(Models.Timesheet Timesheet);
         Models.Timesheet UpdateTimesheet(Models.Timesheet Timesheet);
         void DeleteTimesheet(int TimesheetId);
+
+        Models.TimesheetData AddTimesheetData(Models.TimesheetData Timesheet);
+
+        List<TimesheetData> GetAllTimesheetData();
+
+        //void AddTimesheetFilter(GearmentTimesheetFilter filter);
     }
 }

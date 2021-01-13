@@ -18,12 +18,7 @@ using Oqtane.Infrastructure;
 using Oqtane.Repository;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Oqtane.Extensions;
-using Syncfusion.XlsIO;
-using Syncfusion.XlsIO.Implementation;
 using System.Data;
-using Gearment.Timesheet.Models;
-using Oqtane.Services;
-using System.Data.SqlClient;
 // ReSharper disable StringIndexOfIsCultureSpecific.1
 
 namespace Oqtane.Controllers
@@ -36,18 +31,16 @@ namespace Oqtane.Controllers
         private readonly IFolderRepository _folders;
         private readonly IUserPermissions _userPermissions;
         private readonly ITenantResolver _tenants;
-        private readonly ILogManager _logger;
-        private readonly ISqlRepository _sql;
+        private readonly ILogManager _logger;        
 
-        public FileController(IWebHostEnvironment environment, IFileRepository files, ISqlRepository sql, IFolderRepository folders, IUserPermissions userPermissions, ITenantResolver tenants, ILogManager logger)
+        public FileController(IWebHostEnvironment environment, IFileRepository files, IFolderRepository folders, IUserPermissions userPermissions, ITenantResolver tenants, ILogManager logger)
         {
             _environment = environment;
             _files = files;
             _folders = folders;
             _userPermissions = userPermissions;
             _tenants = tenants;
-            _logger = logger;
-            _sql = sql;
+            _logger = logger;          
         }
 
         // GET: api/<controller>?folder=x
@@ -121,67 +114,6 @@ namespace Oqtane.Controllers
             {
                 if (_userPermissions.IsAuthorized(User, PermissionNames.View, file.Folder.Permissions))
                 {
-                    return file;
-                }
-                else
-                {
-                    _logger.Log(LogLevel.Error, this, LogFunction.Read, "User Not Authorized To Access File {File}", file);
-                    HttpContext.Response.StatusCode = 401;
-                    return null;
-                }
-            }
-            else
-            {
-                _logger.Log(LogLevel.Error, this, LogFunction.Read, "File Not Found {FileId}", id);
-                HttpContext.Response.StatusCode = 404;
-                return null;
-            }
-        }
-
-        // GET api/<controller>/5
-        [HttpGet("process/{id}")]
-        public Models.File Process(int id)
-        {
-            Models.File file = _files.GetFile(id);
-            List<TimesheetViewModel> timesheetViewModelList = new List<TimesheetViewModel>();
-
-            if (file != null)
-            {
-                if (_userPermissions.IsAuthorized(User, PermissionNames.View, file.Folder.Permissions))
-                {
-                    using (ExcelEngine excelEngine = new ExcelEngine())
-                    {
-                        IApplication application = excelEngine.Excel;
-                        application.DefaultVersion = ExcelVersion.Excel2016;
-                        FileStream inputStream = new FileStream(ResolveApplicationPath(file), FileMode.Open, FileAccess.Read);
-                        IWorkbook workbook = application.Workbooks.Open(inputStream, ExcelParseOptions.Default);
-                        IWorksheet worksheet = workbook.Worksheets[0];
-                        //Read data from spreadsheet.
-                        DataTable dataTable = worksheet.ExportDataTable(worksheet.UsedRange, ExcelExportDataTableOptions.ColumnNames);
-                        timesheetViewModelList = ExportDataFromExcelSheet(worksheet, 2, 1, dataTable.Rows.Count + 1);
-                    }
-
-                    // Generate Database Script
-                    DateTime scriptDate = DateTime.Parse(timesheetViewModelList.FirstOrDefault().Date);
-                    string scriptName = string.Format("{0}{1}", scriptDate.Year, scriptDate.Month);
-                    string _script = string.Format("select case when exists((select * from information_schema.tables where table_name = '{0}')) then 1 else 0 end", scriptName);
-
-                    int isExisted = _sql.ExecuteNonQuery(_tenants.GetTenant(), _script);
-
-                    SqlDataReader dr = _sql.ExecuteReader(_tenants.GetTenant(), _script);
-                    _logger.Log(LogLevel.Information, this, LogFunction.Other, "Sql Query {Query} Executed on Tenant {TenantId}", _script, _tenants.GetTenant().TenantId);
-                    while (dr.Read())
-                    {
-                        //row = new Dictionary<string, string>();
-                        //for (var field = 0; field < dr.FieldCount; field++)
-                        //{
-                        //    row[dr.GetName(field)] = dr.IsDBNull(field) ? "" : dr.GetValue(field).ToString();
-                        //}
-                        //results.Add(row);
-                    }
-
-
-
                     return file;
                 }
                 else
@@ -621,31 +553,6 @@ namespace Oqtane.Controllers
             }
 
             return file;
-        }
-
-        private string ResolveApplicationPath(Models.File file)
-        {
-            return Utilities.PathCombine(_environment.ContentRootPath, "Content", "Tenants", _tenants.GetTenant().TenantId.ToString(), "Sites", file.FolderId.ToString(), file.Name);
-        }
-
-        private List<TimesheetViewModel> ExportDataFromExcelSheet(IWorksheet sheet, int startRowIndex, int startColumnIndex, int lastRowIndex)
-        {
-            List<TimesheetViewModel> result = new List<TimesheetViewModel>();
-            for (int r = startRowIndex; r <= lastRowIndex; r++)
-            {
-                TimesheetViewModel record = new TimesheetViewModel();
-                record.Employee = string.IsNullOrEmpty(sheet[r, startColumnIndex].Text) ? string.Empty : sheet[r, startColumnIndex].Text;
-                record.PayRollID = string.IsNullOrEmpty(sheet[r, startColumnIndex + 1].Text) ? string.Empty : sheet[r, startColumnIndex + 1].Text;
-                record.DayOfWeek = string.IsNullOrEmpty(sheet[r, startColumnIndex + 2].Text) ? string.Empty : sheet[r, startColumnIndex + 2].Text;
-                record.Date = string.IsNullOrEmpty(sheet[r, startColumnIndex + 3].Text) ? string.Empty : sheet[r, startColumnIndex + 3].Text;
-                record.In = string.IsNullOrEmpty(sheet[r, startColumnIndex + 4].Text) ? string.Empty : sheet[r, startColumnIndex + 4].Text;
-                record.Out = string.IsNullOrEmpty(sheet[r, startColumnIndex + 5].Text) ? string.Empty : sheet[r, startColumnIndex + 5].Text;
-                record.Hours = string.IsNullOrEmpty(sheet[r, startColumnIndex + 6].Text) ? string.Empty : sheet[r, startColumnIndex + 6].Text;
-                record.Type = string.IsNullOrEmpty(sheet[r, startColumnIndex + 7].Text) ? string.Empty : sheet[r, startColumnIndex + 7].Text;
-                result.Add(record);
-            }
-
-            return result;
         }
     }
 }

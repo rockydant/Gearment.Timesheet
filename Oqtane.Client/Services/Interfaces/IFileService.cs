@@ -1,3 +1,4 @@
+using Gearment.Timesheet.Models;
 using Oqtane.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,6 +19,5 @@ namespace Oqtane.Services
         Task<byte[]> DownloadFileAsync(int fileId);
 
         Task<List<File>> GetFilesAsync(int siteId, string folderPath);
-        Task<File> ProcessFileAsync(int fileId);
     }
 }

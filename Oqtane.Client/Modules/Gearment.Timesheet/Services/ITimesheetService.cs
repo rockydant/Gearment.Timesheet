@@ -15,5 +15,9 @@ namespace Gearment.Timesheet.Services
         Task<Models.Timesheet> UpdateTimesheetAsync(Models.Timesheet Timesheet);
 
         Task DeleteTimesheetAsync(int TimesheetId, int ModuleId);
+
+        Task<Models.TimesheetViewModel> ProcessFileAsync(int ModuleId, int fileId);
+
+        Task<List<Models.TimesheetData>> GetTimesheetDataAsync(int ModuleId);
     }
 }

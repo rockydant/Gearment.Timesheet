@@ -15,27 +15,45 @@
 <p><em>Loading...</em></p> }
 else
 {
-<ActionLink Action="Upload" class="btn btn-info" Text="Import Excel" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
-                <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Timesheet" />
+<ActionLink Action="Upload" class="btn btn-info" Text="Import Data" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
+                <br />
                                 <br />
-                                                <br />
-                                                                @if (@_Timesheets.Count != 0)
-                                                                {
-                                                <Pager Items="@_Timesheets">
-                                                    <Header>
-                                                        <th style="width: 1px;">&nbsp;</th>
-                                                        <th style="width: 1px;">&nbsp;</th>
-                                                        <th>Name</th>
-                                                    </Header>
-                                                    <Row>
-                                                        <td><ActionLink Action="Edit" Parameters="@($"id=" + context.TimesheetId.ToString())" /></td>
-                                                        <td><ActionDialog Header="Delete Timesheet" Message="@("Are You Sure You Wish To Delete The " + context.Name + " Timesheet?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
-                                                        <td>@context.Name</td>
-                                                    </Row>
-                                                </Pager> }
-                                            else
-                                            {
-                            <p>No Timesheets To Display</p>}}
+                                <SfGrid DataSource="@_Timesheets" AllowPaging="true" AllowSorting="true">
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(TimesheetData.FirstName) HeaderText="First Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(TimesheetData.LastName) HeaderText="Last Name" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                        <GridColumn Field=@nameof(TimesheetData.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                        <GridColumn Field=@nameof(TimesheetData.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                        <GridColumn Field=@nameof(TimesheetData.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                        <GridColumn HeaderText="Start Time" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as TimesheetData);
+                                    <Label class="form-group label">@department.DailyStartTime.ToString("hh:mm tt")</Label> }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="End Time" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as TimesheetData);
+                                    <Label class="form-group label">@department.DailyEndTime.ToString("hh:mm tt")</Label>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Break Start" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as TimesheetData);
+                                    <Label class="form-group label">@department.BreakStartTime.ToString("hh:mm tt")</Label> }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Break End" TextAlign="TextAlign.Center" Width="120">
+                                            <Template>
+                                                @{ var department = (context as TimesheetData);
+                                                    <Label class="form-group label">@department.BreakEndTime.ToString("hh:mm tt")</Label>
+                                                }
+                                            </Template>
+                                        </GridColumn>                                       
+                                    </GridColumns>
+                                </SfGrid>
+                            }
 
 <!-- The content below is for informational purposes only and can be safely removed -->
 
@@ -49,7 +67,7 @@ else
         new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
     };
 
-    List<Timesheet> _Timesheets;
+    List<TimesheetData> _Timesheets;
     private int _folderId = 1;
 
     private bool ImportExcelDialogEnable { get; set; } = false;
@@ -65,7 +83,7 @@ else
 
         try
         {
-            _Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
         }
         catch (Exception ex)
         {
@@ -80,7 +98,7 @@ else
         {
             await TimesheetService.DeleteTimesheetAsync(Timesheet.TimesheetId, ModuleState.ModuleId);
             await logger.LogInformation("Timesheet Deleted {Timesheet}", Timesheet);
-            _Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
             StateHasChanged();
         }
         catch (Exception ex)
@@ -88,5 +106,4 @@ else
             await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", Timesheet, ex.Message);
             AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
         }
-    }
-}
+    } }

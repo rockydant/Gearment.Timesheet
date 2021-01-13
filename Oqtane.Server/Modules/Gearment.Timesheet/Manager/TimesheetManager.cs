@@ -53,7 +53,7 @@ namespace Gearment.Timesheet.Manager
             {
                 foreach(var Timesheet in Timesheets)
                 {
-                    _TimesheetRepository.AddTimesheet(new Models.Timesheet { ModuleId = module.ModuleId, Name = Timesheet.Name });
+                    _TimesheetRepository.AddTimesheet(new Models.Timesheet { ModuleId = module.ModuleId, FirstName = Timesheet.FirstName });
                 }
             }
         }

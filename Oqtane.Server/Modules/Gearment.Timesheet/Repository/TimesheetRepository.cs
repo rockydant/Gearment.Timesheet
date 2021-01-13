@@ -27,9 +27,37 @@ namespace Gearment.Timesheet.Repository
 
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)
         {
-            _db.Timesheet.Add(Timesheet);
+            if (!_db.Timesheet.Any(x =>
+            string.Equals(x.FirstName, Timesheet.FirstName) &&
+            string.Equals(x.LastName, Timesheet.LastName) &&
+            string.Equals(x.PayRollID, Timesheet.PayRollID) &&
+            string.Equals(x.DayOfWeek, Timesheet.DayOfWeek) &&
+            string.Equals(x.Date, Timesheet.Date) &&
+            string.Equals(x.In, Timesheet.In) &&
+            string.Equals(x.Out, Timesheet.Out) &&
+            string.Equals(x.Hours, Timesheet.Hours) &&
+            string.Equals(x.Type, Timesheet.Type)))
+            {
+                _db.Timesheet.Add(Timesheet);
+                _db.SaveChanges();
+
+                return Timesheet;
+            }
+
+            return null;
+        }
+
+        public TimesheetData AddTimesheetData(TimesheetData timesheetData)
+        {
+            _db.TimesheetData.Add(timesheetData);
             _db.SaveChanges();
-            return Timesheet;
+
+            return timesheetData;
+        }
+
+        public List<TimesheetData> GetAllTimesheetData()
+        {
+            return _db.TimesheetData.ToList();
         }
 
         public Models.Timesheet UpdateTimesheet(Models.Timesheet Timesheet)
@@ -45,5 +73,11 @@ namespace Gearment.Timesheet.Repository
             _db.Timesheet.Remove(Timesheet);
             _db.SaveChanges();
         }
+
+        //public void AddTimesheetFilter(GearmentTimesheetFilter filter)
+        //{
+        //    _db.TimesheetFilter.Add(filter);
+        //    _db.SaveChanges();
+        //}
     }
 }

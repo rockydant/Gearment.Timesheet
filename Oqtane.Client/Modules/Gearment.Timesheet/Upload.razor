@@ -1,9 +1,12 @@
 @namespace Gearment.Timesheet
-
+@using Gearment.Timesheet.Services
+@using Gearment.Timesheet.Models
 @inherits ModuleBase
 @inject NavigationManager NavigationManager
+@inject ITimesheetService TimesheetService
 @inject IFileService FileService
 @inject IFolderService FolderService
+
 
 <table class="table table-borderless">
     <tr>
@@ -32,6 +35,39 @@
     </GridColumns>
 </SfGrid>
 <br />
+<br />
+
+<Label>Missing Employee Info Counts: @_missingCount</Label>
+<br />
+<br />
+
+<SfGrid DataSource="@_MissingEmployee" AllowPaging="true" AllowSorting="true">
+    <GridColumns>
+        <GridColumn Field=@nameof(Employee.Models.Employee.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Employee.Models.Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>        
+    </GridColumns>
+</SfGrid>
+<br />
+<br />
+<Label>Row Counts: @_rowCount</Label>
+<br />
+<br />
+
+<SfGrid DataSource="@_Timesheets" AllowPaging="true" AllowSorting="true">
+    <GridColumns>
+        <GridColumn Field=@nameof(Timesheet.FirstName) HeaderText="First Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.LastName) HeaderText="Last Name" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.PayRollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.In) HeaderText="In" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.Out) HeaderText="Out" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.Hours) HeaderText="Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.Type) HeaderText="Type" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+<br />
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
 
 @code { private string url = string.Empty;
@@ -40,6 +76,12 @@
     List<string> _fileType = new List<string>() { "csv", "xls", "xlsx" };
 
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
+
+    private List<Timesheet> _Timesheets { get; set; }
+    private List<Employee.Models.Employee> _MissingEmployee { get; set; }
+
+    private int _rowCount = 0;
+    private int _missingCount = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,6 +100,7 @@
     {
         _files = await FileService.GetFilesAsync(_folderId);
         _files = _files.FindAll(x => _fileType.Contains(x.Extension));
+
         HideProgressIndicator();
     }
 
@@ -80,13 +123,23 @@
 
     private async Task ProcessFile(File file)
     {
+        ShowProgressIndicator();
+
         try
         {
-            await FileService.ProcessFileAsync(file.FileId);
+            var result = await TimesheetService.ProcessFileAsync(ModuleState.ModuleId, file.FileId);
+            _Timesheets = result.TimesheetList;
+            _MissingEmployee = result.MissingEmployee;
+
+            _missingCount = _MissingEmployee.Count();
+            _rowCount = _Timesheets.Count();
+
             await logger.LogInformation("File Processed {File}", file.Name);
-            AddModuleMessage("File " + file.Name + " Processed", MessageType.Success);
+            AddModuleMessage("File " + file.Name + " Processed. Total " + _rowCount + " Rows Imported", MessageType.Success);
+
             await GetFiles();
             StateHasChanged();
+            HideProgressIndicator();
         }
         catch (Exception ex)
         {

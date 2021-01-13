@@ -11,5 +11,7 @@ namespace Gearment.Employee.Repository
         Models.Employee UpdateEmployee(Models.Employee Employee);
         IEnumerable<Models.Employee> UpdateEmployees(IEnumerable<Models.Employee> Employees);
         void DeleteEmployee(int EmployeeId);
+
+        List<Models.Employee> GetEmployeeByNameOrPayrollId(Models.Employee Employee);
     }
 }

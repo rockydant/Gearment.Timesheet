@@ -55,7 +55,7 @@
                 Timesheet Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
                 if (Timesheet != null)
                 {
-                    _name = Timesheet.Name;
+                    _name = Timesheet.FirstName;
                     _createdby = Timesheet.CreatedBy;
                     _createdon = Timesheet.CreatedOn;
                     _modifiedby = Timesheet.ModifiedBy;
@@ -78,14 +78,14 @@
             {
                 Timesheet Timesheet = new Timesheet();
                 Timesheet.ModuleId = ModuleState.ModuleId;
-                Timesheet.Name = _name;
+                Timesheet.FirstName = _name;
                 Timesheet = await TimesheetService.AddTimesheetAsync(Timesheet);
                 await logger.LogInformation("Timesheet Added {Timesheet}", Timesheet);
             }
             else
             {
                 Timesheet Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
-                Timesheet.Name = _name;
+                Timesheet.FirstName = _name;
                 await TimesheetService.UpdateTimesheetAsync(Timesheet);
                 await logger.LogInformation("Timesheet Updated {Timesheet}", Timesheet);
             }

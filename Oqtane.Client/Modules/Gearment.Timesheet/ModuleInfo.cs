@@ -9,9 +9,9 @@ namespace Gearment.Timesheet
         {
             Name = "Timesheet",
             Description = "Timesheet",
-            Version = "1.0.0",
+            Version = "1.0.1",
             ServerManagerType = "Gearment.Timesheet.Manager.TimesheetManager, Oqtane.Server",
-            ReleaseVersions = "1.0.0"
+            ReleaseVersions = "1.0.1"
         };
     }
 }

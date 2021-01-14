@@ -3,7 +3,7 @@
 @using Gearment.Department.Models
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Inputs
- 
+
 @namespace Gearment.Department
 @inherits ModuleBase
 @inject IDepartmentService DepartmentService
@@ -12,7 +12,7 @@
 <div class="form-group row">
     <label for="text" class="col-2 col-form-label">Department Name</label>
     <div class="col-10">
-        <div class="input-group">            
+        <div class="input-group">
             <SfTextBox @bind-Value="@_name"></SfTextBox>
         </div>
     </div>
@@ -31,7 +31,7 @@
     <label for="text" class="col-2 col-form-label">End Time</label>
     <div class="col-10">
         <div class="input-group">
-            <SfTimePicker TValue="DateTime"  @bind-Value="@_dailyEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+            <SfTimePicker TValue="DateTime" @bind-Value="@_dailyEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
         </div>
     </div>
 </div>
@@ -40,7 +40,7 @@
     <label for="text" class="col-2 col-form-label">Break Start Time</label>
     <div class="col-10">
         <div class="input-group">
-            <SfTimePicker TValue="DateTime"  @bind-Value="@_breakStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+            <SfTimePicker TValue="DateTime" @bind-Value="@_breakStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
         </div>
     </div>
 </div>
@@ -49,7 +49,7 @@
     <label for="text" class="col-2 col-form-label">Break End Time</label>
     <div class="col-10">
         <div class="input-group">
-            <SfTimePicker TValue="DateTime"  @bind-Value="@_breakEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+            <SfTimePicker TValue="DateTime" @bind-Value="@_breakEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
         </div>
     </div>
 </div>
@@ -57,12 +57,11 @@
 <div class="form-group row">
     <label for="text" class="col-2 col-form-label">Total Rest Hour</label>
     <div class="col-10">
-        <div class="input-group">            
+        <div class="input-group">
             <SfNumericTextBox TValue="int" @bind-Value="@_totalRestHour" Format="###.##" FloatLabelType="@FloatLabelType.Never"></SfNumericTextBox>
         </div>
     </div>
 </div>
-
 
 <button type="button" class="btn btn-success" @onclick="Save">Save</button>
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
@@ -70,7 +69,7 @@
 <br />
 @if (PageState.Action == "Edit")
 {
-<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
+    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
 
 @code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
@@ -89,7 +88,7 @@
     DateTime _dailyEndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 16, 00, 00);
     DateTime _breakStartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 10, 00, 00);
     DateTime _breakEndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 12, 00, 00);
-    int _totalRestHour = 1;
+    int _totalRestHour = 1;    
 
     string _createdby;
     DateTime _createdon;

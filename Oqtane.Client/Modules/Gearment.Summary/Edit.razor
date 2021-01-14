@@ -1,0 +1,100 @@
+@using Oqtane.Modules.Controls
+@using Gearment.Summary.Services
+@using Gearment.Summary.Models
+
+@namespace Gearment.Summary
+@inherits ModuleBase
+@inject ISummaryService SummaryService
+@inject NavigationManager NavigationManager
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <Label For="name" HelpText="Enter a name">Name: </Label>
+        </td>
+        <td>
+            <input id="name" class="form-control" @bind="@_name" />
+        </td>
+    </tr>
+</table>
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+<br />
+<br />
+@if (PageState.Action == "Edit")
+{
+    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
+}
+
+@code {
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Actions => "Add,Edit";
+
+    public override string Title => "Manage Summary";
+
+    public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
+    };
+
+    int _id;
+    string _name;
+    string _createdby;
+    DateTime _createdon;
+    string _modifiedby;
+    DateTime _modifiedon;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (PageState.Action == "Edit")
+            {
+                _id = Int32.Parse(PageState.QueryString["id"]);
+                Summary Summary = await SummaryService.GetSummaryAsync(_id, ModuleState.ModuleId);
+                if (Summary != null)
+                {
+                    _name = Summary.Name;
+                    _createdby = Summary.CreatedBy;
+                    _createdon = Summary.CreatedOn;
+                    _modifiedby = Summary.ModifiedBy;
+                    _modifiedon = Summary.ModifiedOn;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Summary {SummaryId} {Error}", _id, ex.Message);
+            AddModuleMessage("Error Loading Summary", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (PageState.Action == "Add")
+            {
+                Summary Summary = new Summary();
+                Summary.ModuleId = ModuleState.ModuleId;
+                Summary.Name = _name;
+                Summary = await SummaryService.AddSummaryAsync(Summary);
+                await logger.LogInformation("Summary Added {Summary}", Summary);
+            }
+            else
+            {
+                Summary Summary = await SummaryService.GetSummaryAsync(_id, ModuleState.ModuleId);
+                Summary.Name = _name;
+                await SummaryService.UpdateSummaryAsync(Summary);
+                await logger.LogInformation("Summary Updated {Summary}", Summary);
+            }
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving Summary {Error}", ex.Message);
+            AddModuleMessage("Error Saving Summary", MessageType.Error);
+        }
+    }
+}

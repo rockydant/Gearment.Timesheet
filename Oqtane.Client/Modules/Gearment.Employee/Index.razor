@@ -70,6 +70,7 @@ else
                 <div class="row">
                     <SfGrid DataSource="@Employees" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
                         <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+                        <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
                         <GridEvents RowSelected="GetSelectedRecords" TValue="Employee"></GridEvents>
                         <GridColumns>
                             <GridColumn Type="ColumnType.CheckBox" Width="30"></GridColumn>

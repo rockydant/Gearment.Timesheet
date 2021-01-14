@@ -17,47 +17,51 @@ else
                                 <br />
                                                 @if (@Departments.Count != 0)
                                                 {
-                                <SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true" Toolbar="Toolbaritems">
-                                    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Department"></GridEvents>
-                                    <GridColumns>
-                                        <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Center" Width="120">
-                                            <Template>
-                                                @{ var department = (context as Department);
-                            <Label class="form-group label">@department.DailyStartTime.ToString("hh:mm tt")</Label> }
-                                            </Template>
-                                        </GridColumn>
-                                        <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Center" Width="120">
-                                            <Template>
-                                                @{ var department = (context as Department);
-                            <Label class="form-group label">@department.DailyEndTime.ToString("hh:mm tt")</Label> }
-                                            </Template>
-                                        </GridColumn>
+<SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+    <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Department"></GridEvents>
+    <GridColumns>
+        <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+        <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Center" Width="120">
+            <Template>
+                @{ var department = (context as Department);
+                    <Label class="form-group label">@department.DailyStartTime.ToString("hh:mm tt")</Label>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Center" Width="120">
+            <Template>
+                @{ var department = (context as Department);
+                    <Label class="form-group label">@department.DailyEndTime.ToString("hh:mm tt")</Label>
+                }
+            </Template>
+        </GridColumn>
 
-                                        <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Center" Width="120">
-                                            <Template>
-                                                @{ var department = (context as Department);
-                            <Label class="form-group label">@department.BreakStartTime.ToString("hh:mm tt")</Label>
-                                                }
-                                            </Template>
-                                        </GridColumn>
-                                        <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Center" Width="120">
-                                            <Template>
-                                                @{ var department = (context as Department);
-                            <Label class="form-group label">@department.BreakEndTime.ToString("hh:mm tt")</Label> }
-                                            </Template>
-                                        </GridColumn>
-                                        <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                                            <Template>
-                                                @{ var department = (context as Department);
-                            <td><ActionLink Action="Edit" Parameters="@($"id=" + department.DepartmentId.ToString())" /></td>
-                                                    <td><ActionDialog Header="Delete Department" Message="@("Are You Sure You Wish To Delete The " + department.Name + " Department?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(department))" /></td>
-                                                }
-                                            </Template>
-                                        </GridColumn>
-                                    </GridColumns>
-                                </SfGrid> }
+        <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Center" Width="120">
+            <Template>
+                @{ var department = (context as Department);
+                    <Label class="form-group label">@department.BreakStartTime.ToString("hh:mm tt")</Label>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Center" Width="120">
+            <Template>
+                @{ var department = (context as Department);
+                    <Label class="form-group label">@department.BreakEndTime.ToString("hh:mm tt")</Label>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+            <Template>
+                @{ var department = (context as Department);
+                    <td><ActionLink Action="Edit" Parameters="@($"id=" + department.DepartmentId.ToString())" /></td>
+                    <td><ActionDialog Header="Delete Department" Message="@("Are You Sure You Wish To Delete The " + department.Name + " Department?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(department))" /></td>
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid> }
                             else
                             {
             <p>No Departments To Display</p>}}

@@ -26,9 +26,9 @@ namespace Gearment.Timesheet.Services
             return Timesheets.OrderBy(item => item.FirstName).ToList();
         }
 
-        public async Task<Models.Timesheet> GetTimesheetAsync(int TimesheetId, int ModuleId)
+        public async Task<Models.TimesheetData> GetTimesheetAsync(int TimesheetId, int ModuleId)
         {
-            return await GetJsonAsync<Models.Timesheet>(CreateAuthorizationPolicyUrl($"{Apiurl}/{TimesheetId}", ModuleId));
+            return await GetJsonAsync<Models.TimesheetData>(CreateAuthorizationPolicyUrl($"{Apiurl}/{TimesheetId}", ModuleId));
         }
 
         public async Task<Models.Timesheet> AddTimesheetAsync(Models.Timesheet Timesheet)
@@ -36,9 +36,9 @@ namespace Gearment.Timesheet.Services
             return await PostJsonAsync<Models.Timesheet>(CreateAuthorizationPolicyUrl($"{Apiurl}", Timesheet.ModuleId), Timesheet);
         }
 
-        public async Task<Models.Timesheet> UpdateTimesheetAsync(Models.Timesheet Timesheet)
+        public async Task<Models.TimesheetData> UpdateTimesheetAsync(Models.TimesheetData Timesheet, int ModuleId)
         {
-            return await PutJsonAsync<Models.Timesheet>(CreateAuthorizationPolicyUrl($"{Apiurl}/{Timesheet.TimesheetId}", Timesheet.ModuleId), Timesheet);
+            return await PutJsonAsync<Models.TimesheetData>(CreateAuthorizationPolicyUrl($"{Apiurl}/{Timesheet.TimesheetDataId}", ModuleId), Timesheet);
         }
 
         public async Task DeleteTimesheetAsync(int TimesheetId, int ModuleId)

@@ -1,0 +1,108 @@
+@using Gearment.Summary.Services
+@using Gearment.Summary.Models
+@using Syncfusion.Blazor.Layouts
+
+@namespace Gearment.Summary
+@inherits ModuleBase
+@inject ISummaryService SummaryService
+@inject NavigationManager NavigationManager
+
+<div class="control-section" id="target">
+    <SfDashboardLayout @ref="dashboardObject" Columns="5" AllowResizing="true">
+        <DashboardLayoutPanels>
+            <DashboardLayoutPanel Id="one" Column="0" Row="0">
+                <ContentTemplate><div class='text-align'>0</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="two" Row="1" Column="0" SizeX=1 SizeY=2>
+                <ContentTemplate><div class='text-align'>1</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="three" Row="0" Column="1" SizeX=2 SizeY=2>
+                <ContentTemplate><div class='text-align'>2</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="four" Row="2" Column="1" SizeX=1 SizeY=1>
+                <ContentTemplate><div class='text-align'>3</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="five" Row="2" Column="2" SizeX=2 SizeY=1>
+                <ContentTemplate><div class='text-align'>4</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="six" Row="0" Column="3" SizeX=1 SizeY=1>
+                <ContentTemplate><div class='text-align'>5</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="seven" Row="1" Column="3" SizeX=1 SizeY=1>
+                <ContentTemplate><div class='text-align'>6</div></ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Id="eight" Row="0" Column="4" SizeX=1 SizeY=3>
+                <ContentTemplate><div class='text-align'>7</div></ContentTemplate>
+            </DashboardLayoutPanel>
+        </DashboardLayoutPanels>
+    </SfDashboardLayout>
+</div>
+
+@code { public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    List<Summary> _Summarys;
+    SfDashboardLayout dashboardObject;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _Summarys = await SummaryService.GetSummarysAsync(ModuleState.ModuleId);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Summary {Error}", ex.Message);
+            AddModuleMessage("Error Loading Summary", MessageType.Error);
+        }
+    }
+
+    private async Task Delete(Summary Summary)
+    {
+        try
+        {
+            await SummaryService.DeleteSummaryAsync(Summary.SummaryId, ModuleState.ModuleId);
+            await logger.LogInformation("Summary Deleted {Summary}", Summary);
+            _Summarys = await SummaryService.GetSummarysAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Summary {Summary} {Error}", Summary, ex.Message);
+            AddModuleMessage("Error Deleting Summary", MessageType.Error);
+        }
+    }
+}
+<style>
+    .e-dashboardlayout {
+        padding: 10px;
+    }
+
+        .e-dashboardlayout.e-control .e-panel:hover span {
+            display: block;
+        }
+
+        .e-dashboardlayout .e-panel .e-panel-container .text-align {
+            vertical-align: middle;
+            font-weight: 600;
+            font-size: 20px;
+            text-align: center;
+        }
+
+    .e-template-icon {
+        padding: 10px;
+        float: right;
+        display: none;
+    }
+
+    .text-align {
+        line-height: 160px;
+    }
+
+    .sb-demo-section .container-fluid {
+        background: #E5E5E5;
+    }
+</style>

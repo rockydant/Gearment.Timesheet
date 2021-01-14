@@ -27,6 +27,8 @@
     <EmbeddedResource Include="Modules\Gearment.Employee\Scripts\Gearment.Employee.Uninstall.sql" />
     <EmbeddedResource Include="Modules\Gearment.Timesheet\Scripts\Gearment.Timesheet.1.0.0.sql" />
     <EmbeddedResource Include="Modules\Gearment.Timesheet\Scripts\Gearment.Timesheet.Uninstall.sql" />
+    <EmbeddedResource Include="Modules\Gearment.Summary\Scripts\Gearment.Summary.1.0.0.sql" />
+    <EmbeddedResource Include="Modules\Gearment.Summary\Scripts\Gearment.Summary.Uninstall.sql" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Master.00.00.00.00.sql" />
@@ -70,7 +72,7 @@
     <TemplateFiles Include="$(ProjectDir)wwwroot\Modules\Templates\**\*.*" />
   </ItemGroup>
   <Target Name="AddPayloadsFolder" AfterTargets="Publish">
-    <Copy SourceFiles="@(UpgradeFiles)" DestinationFiles="@(UpgradeFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
-    <Copy SourceFiles="@(TemplateFiles)" DestinationFiles="@(TemplateFiles->'$(PublishDir)wwwroot\Modules\Templates\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
+    <Copy SourceFiles="@(UpgradeFiles)" DestinationFiles="@(UpgradeFiles-&gt;'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
+    <Copy SourceFiles="@(TemplateFiles)" DestinationFiles="@(TemplateFiles-&gt;'$(PublishDir)wwwroot\Modules\Templates\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
   </Target>
 </Project>

@@ -47,8 +47,36 @@ namespace Gearment.Timesheet.Models
         public DateTime BreakStartTime { get; set; }
         public DateTime BreakEndTime { get; set; }
         public int TotalRestHour { get; set; }
+        public int TotalWorkingHour { get; set; }
         public string Department { get; set; }
         public string Status { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public string ModifiedBy { get; set; }
+        public DateTime ModifiedOn { get; set; }
+    }
+
+    public class TimesheetDataExcelExport
+    {
+        public int TimesheetDataId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PayrollID { get; set; }
+        public string DayOfWeek { get; set; }
+        public string Date { get; set; }
+        public double Rate { get; set; }
+        public string DailyStartTime { get; set; }
+        public string DailyEndTime { get; set; }
+        public string BreakStartTime { get; set; }
+        public string BreakEndTime { get; set; }
+        public int TotalRestHour { get; set; }
+        public int TotalWorkingHour { get; set; }
+        public string Department { get; set; }
+        public string Status { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public string ModifiedBy { get; set; }
+        public DateTime ModifiedOn { get; set; }
     }
 
     public class TimesheetDataViewModel

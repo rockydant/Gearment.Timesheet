@@ -23,7 +23,7 @@
         <GridColumn Field=@nameof(File.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
         <GridColumn Field=@nameof(File.FileId) HeaderText="ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
         <GridColumn Field=@nameof(File.FolderId) HeaderText="Folder ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(File.CreatedOn) HeaderText="Folder ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(File.CreatedOn) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
         <GridColumn HeaderText="Actions" TextAlign="TextAlign.Left" Width="120">
             <Template>
                 @{ var file = (context as File);

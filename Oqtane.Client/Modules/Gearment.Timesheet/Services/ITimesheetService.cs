@@ -8,11 +8,11 @@ namespace Gearment.Timesheet.Services
     {
         Task<List<Models.Timesheet>> GetTimesheetsAsync(int ModuleId);
 
-        Task<Models.Timesheet> GetTimesheetAsync(int TimesheetId, int ModuleId);
+        Task<Models.TimesheetData> GetTimesheetAsync(int TimesheetId, int ModuleId);
 
         Task<Models.Timesheet> AddTimesheetAsync(Models.Timesheet Timesheet);
 
-        Task<Models.Timesheet> UpdateTimesheetAsync(Models.Timesheet Timesheet);
+        Task<Models.TimesheetData> UpdateTimesheetAsync(Models.TimesheetData Timesheet, int ModuleId);
 
         Task DeleteTimesheetAsync(int TimesheetId, int ModuleId);
 

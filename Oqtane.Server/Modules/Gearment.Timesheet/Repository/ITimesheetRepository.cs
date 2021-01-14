@@ -6,9 +6,9 @@ namespace Gearment.Timesheet.Repository
     public interface ITimesheetRepository
     {
         IEnumerable<Models.Timesheet> GetTimesheets(int ModuleId);
-        Models.Timesheet GetTimesheet(int TimesheetId);
+        Models.TimesheetData GetTimesheet(int TimesheetId);
         Models.Timesheet AddTimesheet(Models.Timesheet Timesheet);
-        Models.Timesheet UpdateTimesheet(Models.Timesheet Timesheet);
+        Models.TimesheetData UpdateTimesheet(Models.TimesheetData Timesheet);
         void DeleteTimesheet(int TimesheetId);
 
         Models.TimesheetData AddTimesheetData(Models.TimesheetData Timesheet);

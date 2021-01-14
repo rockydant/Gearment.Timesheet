@@ -1,46 +1,91 @@
 @using Oqtane.Modules.Controls
 @using Gearment.Timesheet.Services
 @using Gearment.Timesheet.Models
+@using Syncfusion.Blazor.Calendars
 
 @namespace Gearment.Timesheet
 @inherits ModuleBase
 @inject ITimesheetService TimesheetService
 @inject NavigationManager NavigationManager
 
-<table class="table table-borderless">
-    <tr>
-        <td>
-            <Label For="name" HelpText="Enter a name">Name: </Label>
-        </td>
-        <td>
-            <input id="name" class="form-control" @bind="@_name" />
-        </td>
-    </tr>
-</table>
+
+<div class="form-group row">
+    <strong class="col-2">Employee Name</strong>
+    <label for="text" class="col-2 col-form-label">@_name</label>
+    <strong class="col-2">Department</strong>
+    <label for="text" class="col-2 col-form-label">@_department</label>
+    <strong class="col-2">Payroll ID</strong>
+    <label for="text" class="col-2 col-form-label">@_payrollID</label>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Start Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_dailyStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">End Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_dailyEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Break Start Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_breakStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Break End Time</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_breakEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+</div>
+
 <button type="button" class="btn btn-success" @onclick="Save">Save</button>
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
 <br />
 <br />
 @if (PageState.Action == "Edit")
 {
-    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
-}
+<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
 
-@code {
-    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+@code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
     public override string Actions => "Add,Edit";
 
     public override string Title => "Manage Timesheet";
 
     public override List<Resource> Resources => new List<Resource>()
-    {
+{
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
     };
 
     int _id;
-    string _name;
-    string _createdby;
+    string _name = string.Empty;
+    string _payrollID = string.Empty;
+    string _createdby = string.Empty;
+    string _date = string.Empty;
+    string _department = string.Empty;
+    DateTime _dailyStartTime = new DateTime();
+    DateTime _dailyEndTime;
+    DateTime _breakStartTime;
+    DateTime _breakEndTime;
+
+    public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
+    public DateTime MaxVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 23, 00, 00);
+
     DateTime _createdon;
     string _modifiedby;
     DateTime _modifiedon;
@@ -52,10 +97,17 @@
             if (PageState.Action == "Edit")
             {
                 _id = Int32.Parse(PageState.QueryString["id"]);
-                Timesheet Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
+                TimesheetData Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
                 if (Timesheet != null)
                 {
-                    _name = Timesheet.FirstName;
+                    _name = Timesheet.FirstName + " " + Timesheet.LastName;
+                    _date = Timesheet.Date;
+                    _department = Timesheet.Department;
+                    _dailyStartTime = Timesheet.DailyStartTime;
+                    _dailyEndTime = Timesheet.DailyEndTime;
+                    _breakStartTime = Timesheet.BreakStartTime;
+                    _breakEndTime = Timesheet.BreakEndTime;
+
                     _createdby = Timesheet.CreatedBy;
                     _createdon = Timesheet.CreatedOn;
                     _modifiedby = Timesheet.ModifiedBy;
@@ -74,21 +126,28 @@
     {
         try
         {
-            if (PageState.Action == "Add")
+            if (PageState.Action == "Edit")
             {
-                Timesheet Timesheet = new Timesheet();
-                Timesheet.ModuleId = ModuleState.ModuleId;
-                Timesheet.FirstName = _name;
-                Timesheet = await TimesheetService.AddTimesheetAsync(Timesheet);
-                await logger.LogInformation("Timesheet Added {Timesheet}", Timesheet);
-            }
-            else
-            {
-                Timesheet Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
-                Timesheet.FirstName = _name;
-                await TimesheetService.UpdateTimesheetAsync(Timesheet);
+                //if (_dailyEndTime < _dailyStartTime || _breakEndTime < _breakStartTime || _breakEndTime > _dailyEndTime || _breakStartTime < _dailyStartTime)
+                //    (TimeSpan.Compare(_dailyEndTime, _dailyStartTime)>)
+                //{
+                //    AddModuleMessage("Invalid Time Range", MessageType.Warning);
+                //    return;
+                //}
+
+                TimesheetData Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
+                Timesheet.DailyStartTime = _dailyStartTime;
+                Timesheet.DailyEndTime = _dailyEndTime;
+                Timesheet.BreakStartTime = _breakStartTime;
+                Timesheet.BreakEndTime = _breakEndTime;
+
+                Timesheet.ModifiedBy = PageState.User.Username;
+                Timesheet.ModifiedOn = DateTime.Now;
+
+                await TimesheetService.UpdateTimesheetAsync(Timesheet, ModuleState.ModuleId);
                 await logger.LogInformation("Timesheet Updated {Timesheet}", Timesheet);
             }
+
             NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)
@@ -96,5 +155,4 @@
             await logger.LogError(ex, "Error Saving Timesheet {Error}", ex.Message);
             AddModuleMessage("Error Saving Timesheet", MessageType.Error);
         }
-    }
-}
+    } }

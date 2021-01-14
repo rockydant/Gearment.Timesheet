@@ -20,9 +20,9 @@ namespace Gearment.Timesheet.Repository
             return _db.Timesheet.Where(item => item.ModuleId == ModuleId);
         }
 
-        public Models.Timesheet GetTimesheet(int TimesheetId)
+        public Models.TimesheetData GetTimesheet(int TimesheetDataId)
         {
-            return _db.Timesheet.Find(TimesheetId);
+            return _db.TimesheetData.Find(TimesheetDataId);
         }
 
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)
@@ -60,7 +60,7 @@ namespace Gearment.Timesheet.Repository
             return _db.TimesheetData.ToList();
         }
 
-        public Models.Timesheet UpdateTimesheet(Models.Timesheet Timesheet)
+        public Models.TimesheetData UpdateTimesheet(Models.TimesheetData Timesheet)
         {
             _db.Entry(Timesheet).State = EntityState.Modified;
             _db.SaveChanges();
@@ -69,8 +69,8 @@ namespace Gearment.Timesheet.Repository
 
         public void DeleteTimesheet(int TimesheetId)
         {
-            Models.Timesheet Timesheet = _db.Timesheet.Find(TimesheetId);
-            _db.Timesheet.Remove(Timesheet);
+            Models.TimesheetData Timesheet = _db.TimesheetData.Find(TimesheetId);
+            _db.TimesheetData.Remove(Timesheet);
             _db.SaveChanges();
         }
 

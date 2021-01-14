@@ -170,7 +170,7 @@ namespace Gearment.Timesheet.Controllers
                                     if (item.InRecords.Count > 1)
                                     {
                                         timesheetData.BreakEndTime = item.InRecords.Max();
-                                    }                                  
+                                    }
                                 }
 
                                 if (item.OutRecords.Any())
@@ -180,35 +180,50 @@ namespace Gearment.Timesheet.Controllers
                                     {
                                         timesheetData.BreakStartTime = item.OutRecords.Min();
                                     }
-                                    
+
                                 }
 
                                 if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
                                 {
                                     //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                                    timesheetData.TotalRestHour = 0;
+                                    timesheetData.TotalRestHour = (int)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60);
                                 }
                                 else
                                 {
                                     timesheetData.TotalRestHour = 0;
                                 }
 
+                                if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
+                                {
+                                    //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
+                                    timesheetData.TotalWorkingHour = (int)Math.Round((timesheetData.DailyEndTime - timesheetData.DailyStartTime).TotalMinutes / 60);
+                                }
+                                else
+                                {
+                                    timesheetData.TotalWorkingHour = 0;
+                                }
+
                                 timesheetData.Status = employee.Status;
+
+                                timesheetData.CreatedBy = User.Identity.Name;
+                                timesheetData.CreatedOn = DateTime.Now;
+                                timesheetData.ModifiedBy = User.Identity.Name;
+                                timesheetData.ModifiedOn = DateTime.Now;
+
                                 _TimesheetRepository.AddTimesheetData(timesheetData);
                             }
                             else
                             {
-                                Employee.Models.Employee missing = new Employee.Models.Employee()
-                                {
-                                    Name = item.FirstName + "," + item.LastName,
-                                    PayrollID = int.Parse(item.PayrollID),
-                                    Rate = -1,
-                                    Department = string.Empty,
-                                    StartDate = DateTime.UtcNow,
-                                    Status = "Active",
-                                    Note = string.Empty,
-                                    ModuleId = moduleId
-                                };
+                                Employee.Models.Employee missing = new Employee.Models.Employee();
+                                missing.Name = item.FirstName + "," + item.LastName;
+                                missing.PayrollID = string.IsNullOrEmpty(item.PayrollID) ? 0 : int.Parse(item.PayrollID);
+                                missing.Rate = -1;
+                                missing.Department = string.Empty;
+                                missing.StartDate = DateTime.UtcNow;
+                                missing.Status = "Active";
+                                missing.Note = string.Empty;
+                                missing.ModuleId = moduleId;
+
 
                                 if (!missingEmployeeList.Any(x => x.Name == missing.Name && x.PayrollID == missing.PayrollID))
                                 {
@@ -242,14 +257,9 @@ namespace Gearment.Timesheet.Controllers
         // GET api/<controller>/5
         [HttpGet("{id}")]
         [Authorize(Policy = PolicyNames.ViewModule)]
-        public Models.Timesheet Get(int id)
+        public Models.TimesheetData Get(int id)
         {
-            Models.Timesheet Timesheet = _TimesheetRepository.GetTimesheet(id);
-            if (Timesheet != null && Timesheet.ModuleId != _entityId)
-            {
-                Timesheet = null;
-            }
-            return Timesheet;
+            return _TimesheetRepository.GetTimesheet(id);
         }
 
         [HttpGet("data")]
@@ -275,9 +285,9 @@ namespace Gearment.Timesheet.Controllers
         // PUT api/<controller>/5
         [HttpPut("{id}")]
         [Authorize(Policy = PolicyNames.EditModule)]
-        public Models.Timesheet Put(int id, [FromBody] Models.Timesheet Timesheet)
+        public Models.TimesheetData Put(int id, [FromBody] Models.TimesheetData Timesheet)
         {
-            if (ModelState.IsValid && Timesheet.ModuleId == _entityId)
+            if (ModelState.IsValid)
             {
                 Timesheet = _TimesheetRepository.UpdateTimesheet(Timesheet);
                 _logger.Log(LogLevel.Information, this, LogFunction.Update, "Timesheet Updated {Timesheet}", Timesheet);
@@ -290,8 +300,8 @@ namespace Gearment.Timesheet.Controllers
         [Authorize(Policy = PolicyNames.EditModule)]
         public void Delete(int id)
         {
-            Models.Timesheet Timesheet = _TimesheetRepository.GetTimesheet(id);
-            if (Timesheet != null && Timesheet.ModuleId == _entityId)
+            Models.TimesheetData Timesheet = _TimesheetRepository.GetTimesheet(id);
+            if (Timesheet != null)
             {
                 _TimesheetRepository.DeleteTimesheet(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Timesheet Deleted {TimesheetId}", id);

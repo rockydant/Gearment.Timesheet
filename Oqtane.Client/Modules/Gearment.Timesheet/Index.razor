@@ -18,76 +18,34 @@ else
 {
 <ActionLink Action="Upload" class="btn btn-info" Text="Import Data" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
                 <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Excel Export"></SfButton>
-                                <br />
-                                                <br /> @*<SfGrid DataSource="@_Timesheets" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
-                                                                        <GridPageSettings PageSizes="true"></GridPageSettings>
-                                                                        <GridColumns>
-                                                                            <GridColumn Field=@nameof(TimesheetData.FirstName) HeaderText="First Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-                                                                            <GridColumn Field=@nameof(TimesheetData.LastName) HeaderText="Last Name" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                                                                            <GridColumn Field=@nameof(TimesheetData.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                                                                            <GridColumn Field=@nameof(TimesheetData.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                                                                            <GridColumn Field=@nameof(TimesheetData.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                                                                            <GridColumn HeaderText="Start Time" TextAlign="TextAlign.Center" Width="120">
-                                                                                <Template>
-                                                                                    @{ var timesheetData = (context as TimesheetData);
-                                                                        <Label class="form-group label">@timesheetData.DailyStartTime.ToString("hh:mm tt")</Label>
-                                                                                    }
-                                                                                </Template>
-                                                                            </GridColumn>
-                                                                            <GridColumn HeaderText="End Time" TextAlign="TextAlign.Center" Width="120">
-                                                                                <Template>
-                                                                                    @{ var timesheetData = (context as TimesheetData);
-                                                                        <Label class="form-group label">@timesheetData.DailyEndTime.ToString("hh:mm tt")</Label> }
-                                                                                </Template>
-                                                                            </GridColumn>
-                                                                            <GridColumn HeaderText="Break Start" TextAlign="TextAlign.Center" Width="120">
-                                                                                <Template>
-                                                                                    @{ var timesheetData = (context as TimesheetData);
-                                                                        <Label class="form-group label">@timesheetData.BreakStartTime.ToString("hh:mm tt")</Label>
-                                                                                    }
-                                                                                </Template>
-                                                                            </GridColumn>
-                                                                            <GridColumn HeaderText="Break End" TextAlign="TextAlign.Center" Width="120">
-                                                                                <Template>
-                                                                                    @{ var timesheetData = (context as TimesheetData);
-                                                                        <Label class="form-group label">@timesheetData.BreakEndTime.ToString("hh:mm tt")</Label> }
-                                                                                </Template>
-                                                                            </GridColumn>
-                                                                            <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Break Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                                                                            <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                                                                            <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                                                                                <Template>
-                                                                                    @{ var timesheetData = (context as TimesheetData);
-                                                                        <td><ActionLink Action="Edit" Parameters="@($"id=" + timesheetData.TimesheetDataId.ToString())" /></td>
-                                                                                                <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + timesheetData.FirstName +" "+ timesheetData.LastName+ " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(timesheetData))" /></td> }
-                                                                                </Template>
-                                                                            </GridColumn>
-                                                                        </GridColumns>
-                                                                    </SfGrid>*@
-<SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
-    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>    
-    <GridColumns>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.FirstName) HeaderText="First Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.LastName) HeaderText="Last Name" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Break Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-            <Template>
-                @{ var timesheetData = (context as TimesheetDataExcelExport);
-<td><ActionLink Action="Edit" Parameters="@($"id=" + timesheetData.TimesheetDataId.ToString())" /></td>
-                        <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + timesheetData.FirstName +" "+ timesheetData.LastName+ " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(timesheetData.TimesheetDataId))" /></td> }
-            </Template>
-        </GridColumn>
-    </GridColumns>
-</SfGrid>
-                                            }
+                                <ActionLink Action="Payroll" />
+
+
+                                                <br />
+                                                                <br />
+                                                                                <SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+                                                                                    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+                                                                                    <GridColumns>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.FirstName) HeaderText="First Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.LastName) HeaderText="Last Name" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Break Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                                                                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                                                                                            <Template>
+                                                                                                @{ var timesheetData = (context as TimesheetDataExcelExport);
+                                                                            <td><ActionLink Action="Edit" Parameters="@($"id=" + timesheetData.TimesheetDataId.ToString())" /></td>
+                                                                                                    <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + timesheetData.FirstName +" "+ timesheetData.LastName+ " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(timesheetData.TimesheetDataId))" /></td> }
+                                                                                            </Template>
+                                                                                        </GridColumn>
+                                                                                    </GridColumns>
+                                                                                </SfGrid>}
 
 <!-- The content below is for informational purposes only and can be safely removed -->
 

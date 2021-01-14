@@ -1,0 +1,125 @@
+@namespace Gearment.Timesheet
+@using Gearment.Timesheet.Services
+@using Gearment.Timesheet.Models
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+
+@inherits ModuleBase
+@inject NavigationManager NavigationManager
+@inject ITimesheetService TimesheetService
+@inject IFileService FileService
+@inject IFolderService FolderService
+
+
+<SfTab CssClass="BlazorTab" Height="390" LoadOn="ContentLoad.Demand">
+    <TabItems>
+        <TabItem>
+            <ChildContent>
+                <TabHeader Text="New Payroll"></TabHeader>
+            </ChildContent>
+            <ContentTemplate>
+                <br />
+                <div class="form-group row">
+                    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                        <div class="input-group">
+                            <SfDatePicker Width="100%" Placeholder="From Date" FloatLabelType="FloatLabelType.Auto" TValue="DateTime?" Value="@(DateTime.Now)" Min="@((DateTime.Now).AddDays(-1))" Max="@(DateTime.Now.AddMonths(3))"></SfDatePicker>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                        <div class="input-group">
+                            <SfDatePicker Width="100%" Placeholder="To Date" FloatLabelType="FloatLabelType.Auto" TValue="DateTime?" Value="@(DateTime.Now)" Min="@((DateTime.Now).AddDays(-1))" Max="@(DateTime.Now.AddMonths(3))"></SfDatePicker>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <SfButton OnClick="Create" class="btn btn-primary" Content="Create"></SfButton>
+            </ContentTemplate>
+        </TabItem>
+
+        <TabItem>
+            <ChildContent>
+                <TabHeader Text="Payroll History"></TabHeader>
+            </ChildContent>
+            <ContentTemplate>
+
+            </ContentTemplate>
+        </TabItem>
+    </TabItems>
+</SfTab>
+
+
+@code { public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+    List<TimesheetData> _Timesheets;
+    private int _folderId = 1;
+    private List<Object> Toolbaritems = new List<Object>() { "Search", "Print" };
+
+    private bool ImportExcelDialogEnable { get; set; } = false;
+    List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
+
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (PageState.QueryString.ContainsKey("id"))
+        {
+            _folderId = int.Parse(PageState.QueryString["id"]);
+        }
+
+        try
+        {
+            _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+
+            foreach (var item in _Timesheets)
+            {
+                TimesheetDataExcelExport row = new TimesheetDataExcelExport();
+                row.FirstName = item.FirstName;
+                row.LastName = item.LastName;
+                row.PayrollID = item.PayrollID;
+                row.DayOfWeek = item.DayOfWeek;
+                row.Date = item.Date;
+                row.DailyStartTime = item.DailyStartTime.ToString("hh:mm tt");
+                row.DailyEndTime = item.DailyEndTime.ToString("hh:mm tt");
+                row.BreakStartTime = item.BreakStartTime.ToString("hh:mm tt");
+                row.BreakEndTime = item.BreakEndTime.ToString("hh:mm tt");
+                row.TotalRestHour = item.TotalRestHour;
+                row.TotalWorkingHour = item.TotalWorkingHour;
+
+                exportData.Add(row);
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Timesheet {Error}", ex.Message);
+            AddModuleMessage("Error Loading Timesheet", MessageType.Error);
+        }
+    }
+
+    private async Task Delete(int TimesheetDataId)
+    {
+        try
+        {
+            await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
+            await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
+            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
+            AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+
+    public async Task Create()
+    {
+        return;
+    }
+}

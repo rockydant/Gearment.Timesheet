@@ -1,41 +1,166 @@
 @using Gearment.Summary.Services
+@using Gearment.Department.Services
+@using Gearment.Employee.Services
+@using Gearment.Timesheet.Services
+
 @using Gearment.Summary.Models
-@using Syncfusion.Blazor.Layouts
+@using Gearment.Department.Models
+@using Gearment.Employee.Models;
+@using Gearment.Timesheet.Models;
 
 @namespace Gearment.Summary
 @inherits ModuleBase
 @inject ISummaryService SummaryService
+@inject IDepartmentService DepartmentService
+@inject IEmployeeService EmployeeService
+@inject ITimesheetService TimesheetService
+
 @inject NavigationManager NavigationManager
 
 
-<SfDashboardLayout @ref="dashboardObject" Columns="5" AllowResizing="true">
-    <DashboardLayoutPanels>
-        <DashboardLayoutPanel Id="one" Column="0" Row="0">
-            <ContentTemplate><div class='text-align'>0</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="two" Row="1" Column="0" SizeX=1 SizeY=2>
-            <ContentTemplate><div class='text-align'>1</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="three" Row="0" Column="1" SizeX=2 SizeY=2>
-            <ContentTemplate><div class='text-align'>2</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="four" Row="2" Column="1" SizeX=1 SizeY=1>
-            <ContentTemplate><div class='text-align'>3</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="five" Row="2" Column="2" SizeX=2 SizeY=1>
-            <ContentTemplate><div class='text-align'>4</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="six" Row="0" Column="3" SizeX=1 SizeY=1>
-            <ContentTemplate><div class='text-align'>5</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="seven" Row="1" Column="3" SizeX=1 SizeY=1>
-            <ContentTemplate><div class='text-align'>6</div></ContentTemplate>
-        </DashboardLayoutPanel>
-        <DashboardLayoutPanel Id="eight" Row="0" Column="4" SizeX=1 SizeY=3>
-            <ContentTemplate><div class='text-align'>7</div></ContentTemplate>
-        </DashboardLayoutPanel>
-    </DashboardLayoutPanels>
-</SfDashboardLayout>
+<section class="content">
+    <div class="container-fluid">
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info elevation-1"><i class="fa fa-sitemap"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Departments</span>
+                        <span class="info-box-number">
+                            @_Departments.Count
+                        </span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-users"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Employees</span>
+                        <span class="info-box-number">@_Employees.Count</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <!-- fix for small devices only -->
+            <div class="clearfix hidden-md-up"></div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-cogs"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Working Hours</span>
+                        <span class="info-box-number">@_totalWorkingHours</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">New Employee (within a week)</span>
+                        <span class="info-box-number">@_LatestEmployees.Count</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+        <!-- /.row -->
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <div class="col-md-12">
+                <!-- /.card -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- USERS LIST -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Latest Employee</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body p-0">
+                                <SfGrid DataSource="@_LatestEmployees" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true">
+                                    <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+                                    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.Department) HeaderText="Dept." TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" Format="d" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                                        <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                                <!-- /.users-list -->
+                            </div>
+                            <!-- /.card-body -->
+                            <div class="card-footer text-center">
+                                <a href="/settings">View All Users</a>
+                            </div>
+                            <!-- /.card-footer -->
+                        </div>
+                        <!--/.card -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header border-transparent">
+                                <h3 class="card-title">Department List</h3>
+
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body p-0">
+                                <SfGrid DataSource="@_DepartmentList" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true">
+                                    <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+                                    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(DepartmentList.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(DepartmentList.TotalEmployee) HeaderText="Total Employee" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                                <!-- /.users-list -->
+                            </div>
+                            <!-- /.card-body -->
+                            <div class="card-footer text-center">
+                                <a href="/settings">View All Departments</a>
+                            </div>
+                            <!-- /.card-footer -->
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.row -->
+                <!-- TABLE: LATEST ORDERS -->
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div><!--/. container-fluid -->
+</section>
 
 
 @code { public override List<Resource> Resources => new List<Resource>()
@@ -45,13 +170,53 @@
     };
 
     List<Summary> _Summarys;
-    SfDashboardLayout dashboardObject;
+    List<DepartmentViewModel> _Departments = new List<DepartmentViewModel>();
+    List<Employee> _Employees = new List<Employee>();
+    List<TimesheetData> _Timesheets = new List<TimesheetData>();
+    int _totalWorkingHours = 0;
+    List<Employee> _LatestEmployees = new List<Employee>();
+    List<DepartmentList> _DepartmentList = new List<DepartmentList>();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            ShowProgressIndicator();
+
             _Summarys = await SummaryService.GetSummarysAsync(ModuleState.ModuleId);
+            _Departments = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+
+            _Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+
+            _LatestEmployees = _Employees.Where(x => x.CreatedOn >= DateTime.Now.Date.AddDays(-7)).ToList();
+
+            foreach (var item in _Employees)
+            {
+                if (_DepartmentList.Any(x => x.Name == item.Department))
+                {
+                    _DepartmentList.FirstOrDefault(x => x.Name == item.Department).TotalEmployee += 1;
+                }
+                else
+                {
+                    _DepartmentList.Add(new DepartmentList()
+                    {
+                        Name = item.Department,
+                        TotalEmployee = 1
+                    });
+                }
+            }
+
+            _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+
+            foreach (var item in _Timesheets)
+            {
+                if (item.TotalWorkingHour > 0)
+                {
+                    _totalWorkingHours += item.TotalWorkingHour;
+                }
+            }
+
+            HideProgressIndicator();
         }
         catch (Exception ex)
         {

@@ -15,7 +15,11 @@
     <!-- stub the PWA manifest but defer the assignment of href -->
     <link id="app-manifest" rel="manifest" />
     <link rel="stylesheet" href="css/app.css" />
-    <link href="_content/Syncfusion.Blazor/styles/fabric.css" rel="stylesheet" />
+    <link rel="stylesheet" href="_content/Syncfusion.Blazor/styles/fabric.css" />
+    <link rel="stylesheet" href="~/css/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/overlayScrollbars/css/OverlayScrollbars.min.css" />
+    <link rel="stylesheet" href="~/css/adminlte.min.css" />
+
     <!---CDN--->
     @*<link href="https://cdn.syncfusion.com/blazor/18.4.31/styles/fabric.css" rel="stylesheet" />*@
     <script src="js/loadjs.min.js"></script>
@@ -42,12 +46,21 @@
 
     @if (Configuration.GetSection("Runtime").Value == "WebAssembly")
     {
-        <script src="_framework/blazor.webassembly.js"></script>
-    }
-    else
-    {
-        <script src="_framework/blazor.server.js"></script>
-    }
+<script src="_framework/blazor.webassembly.js"></script> }
+            else
+            {
+<script src="_framework/blazor.server.js"></script>}
+
+    <script src="~/js/overlayScrollbars/js/OverlayScrollbars.min.js"></script>
+    <script src="~/js/adminlte.js"></script>
+    <script src="~/js/jquery.mousewheel.js"></script>
+    <script src="~/js/raphael.min.js"></script>
+    <script src="~/js/jquery.mapael.min.js"></script>
+    <script src="~/js/usa_states.min.js"></script>
+    <script src="~/js/Chart.min.js"></script>
+    <script src="~/js/demo.js"></script>
+    <script src="~/js/dashboard2.js"></script>
+
     @Html.Raw(@Model.BodyResources)
 </body>
 </html>

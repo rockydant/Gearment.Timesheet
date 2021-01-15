@@ -5,6 +5,7 @@
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
 
 @namespace Gearment.Employee
 @inherits ModuleBase
@@ -17,8 +18,10 @@
 else
 {
     <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Employee" />
-    <button class="btn btn-info" @onclick="@OnRateButtonClick">Update Rate</button>
-    <button class="btn btn-success" @onclick="@OnDepartmentButtonClick">Update Department</button>
+    <SfButton class="btn btn-info" @onclick="@OnRateButtonClick">Update Rate</SfButton>
+    <SfButton class="btn btn-success" @onclick="@OnDepartmentButtonClick">Update Department</SfButton>
+    <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
+
     <SfDialog Width="335px" Target="#target" IsModal="true" @bind-Visible="RateDialogEnable">
         <DialogTemplates>
             <Header> Rate Update </Header>
@@ -66,33 +69,31 @@ else
     @if (Employees.Count != 0)
     {
         <div class="col-lg-12 control-section">
-            <div class="content-wrapper">
-                <div class="row">
-                    <SfGrid DataSource="@Employees" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
-                        <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
-                        <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
-                        <GridEvents RowSelected="GetSelectedRecords" TValue="Employee"></GridEvents>
-                        <GridColumns>
-                            <GridColumn Type="ColumnType.CheckBox" Width="30"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Center" Width="100"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" Format="C2" TextAlign="TextAlign.Center" Width="80"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.Department) HeaderText="Dept." TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" Format="d" TextAlign="TextAlign.Center" Width="100"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Center" Width="60"></GridColumn>
-                            <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+            <div class="row">
+                <SfGrid DataSource="@Employees" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+                    <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+                    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+                    <GridEvents RowSelected="GetSelectedRecords" TValue="Employee"></GridEvents>
+                    <GridColumns>
+                        <GridColumn Type="ColumnType.CheckBox" Width="30"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Rate) HeaderText="Rate" Format="C2" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Department) HeaderText="Dept." TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" Format="d" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+                        <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Left" Width="120"></GridColumn>
 
-                            <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                                <Template>
-                                    @{ var employee = (context as Employee);
-                                        <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
-                                        <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
-                                    }
-                                </Template>
-                            </GridColumn>
-                        </GridColumns>
-                    </SfGrid>
-                </div>
+                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                            <Template>
+                                @{ var employee = (context as Employee);
+                                    <td><ActionLink Action="Edit" Parameters="@($"id=" + employee.EmployeeId.ToString())" /></td>
+                                    <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + employee.Name + " Employee?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(employee))" /></td>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
             </div>
         </div>
     }
@@ -110,7 +111,7 @@ else
     private bool RateDialogEnable { get; set; } = false;
     private bool DeptDialogEnable { get; set; } = false;
 
-    private List<Object> Toolbaritems = new List<Object>() { "Search", "ExcelExport", "Print", "PdfExport" };
+    private List<Object> Toolbaritems = new List<Object>() { "Search", "Print", "PdfExport" };
     SfGrid<Employee> Grid;
     List<Employee> selectedEmployees = new List<Employee>();
     double _rate = 14;
@@ -214,5 +215,15 @@ else
         await RefreshGrid();
 
         DeptDialogEnable = false;
+    }
+
+    public async Task ExcelExport()
+    {
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+        ExcelProperties.DataSource = Employees;
+
+        ExcelProperties.FileName = "EmployeeInfo.xlsx";
+
+        await this.Grid.ExcelExport(ExcelProperties);
     }
 }

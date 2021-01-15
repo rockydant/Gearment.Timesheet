@@ -27,4 +27,10 @@ namespace Gearment.Department.Models
         public int DepartmentId { get; set; }
         public string Name { get; set; }
     }
+
+    public class DepartmentList
+    {
+        public string Name { get; set; }
+        public int TotalEmployee { get; set; }
+    }
 }

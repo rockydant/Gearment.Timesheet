@@ -16,8 +16,8 @@
 <p><em>Loading...</em></p> }
 else
 {
-<ActionLink Action="Upload" class="btn btn-info" Text="Import Data" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
-                <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Excel Export"></SfButton>
+<ActionLink Action="Upload" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
+                <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
                                 <ActionLink Action="Payroll" />
 
 
@@ -123,27 +123,6 @@ else
 
     public async Task ExcelExport()
     {
-        //ExcelExportProperties ExcelProperties = new ExcelExportProperties();
-        //ExcelProperties.DataSource = _Timesheets;
-
-        //var columns = new List<GridColumn>();
-
-        //columns.Add(new GridColumn() { Field = "FirstName", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "LastName", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
-        //columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
-
-        //ExcelProperties.Columns = columns;
-
-        //await this.Grid.ExcelExport(ExcelProperties);
-
         List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
         foreach (var item in _Timesheets)
         {
@@ -181,6 +160,7 @@ else
         columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
 
         ExcelProperties.Columns = columns;
+        ExcelProperties.FileName = "DetailReport.xlsx";
 
         await this.Grid.ExcelExport(ExcelProperties);
     } }

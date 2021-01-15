@@ -31,7 +31,7 @@ namespace Gearment.Department.Repository
                 }
             }
 
-            return result;                
+            return result;
         }
 
         public IEnumerable<Models.Department> GetDepartments(int ModuleId)
@@ -42,6 +42,11 @@ namespace Gearment.Department.Repository
         public Models.Department GetDepartment(int DepartmentId)
         {
             return _db.Department.Find(DepartmentId);
+        }
+
+        public Models.Department GetDepartmentByName(string Name)
+        {
+            return _db.Department.FirstOrDefault(x => x.Name.ToLower() == Name.Trim().ToLower());
         }
 
         public Models.Department AddDepartment(Models.Department Department)

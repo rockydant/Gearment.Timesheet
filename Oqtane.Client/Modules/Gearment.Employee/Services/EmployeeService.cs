@@ -59,7 +59,11 @@ namespace Gearment.Employee.Services
         public async Task<List<Department.Models.DepartmentViewModel>> GetDepartmentsAsync(int ModuleId)
         {
             return await GetJsonAsync<List<Department.Models.DepartmentViewModel>>(CreateAuthorizationPolicyUrl($"{Apiurl}/departments", ModuleId));
+        }
 
+        public async Task<List<Models.Employee>> ProcessFileAsync(int moduleId, int fileId)
+        {
+            return await GetJsonAsync<List<Models.Employee>>($"{Apiurl}/process/{moduleId}/{fileId}");
         }
     }
 }

@@ -19,5 +19,7 @@ namespace Gearment.Employee.Services
         Task<List<Models.Employee>> UpdateEmployeesAsync(List<Models.Employee> Employees);
 
         Task DeleteEmployeeAsync(int EmployeeId, int ModuleId);
+
+        Task<List<Models.Employee>> ProcessFileAsync(int ModuleId, int fileId);
     }
 }

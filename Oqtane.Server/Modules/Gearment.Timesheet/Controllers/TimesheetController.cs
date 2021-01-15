@@ -155,8 +155,8 @@ namespace Gearment.Timesheet.Controllers
 
                             if (employee != null)
                             {
-                                timesheetData.FirstName = item.FirstName;
-                                timesheetData.LastName = item.LastName;
+                                timesheetData.FirstName = item.FirstName.Trim();
+                                timesheetData.LastName = item.LastName.Trim();
 
                                 timesheetData.PayrollID = item.PayrollID;
                                 timesheetData.Rate = employee.Rate;
@@ -215,7 +215,7 @@ namespace Gearment.Timesheet.Controllers
                             else
                             {
                                 Employee.Models.Employee missing = new Employee.Models.Employee();
-                                missing.Name = item.FirstName + "," + item.LastName;
+                                missing.Name = item.FirstName.Trim() + " " + item.LastName.Trim();
                                 missing.PayrollID = string.IsNullOrEmpty(item.PayrollID) ? 0 : int.Parse(item.PayrollID);
                                 missing.Rate = -1;
                                 missing.Department = string.Empty;

@@ -17,7 +17,7 @@ else
                                 <br />
                                                 @if (@Departments.Count != 0)
                                                 {
-<SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+<SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true"Toolbar="Toolbaritems">
     <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Department"></GridEvents>
     <GridColumns>
@@ -76,7 +76,7 @@ else
     };
 
     SfGrid<Department> Grid;
-    private List<Object> Toolbaritems = new List<Object>() { "Search", "Print" };
+    private List<Object> Toolbaritems = new List<Object>() { "Search"};
 
     public List<Department> Departments { get; set; }
 

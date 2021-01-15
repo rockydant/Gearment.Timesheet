@@ -1,5 +1,6 @@
 @namespace Gearment.Timesheet
 @using Gearment.Timesheet.Services
+@using Gearment.Employee.Services
 @using Gearment.Timesheet.Models
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.DropDowns
@@ -7,13 +8,14 @@
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Inputs
+@using Gearment.Department.Models
 
 @inherits ModuleBase
 @inject NavigationManager NavigationManager
 @inject ITimesheetService TimesheetService
 @inject IFileService FileService
 @inject IFolderService FolderService
-
+@inject IEmployeeService EmployeeService
 
 <SfTab CssClass="BlazorTab" Height="390" LoadOn="ContentLoad.Demand">
     <TabItems>
@@ -33,6 +35,20 @@
                         <div class="input-group">
                             <SfDatePicker Width="100%" Placeholder="To Date" FloatLabelType="FloatLabelType.Auto" TValue="DateTime?" Value="@(DateTime.Now)" Min="@((DateTime.Now).AddDays(-1))" Max="@(DateTime.Now.AddMonths(3))"></SfDatePicker>
                         </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
+                        <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by employee" DataSource="@departmentListFilter">
+                            <DropDownListEvents ValueChange="@FilterChange" TValue="string" TItem="DepartmentViewModel"></DropDownListEvents>
+                            <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+                    <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
+                        <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by department" DataSource="@departmentListFilter">
+                            <DropDownListEvents ValueChange="@FilterChange" TValue="string" TItem="DepartmentViewModel"></DropDownListEvents>
+                            <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+                        </SfDropDownList>
                     </div>
                 </div>
                 <br />
@@ -63,11 +79,15 @@
 
     private bool ImportExcelDialogEnable { get; set; } = false;
     List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
+    List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
+
 
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
 
     protected override async Task OnInitializedAsync()
     {
+        departmentListFilter = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+
         if (PageState.QueryString.ContainsKey("id"))
         {
             _folderId = int.Parse(PageState.QueryString["id"]);
@@ -80,8 +100,7 @@
             foreach (var item in _Timesheets)
             {
                 TimesheetDataExcelExport row = new TimesheetDataExcelExport();
-                row.FirstName = item.FirstName;
-                row.LastName = item.LastName;
+                row.Name = item.FirstName + " " + item.LastName;
                 row.PayrollID = item.PayrollID;
                 row.DayOfWeek = item.DayOfWeek;
                 row.Date = item.Date;
@@ -118,8 +137,22 @@
         }
     }
 
-    public async Task Create()
+    private async Task FilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, DepartmentViewModel> args)
+    {
+        if (args.Value == "All")
+        {
+            //await RefreshGrid();
+        }
+        else
+        {
+            //Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+            //Employees = Employees.FindAll(x => x.Department.Contains(args.Value));
+        }
+    }
+
+    private async Task Create()
     {
         return;
     }
 }
+

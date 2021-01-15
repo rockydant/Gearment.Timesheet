@@ -59,8 +59,7 @@ namespace Gearment.Timesheet.Models
     public class TimesheetDataExcelExport
     {
         public int TimesheetDataId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string Name { get; set; }        
         public string PayrollID { get; set; }
         public string DayOfWeek { get; set; }
         public string Date { get; set; }

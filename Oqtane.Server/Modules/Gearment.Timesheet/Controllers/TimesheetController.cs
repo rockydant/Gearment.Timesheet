@@ -101,7 +101,7 @@ namespace Gearment.Timesheet.Controllers
 
                         foreach (var item in result)
                         {
-                            var foundRecord = dataViewModel.FirstOrDefault(x => x.FirstName == item.FirstName && x.LastName == item.LastName && x.PayrollID == item.PayRollID && x.Date == item.Date);
+                            var foundRecord = dataViewModel.FirstOrDefault(x => x.FirstName == item.FirstName && x.LastName == item.LastName);
                             if (foundRecord != null)
                             {
                                 if (!string.IsNullOrEmpty(item.In))
@@ -151,7 +151,7 @@ namespace Gearment.Timesheet.Controllers
                                 employee.PayrollID = int.Parse(item.PayrollID);
                             }
 
-                            employee = _employeeRepository.GetEmployeeByNameOrPayrollId(employee).FirstOrDefault();
+                            employee = _employeeRepository.GetEmployeeByName(employee.Name);
 
                             if (employee != null)
                             {
@@ -225,7 +225,7 @@ namespace Gearment.Timesheet.Controllers
                                 missing.ModuleId = moduleId;
 
 
-                                if (!missingEmployeeList.Any(x => x.Name == missing.Name && x.PayrollID == missing.PayrollID))
+                                if (!missingEmployeeList.Any(x => x.Name == missing.Name))
                                 {
                                     missingEmployeeList.Add(missing);
                                     _employeeRepository.AddEmployee(missing);

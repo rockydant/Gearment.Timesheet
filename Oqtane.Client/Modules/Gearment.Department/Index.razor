@@ -7,29 +7,22 @@
 @inject IDepartmentService DepartmentService
 @inject NavigationManager NavigationManager
 
-@if (Departments == null)
-{
-<p><em>Loading...</em></p> }
-else
-{
 <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Department" />
-                <br />
-                                <br />
-                                                @if (@Departments.Count != 0)
-                                                {
-<SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true"Toolbar="Toolbaritems">
+<br />
+<br />
+<SfGrid DataSource="@Departments" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowSorting="true" Toolbar="Toolbaritems">
     <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
     <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="Department"></GridEvents>
     <GridColumns>
-        <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-        <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Center" Width="120">
+        <GridColumn Field=@nameof(Department.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+        <GridColumn HeaderText="Daily Start Time" TextAlign="TextAlign.Left" Width="120">
             <Template>
                 @{ var department = (context as Department);
                     <Label class="form-group label">@department.DailyStartTime.ToString("hh:mm tt")</Label>
                 }
             </Template>
         </GridColumn>
-        <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Center" Width="120">
+        <GridColumn HeaderText="Daily End Time" TextAlign="TextAlign.Left" Width="120">
             <Template>
                 @{ var department = (context as Department);
                     <Label class="form-group label">@department.DailyEndTime.ToString("hh:mm tt")</Label>
@@ -37,21 +30,21 @@ else
             </Template>
         </GridColumn>
 
-        <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Center" Width="120">
+        <GridColumn HeaderText="Break Start Time" TextAlign="TextAlign.Left" Width="120">
             <Template>
                 @{ var department = (context as Department);
                     <Label class="form-group label">@department.BreakStartTime.ToString("hh:mm tt")</Label>
                 }
             </Template>
         </GridColumn>
-        <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Center" Width="120">
+        <GridColumn HeaderText="Break End Time" TextAlign="TextAlign.Left" Width="120">
             <Template>
                 @{ var department = (context as Department);
                     <Label class="form-group label">@department.BreakEndTime.ToString("hh:mm tt")</Label>
                 }
             </Template>
         </GridColumn>
-        <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Department.TotalRestHour) HeaderText="Total Rest Hour" TextAlign="TextAlign.Left" Width="120"></GridColumn>
         <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
             <Template>
                 @{ var department = (context as Department);
@@ -61,10 +54,7 @@ else
             </Template>
         </GridColumn>
     </GridColumns>
-</SfGrid> }
-                            else
-                            {
-            <p>No Departments To Display</p>}}
+</SfGrid>
 <br />
 <br />
 <br />
@@ -76,7 +66,7 @@ else
     };
 
     SfGrid<Department> Grid;
-    private List<Object> Toolbaritems = new List<Object>() { "Search"};
+    private List<Object> Toolbaritems = new List<Object>() { "Search" };
 
     public List<Department> Departments { get; set; }
 

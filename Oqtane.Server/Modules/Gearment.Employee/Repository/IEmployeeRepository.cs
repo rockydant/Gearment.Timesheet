@@ -14,5 +14,6 @@ namespace Gearment.Employee.Repository
         void DeleteEmployee(int EmployeeId);
 
         List<Models.Employee> GetEmployeeByNameOrPayrollId(Models.Employee Employee);
+        Models.Employee GetEmployeeByName(string Name);
     }
 }

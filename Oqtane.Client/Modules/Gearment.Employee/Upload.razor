@@ -7,7 +7,7 @@
 @inject IFileService FileService
 @inject IFolderService FolderService
 
-
+<Label>*Rate column would be in number format</Label>
 <table class="table table-borderless">
     <tr>
         <td>
@@ -110,10 +110,8 @@
         {
             _Employees = await EmployeeService.ProcessFileAsync(ModuleState.ModuleId, file.FileId);          
 
-            _missingCount = _Employees.Count();
-
             await logger.LogInformation("File Processed {File}", file.Name);
-            AddModuleMessage("File " + file.Name + " Processed. Total " + _rowCount + " Rows Imported", MessageType.Success);
+            AddModuleMessage("File " + file.Name + " Processed. Total " + _Employees.Count() + " Rows Imported", MessageType.Success);
 
             await GetFiles();
             StateHasChanged();

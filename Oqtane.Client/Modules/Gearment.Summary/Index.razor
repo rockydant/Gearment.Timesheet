@@ -183,7 +183,6 @@
         {
             ShowProgressIndicator();
 
-            _Summarys = await SummaryService.GetSummarysAsync(ModuleState.ModuleId);
             _Departments = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
 
             _Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);

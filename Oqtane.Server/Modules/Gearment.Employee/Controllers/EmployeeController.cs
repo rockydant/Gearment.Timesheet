@@ -180,12 +180,13 @@ namespace Gearment.Employee.Controllers
 
                     foreach (var item in importList)
                     {
-                        var row = _EmployeeRepository.GetEmployeeByNameOrPayrollId(item);
+                        var row = _EmployeeRepository.GetEmployeeByName(item.Name);
                         if (row != null)
                         {
-                            var foundRow = _EmployeeRepository.GetEmployee(row.FirstOrDefault().EmployeeId);
-                            foundRow.Rate = item.Rate;
-                            foundRow.Department = item.Department;
+                            row.Rate = item.Rate;
+                            row.Department = item.Department;
+
+                            _EmployeeRepository.UpdateEmployee(row);
                         }
                         else
                         {
@@ -198,6 +199,8 @@ namespace Gearment.Employee.Controllers
                             missing.Status = "Active";
                             missing.Note = string.Empty;
                             missing.ModuleId = moduleId;
+
+                            _EmployeeRepository.AddEmployee(missing);
                         }
                     }
 
@@ -229,14 +232,13 @@ namespace Gearment.Employee.Controllers
             for (int r = startRowIndex; r <= lastRowIndex; r++)
             {
                 Models.Employee record = new Models.Employee();
-                List<string> fullName = string.IsNullOrEmpty(sheet[r, startColumnIndex].Text) ? new List<string>() : sheet[r, startColumnIndex].Text.Split(" ").ToList();
-
-                record.Name = fullName[1].Trim() + "," + fullName[0].Trim();
+                
+                record.Name = string.IsNullOrEmpty(sheet[r, startColumnIndex].Text) ? string.Empty : sheet[r, startColumnIndex].Text;
 
                 record.ModuleId = moduleId;
 
                 record.Department = string.IsNullOrEmpty(sheet[r, startColumnIndex + 1].Text) ? string.Empty : sheet[r, startColumnIndex + 1].Text;
-                record.Rate = string.IsNullOrEmpty(sheet[r, startColumnIndex + 2].Text) ? 0.0 : double.Parse(sheet[r, startColumnIndex + 2].Text.Replace("$", string.Empty).Trim());
+                record.Rate = sheet[r, startColumnIndex + 2].Number;
 
                 result.Add(record);
             }

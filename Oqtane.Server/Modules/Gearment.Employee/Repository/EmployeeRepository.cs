@@ -32,6 +32,10 @@ namespace Gearment.Employee.Repository
 
             return result;
         }
+        public Models.Employee GetEmployeeByName(string Name)
+        {
+            return _db.Employee.FirstOrDefault(x => x.Name.ToLower() == Name.ToLower());
+        }
 
         public Models.Employee GetEmployee(int EmployeeId)
         {

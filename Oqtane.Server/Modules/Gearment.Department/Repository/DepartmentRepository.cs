@@ -36,7 +36,7 @@ namespace Gearment.Department.Repository
 
         public IEnumerable<Models.Department> GetDepartments(int ModuleId)
         {
-            return _db.Department.Where(item => item.ModuleId == ModuleId);
+            return _db.Department.ToList();
         }
 
         public Models.Department GetDepartment(int DepartmentId)

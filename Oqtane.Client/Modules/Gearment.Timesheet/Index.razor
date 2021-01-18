@@ -170,7 +170,7 @@ else
             args.Row.AddClass(new string[] { "table-warning" });
         }
 
-        if (args.Data.TotalWorkingHour < 0)
+        if (args.Data.TotalWorkingHour < 0 || args.Data.TotalRestHour < 0)
         {
             args.Row.AddClass(new string[] { "table-danger" });
         }

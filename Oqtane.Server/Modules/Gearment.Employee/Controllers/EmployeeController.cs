@@ -76,12 +76,7 @@ namespace Gearment.Employee.Controllers
         [Authorize(Policy = PolicyNames.ViewModule)]
         public Models.Employee Get(int id)
         {
-            Models.Employee Employee = _EmployeeRepository.GetEmployee(id);
-            if (Employee != null && Employee.ModuleId != _entityId)
-            {
-                Employee = null;
-            }
-            return Employee;
+            return _EmployeeRepository.GetEmployee(id);            
         }
 
         // POST api/<controller>

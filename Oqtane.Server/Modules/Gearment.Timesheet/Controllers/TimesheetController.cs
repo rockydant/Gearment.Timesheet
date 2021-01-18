@@ -86,6 +86,7 @@ namespace Gearment.Timesheet.Controllers
                         timesheetList = ExportDataFromExcelSheet(worksheet, 2, 1, dataTable.Rows.Count + 1, moduleId);
                     }
 
+                    // Add Raw Data from Devices
                     foreach (var item in timesheetList)
                     {
                         var row = _TimesheetRepository.AddTimesheet(item);
@@ -95,8 +96,10 @@ namespace Gearment.Timesheet.Controllers
                         }
                     }
 
+                    // Process Data: Manipulate Timesheet Records, Add New Employees
                     if (result.Any())
                     {
+                        // Manipulate Timesheet records
                         List<TimesheetDataViewModel> dataViewModel = new List<TimesheetDataViewModel>();
 
                         foreach (var item in result)
@@ -139,80 +142,23 @@ namespace Gearment.Timesheet.Controllers
                             }
                         }
 
+                        // Add new Employee
                         foreach (var item in dataViewModel)
                         {
                             TimesheetData timesheetData = new TimesheetData();
 
                             Employee.Models.Employee employee = new Employee.Models.Employee();
-                            employee.Name = item.LastName + "," + item.FirstName;
+                            employee.Name = item.FirstName + " " + item.LastName;
 
                             if (!string.IsNullOrEmpty(item.PayrollID))
                             {
                                 employee.PayrollID = int.Parse(item.PayrollID);
                             }
 
+                            // Check Existed Employee
                             employee = _employeeRepository.GetEmployeeByName(employee.Name);
 
-                            if (employee != null)
-                            {
-                                timesheetData.FirstName = item.FirstName.Trim();
-                                timesheetData.LastName = item.LastName.Trim();
-
-                                timesheetData.PayrollID = item.PayrollID;
-                                timesheetData.Rate = employee.Rate;
-                                timesheetData.Date = item.Date;
-                                timesheetData.DayOfWeek = item.DayOfWeek;
-                                timesheetData.Department = employee.Department;
-
-                                if (item.InRecords.Any())
-                                {
-                                    timesheetData.DailyStartTime = item.InRecords.Min();
-                                    if (item.InRecords.Count > 1)
-                                    {
-                                        timesheetData.BreakEndTime = item.InRecords.Max();
-                                    }
-                                }
-
-                                if (item.OutRecords.Any())
-                                {
-                                    timesheetData.DailyEndTime = item.OutRecords.Max();
-                                    if (item.OutRecords.Count > 1)
-                                    {
-                                        timesheetData.BreakStartTime = item.OutRecords.Min();
-                                    }
-
-                                }
-
-                                if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
-                                {
-                                    //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                                    timesheetData.TotalRestHour = (int)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60);
-                                }
-                                else
-                                {
-                                    timesheetData.TotalRestHour = 0;
-                                }
-
-                                if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
-                                {
-                                    //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                                    timesheetData.TotalWorkingHour = (int)Math.Round((timesheetData.DailyEndTime - timesheetData.DailyStartTime).TotalMinutes / 60);
-                                }
-                                else
-                                {
-                                    timesheetData.TotalWorkingHour = 0;
-                                }
-
-                                timesheetData.Status = employee.Status;
-
-                                timesheetData.CreatedBy = User.Identity.Name;
-                                timesheetData.CreatedOn = DateTime.Now;
-                                timesheetData.ModifiedBy = User.Identity.Name;
-                                timesheetData.ModifiedOn = DateTime.Now;
-
-                                _TimesheetRepository.AddTimesheetData(timesheetData);
-                            }
-                            else
+                            if (employee == null)
                             {
                                 Employee.Models.Employee missing = new Employee.Models.Employee();
                                 missing.Name = item.FirstName.Trim() + " " + item.LastName.Trim();
@@ -224,13 +170,73 @@ namespace Gearment.Timesheet.Controllers
                                 missing.Note = string.Empty;
                                 missing.ModuleId = moduleId;
 
+                                employee = _employeeRepository.AddEmployee(missing);
+                                missingEmployeeList.Add(employee);
+                            }
+                            else
+                            {
+                                employee.PayrollID = string.IsNullOrEmpty(item.PayrollID) ? 0 : int.Parse(item.PayrollID);
+                                employee = _employeeRepository.UpdateEmployee(employee);
+                            }
 
-                                if (!missingEmployeeList.Any(x => x.Name == missing.Name))
+                            timesheetData.FirstName = item.FirstName.Trim();
+                            timesheetData.LastName = item.LastName.Trim();
+
+                            timesheetData.PayrollID = item.PayrollID;
+                            timesheetData.Rate = employee.Rate;
+                            timesheetData.Date = item.Date;
+                            timesheetData.DayOfWeek = item.DayOfWeek;
+                            timesheetData.Department = employee.Department;
+
+                            if (item.InRecords.Any())
+                            {
+                                timesheetData.DailyStartTime = item.InRecords.Min();
+                                if (item.InRecords.Count > 1)
                                 {
-                                    missingEmployeeList.Add(missing);
-                                    _employeeRepository.AddEmployee(missing);
+                                    timesheetData.BreakEndTime = item.InRecords.Max();
                                 }
                             }
+
+                            if (item.OutRecords.Any())
+                            {
+                                timesheetData.DailyEndTime = item.OutRecords.Max();
+                                if (item.OutRecords.Count > 1)
+                                {
+                                    timesheetData.BreakStartTime = item.OutRecords.Min();
+                                }
+
+                            }
+
+                            if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
+                            {
+                                //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
+                                timesheetData.TotalRestHour = (int)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60);
+                            }
+                            else
+                            {
+                                timesheetData.TotalRestHour = 0;
+                            }
+
+                            if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
+                            {
+                                //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
+                                timesheetData.TotalWorkingHour = (int)Math.Round((timesheetData.DailyEndTime - timesheetData.DailyStartTime).TotalMinutes / 60);
+                            }
+                            else
+                            {
+                                timesheetData.TotalWorkingHour = 0;
+                            }
+
+                            timesheetData.Status = employee.Status;
+
+                            timesheetData.CreatedBy = User.Identity.Name;
+                            timesheetData.CreatedOn = DateTime.Now;
+                            timesheetData.ModifiedBy = User.Identity.Name;
+                            timesheetData.ModifiedOn = DateTime.Now;
+
+                            _TimesheetRepository.AddTimesheetData(timesheetData);
+
+
                         }
                     }
 
@@ -321,8 +327,8 @@ namespace Gearment.Timesheet.Controllers
                 Models.Timesheet record = new Models.Timesheet();
                 List<string> fullName = string.IsNullOrEmpty(sheet[r, startColumnIndex].Text) ? new List<string>() : sheet[r, startColumnIndex].Text.Split(',').ToList();
 
-                record.FirstName = fullName[1];
-                record.LastName = fullName[0];
+                record.FirstName = fullName[1].Trim();
+                record.LastName = fullName[0].Trim();
 
                 record.ModuleId = moduleId;
 

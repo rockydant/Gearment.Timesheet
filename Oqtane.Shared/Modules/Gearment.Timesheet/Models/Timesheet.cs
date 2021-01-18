@@ -64,6 +64,7 @@ namespace Gearment.Timesheet.Models
         public string DayOfWeek { get; set; }
         public string Date { get; set; }
         public double Rate { get; set; }
+        public double TotalPay { get; set; }
         public string DailyStartTime { get; set; }
         public string DailyEndTime { get; set; }
         public string BreakStartTime { get; set; }
@@ -93,5 +94,20 @@ namespace Gearment.Timesheet.Models
     {
         public List<Models.Timesheet> TimesheetList { get; set; }
         public List<Employee.Models.Employee> MissingEmployee { get; set; }
+    }
+
+    public class TimesheetDailyQuery
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public string Department { get; set; }
+        public string EmployeeName { get; set; }
+    }
+
+    public class PayrollViewModel
+    {
+        public string Name { get; set; }
+        public Dictionary<string,string> WorkingDates { get; set; }
+        public double TotalPay { get; set; }
     }
 }

@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Gearment.Timesheet.Models;
 
 namespace Gearment.Timesheet.Services
 {
-    public interface ITimesheetService 
+    public interface ITimesheetService
     {
         Task<List<Models.Timesheet>> GetTimesheetsAsync(int ModuleId);
 
@@ -19,5 +20,7 @@ namespace Gearment.Timesheet.Services
         Task<Models.TimesheetViewModel> ProcessFileAsync(int ModuleId, int fileId);
 
         Task<List<Models.TimesheetData>> GetTimesheetDataAsync(int ModuleId);
+
+        Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
     }
 }

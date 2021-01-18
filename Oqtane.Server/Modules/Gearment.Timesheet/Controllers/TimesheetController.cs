@@ -104,7 +104,7 @@ namespace Gearment.Timesheet.Controllers
 
                         foreach (var item in result)
                         {
-                            var foundRecord = dataViewModel.FirstOrDefault(x => x.FirstName == item.FirstName && x.LastName == item.LastName);
+                            var foundRecord = dataViewModel.FirstOrDefault(x => x.FirstName == item.FirstName && x.LastName == item.LastName && x.Date == item.Date);
                             if (foundRecord != null)
                             {
                                 if (!string.IsNullOrEmpty(item.In))
@@ -269,10 +269,23 @@ namespace Gearment.Timesheet.Controllers
         }
 
         [HttpGet("data")]
-        [Authorize(Policy = PolicyNames.ViewModule)]
         public List<Models.TimesheetData> GetTimesheetData()
         {
             return _TimesheetRepository.GetAllTimesheetData();
+        }
+
+        [HttpPost("data")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public List<Models.TimesheetData> GetTimesheetDataByDate([FromBody] TimesheetDailyQuery Query)
+        {
+            if (Query.Department == "All")
+            {
+                return _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate).ToList();
+            }
+            else
+            {
+                return _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate && x.Department == Query.Department).ToList();
+            }
         }
 
         // POST api/<controller>
@@ -332,13 +345,13 @@ namespace Gearment.Timesheet.Controllers
 
                 record.ModuleId = moduleId;
 
-                record.PayRollID = string.IsNullOrEmpty(sheet[r, startColumnIndex + 1].Text) ? string.Empty : sheet[r, startColumnIndex + 1].Text;
-                record.DayOfWeek = string.IsNullOrEmpty(sheet[r, startColumnIndex + 2].Text) ? string.Empty : sheet[r, startColumnIndex + 2].Text;
-                record.Date = string.IsNullOrEmpty(sheet[r, startColumnIndex + 3].Text) ? string.Empty : sheet[r, startColumnIndex + 3].Text;
-                record.In = string.IsNullOrEmpty(sheet[r, startColumnIndex + 4].Text) ? string.Empty : sheet[r, startColumnIndex + 4].Text;
-                record.Out = string.IsNullOrEmpty(sheet[r, startColumnIndex + 5].Text) ? string.Empty : sheet[r, startColumnIndex + 5].Text;
-                record.Hours = string.IsNullOrEmpty(sheet[r, startColumnIndex + 6].Text) ? string.Empty : sheet[r, startColumnIndex + 6].Text;
-                record.Type = string.IsNullOrEmpty(sheet[r, startColumnIndex + 7].Text) ? string.Empty : sheet[r, startColumnIndex + 7].Text;
+                record.PayRollID = string.IsNullOrEmpty(sheet[r, startColumnIndex + 1].Value) ? string.Empty : sheet[r, startColumnIndex + 1].Value;
+                record.DayOfWeek = string.IsNullOrEmpty(sheet[r, startColumnIndex + 2].Value) ? string.Empty : sheet[r, startColumnIndex + 2].Value;
+                record.Date = string.IsNullOrEmpty(sheet[r, startColumnIndex + 3].Value) ? string.Empty : sheet[r, startColumnIndex + 3].Value;
+                record.In = string.IsNullOrEmpty(sheet[r, startColumnIndex + 4].Value) ? string.Empty : sheet[r, startColumnIndex + 4].Value;
+                record.Out = string.IsNullOrEmpty(sheet[r, startColumnIndex + 5].Value) ? string.Empty : sheet[r, startColumnIndex + 5].Value;
+                record.Hours = string.IsNullOrEmpty(sheet[r, startColumnIndex + 6].Value) ? string.Empty : sheet[r, startColumnIndex + 6].Value;
+                record.Type = string.IsNullOrEmpty(sheet[r, startColumnIndex + 7].Value) ? string.Empty : sheet[r, startColumnIndex + 7].Value;
                 result.Add(record);
             }
 

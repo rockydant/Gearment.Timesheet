@@ -6,6 +6,7 @@ using Oqtane.Modules;
 using Oqtane.Services;
 using Oqtane.Shared;
 using Gearment.Timesheet.Models;
+using System;
 
 namespace Gearment.Timesheet.Services
 {
@@ -18,7 +19,7 @@ namespace Gearment.Timesheet.Services
             _siteState = siteState;
         }
 
-         private string Apiurl => CreateApiUrl(_siteState.Alias, "Timesheet");
+        private string Apiurl => CreateApiUrl(_siteState.Alias, "Timesheet");
 
         public async Task<List<Models.Timesheet>> GetTimesheetsAsync(int ModuleId)
         {
@@ -53,6 +54,12 @@ namespace Gearment.Timesheet.Services
         public async Task<List<Models.TimesheetData>> GetTimesheetDataAsync(int ModuleId)
         {
             List<Models.TimesheetData> Timesheets = await GetJsonAsync<List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId));
+            return Timesheets.OrderBy(item => item.Date).ToList();
+        }
+
+        public async Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery Query)
+        {
+            List<Models.TimesheetData> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId), Query);
             return Timesheets.OrderBy(item => item.Date).ToList();
         }
     }

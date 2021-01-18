@@ -18,16 +18,15 @@ else
 {
     <ActionLink Action="Upload" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
     <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
-    <ActionLink Action="Payroll" />
-
+    <ActionLink Action="Payroll" class="btn btn-secondary" Text="Daily Summary" />
 
     <br />
     <br />
-    <SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+    <SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" AllowGrouping="true" Toolbar="Toolbaritems">
         <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
         <GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
         <GridColumns>
-            <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="First Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
             <GridColumn Field=@nameof(TimesheetDataExcelExport.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
             <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
             <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" Type="ColumnType.Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
@@ -88,12 +87,14 @@ else
                 row.PayrollID = item.PayrollID;
                 row.DayOfWeek = item.DayOfWeek;
                 row.Date = item.Date;
+                row.Rate = item.Rate;
                 row.DailyStartTime = item.DailyStartTime.ToString("hh:mm tt");
                 row.DailyEndTime = item.DailyEndTime.ToString("hh:mm tt");
                 row.BreakStartTime = item.BreakStartTime.ToString("hh:mm tt");
                 row.BreakEndTime = item.BreakEndTime.ToString("hh:mm tt");
                 row.TotalRestHour = item.TotalRestHour;
                 row.TotalWorkingHour = item.TotalWorkingHour;
+                row.TotalPay = item.Rate * item.TotalWorkingHour;
 
                 exportData.Add(row);
             }
@@ -131,12 +132,14 @@ else
             row.PayrollID = item.PayrollID;
             row.DayOfWeek = item.DayOfWeek;
             row.Date = item.Date;
+            row.Rate = item.Rate;
             row.DailyStartTime = item.DailyStartTime.ToString("hh:mm tt");
             row.DailyEndTime = item.DailyEndTime.ToString("hh:mm tt");
             row.BreakStartTime = item.BreakStartTime.ToString("hh:mm tt");
             row.BreakEndTime = item.BreakEndTime.ToString("hh:mm tt");
             row.TotalRestHour = item.TotalRestHour;
             row.TotalWorkingHour = item.TotalWorkingHour;
+            row.TotalPay = item.Rate * item.TotalWorkingHour;
 
             exportData.Add(row);
         }
@@ -156,6 +159,9 @@ else
         columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
         columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
         columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+
 
         ExcelProperties.Columns = columns;
         ExcelProperties.FileName = "DetailReport.xlsx";

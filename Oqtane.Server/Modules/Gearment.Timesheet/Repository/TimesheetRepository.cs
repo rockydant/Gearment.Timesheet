@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Oqtane.Modules;
 using Gearment.Timesheet.Models;
+using Gearment.Employee.Models;
 
 namespace Gearment.Timesheet.Repository
 {
@@ -20,10 +21,31 @@ namespace Gearment.Timesheet.Repository
             return _db.Timesheet.Where(item => item.ModuleId == ModuleId);
         }
 
+        public IEnumerable<Models.TimesheetData> GetTimesheets(string employeeName)
+        {
+            return _db.TimesheetData.Where(item => (item.FirstName + " " + item.LastName) == employeeName);
+        }
+
         public Models.TimesheetData GetTimesheet(int TimesheetDataId)
         {
             return _db.TimesheetData.Find(TimesheetDataId);
         }
+
+        public Models.TimesheetData UpdateRateAnDepartment(Gearment.Employee.Models.Employee timesheet)
+        {
+            var data = _db.TimesheetData.Where(item => (item.FirstName + " " + item.LastName) == timesheet.Name).ToList();
+            foreach (var item in data)
+            {
+                item.Rate = timesheet.Rate;
+                item.Department = timesheet.Department;
+                _db.TimesheetData.Update(item);
+            }
+
+            _db.SaveChanges();
+
+            return data.FirstOrDefault();
+        }
+
 
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)
         {

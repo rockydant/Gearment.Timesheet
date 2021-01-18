@@ -7,8 +7,10 @@ using Oqtane.Enums;
 using Oqtane.Infrastructure;
 using Gearment.Employee.Models;
 using Gearment.Department.Models;
+using Gearment.Timesheet.Models;
 using Gearment.Employee.Repository;
 using Gearment.Department.Repository;
+using Gearment.Timesheet.Repository;
 using Oqtane.Repository;
 using Oqtane.Security;
 using Syncfusion.XlsIO;
@@ -25,6 +27,7 @@ namespace Gearment.Employee.Controllers
     {
         private readonly IEmployeeRepository _EmployeeRepository;
         private readonly IDepartmentRepository _DepartmentRepository;
+        private readonly ITimesheetRepository _TimesheetRepository;
         private readonly IFileRepository _files;
         private readonly IUserPermissions _userPermissions;
         private readonly ILogManager _logger;
@@ -33,7 +36,7 @@ namespace Gearment.Employee.Controllers
 
         protected int _entityId = -1;
 
-        public EmployeeController(IEmployeeRepository EmployeeRepository, IDepartmentRepository DepartmentRepository, ITenantResolver tenants, IWebHostEnvironment environment, IUserPermissions userPermissions, IFileRepository files, ILogManager logger, IHttpContextAccessor accessor)
+        public EmployeeController(IEmployeeRepository EmployeeRepository, IDepartmentRepository DepartmentRepository, ITimesheetRepository TimesheetRepository, ITenantResolver tenants, IWebHostEnvironment environment, IUserPermissions userPermissions, IFileRepository files, ILogManager logger, IHttpContextAccessor accessor)
         {
             _EmployeeRepository = EmployeeRepository;
             _DepartmentRepository = DepartmentRepository;
@@ -42,6 +45,7 @@ namespace Gearment.Employee.Controllers
             _environment = environment;
             _logger = logger;
             _tenants = tenants;
+            _TimesheetRepository = TimesheetRepository;
 
             if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
             {
@@ -182,6 +186,8 @@ namespace Gearment.Employee.Controllers
                             row.Department = item.Department;
 
                             _EmployeeRepository.UpdateEmployee(row);
+                        
+                            _TimesheetRepository.UpdateRateAnDepartment(row);                           
                         }
                         else
                         {

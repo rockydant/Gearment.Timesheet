@@ -56,6 +56,14 @@
                 <SfButton OnClick="Export" class="btn btn-secondary" Content="Export"></SfButton>
                 <br /><br />
                 <div class="form-group row">
+                    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                        <div class="input-group">
+                            <Label>Total Amount: $@_TotalAmount</Label>
+                        </div>
+                    </div>
+                </div>
+                <br /><br />
+                <div class="form-group row">
                     <SfGrid DataSource="@payrollList" @ref="@Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
                         <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
                         @*<GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>*@
@@ -71,6 +79,8 @@
                                                 <thead>
                                                     <tr>
                                                         <th scope="col">Date</th>
+                                                        <th scope="col">Start</th>
+                                                        <th scope="col">End</th>
                                                         <th scope="col">Hours</th>
                                                         <th scope="col">Payment Amount</th>
                                                     </tr>
@@ -82,7 +92,9 @@
                                                         <tr>
                                                             <td>@item[0]</td>
                                                             <td>@item[1]</td>
-                                                            <td>$@item[2]</td>
+                                                            <td>@item[2]</td>
+                                                            <td>$@item[3]</td>
+                                                            <td>$@item[4]</td>
                                                         </tr>
                                                     }
                                                 </tbody>
@@ -136,6 +148,8 @@
     DateTime _fromDate = DateTime.Now;
     DateTime _toDate = DateTime.Now;
     string _department = "All";
+
+    double _TotalAmount = 0;
 
 
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
@@ -198,6 +212,8 @@
             return;
         }
 
+        _TotalAmount = 0;
+
         TimesheetDailyQuery timesheetDailyQuery = new TimesheetDailyQuery();
         timesheetDailyQuery.FromDate = _fromDate;
         timesheetDailyQuery.ToDate = _toDate;
@@ -228,17 +244,19 @@
                 payroll.Rate = item.Rate;
                 payroll.Id = Guid.NewGuid().ToString();
                 payroll.WorkingDates = new List<string[]>();
-                payroll.WorkingDates.Add(new string[] { row.Date, row.TotalWorkingHour.ToString(), row.TotalPay.ToString() });
+                payroll.WorkingDates.Add(new string[] { row.Date, row.DailyStartTime, row.DailyEndTime, row.TotalWorkingHour.ToString(), row.TotalPay.ToString() });
                 payroll.TotalPay = row.TotalPay;
                 payrollList.Add(payroll);
             }
             else
             {
                 PayrollViewModel payroll = payrollList.FirstOrDefault(x => x.Name == row.Name);
-                payroll.WorkingDates.Add(new string[] { row.Date, row.TotalWorkingHour.ToString(), row.TotalPay.ToString() });
+                payroll.WorkingDates.Add(new string[] { row.Date, row.DailyStartTime, row.DailyEndTime, row.TotalWorkingHour.ToString(), row.TotalPay.ToString() });
                 payroll.TotalPay += row.TotalPay;
             }
         }
+
+        _TotalAmount = payrollList.Sum(x => x.TotalPay);
 
         Grid.Refresh();
     }

@@ -16,6 +16,7 @@
     <PackageReleaseNotes>https://github.com/oqtane/oqtane.framework/releases/tag/v2.0.0</PackageReleaseNotes>
     <RootNamespace>Oqtane</RootNamespace>
     <IsPackable>true</IsPackable>
+    <UserSecretsId>50bc6b70-c376-4ca3-abbd-f089d6453833</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="wwwroot\Modules\Templates\**" />
@@ -29,6 +30,8 @@
     <EmbeddedResource Include="Modules\Gearment.Timesheet\Scripts\Gearment.Timesheet.Uninstall.sql" />
     <EmbeddedResource Include="Modules\Gearment.Summary\Scripts\Gearment.Summary.1.0.0.sql" />
     <EmbeddedResource Include="Modules\Gearment.Summary\Scripts\Gearment.Summary.Uninstall.sql" />
+    <EmbeddedResource Include="Modules\Gearment.EmployeeSchedule\Scripts\Gearment.EmployeeSchedule.1.0.0.sql" />
+    <EmbeddedResource Include="Modules\Gearment.EmployeeSchedule\Scripts\Gearment.EmployeeSchedule.Uninstall.sql" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Master.00.00.00.00.sql" />
@@ -72,7 +75,7 @@
     <TemplateFiles Include="$(ProjectDir)wwwroot\Modules\Templates\**\*.*" />
   </ItemGroup>
   <Target Name="AddPayloadsFolder" AfterTargets="Publish">
-    <Copy SourceFiles="@(UpgradeFiles)" DestinationFiles="@(UpgradeFiles-&gt;'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
-    <Copy SourceFiles="@(TemplateFiles)" DestinationFiles="@(TemplateFiles-&gt;'$(PublishDir)wwwroot\Modules\Templates\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
+    <Copy SourceFiles="@(UpgradeFiles)" DestinationFiles="@(UpgradeFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
+    <Copy SourceFiles="@(TemplateFiles)" DestinationFiles="@(TemplateFiles->'$(PublishDir)wwwroot\Modules\Templates\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="false" />
   </Target>
 </Project>

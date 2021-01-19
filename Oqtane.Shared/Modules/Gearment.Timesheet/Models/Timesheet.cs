@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Oqtane.Models;
@@ -102,12 +103,24 @@ namespace Gearment.Timesheet.Models
         public DateTime ToDate { get; set; }
         public string Department { get; set; }
         public string EmployeeName { get; set; }
+        public string AttendanceStatus { get; set; }
     }
 
     public class PayrollViewModel
     {
+        public string Id { get; set; }
         public string Name { get; set; }
-        public Dictionary<string,string> WorkingDates { get; set; }
+        public double Rate { get; set; }
+        public List<string[]> WorkingDates { get; set; }
         public double TotalPay { get; set; }
+    }
+
+    public class AttendanceReport
+    {
+        public DateTime Date { get; set; }
+        public string Name { get; set; }
+        public string Department { get; set; }
+        public string Present { get; set; }
+        public string ArrivalTime { get; set; }
     }
 }

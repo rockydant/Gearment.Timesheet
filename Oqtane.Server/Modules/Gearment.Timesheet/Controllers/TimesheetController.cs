@@ -288,6 +288,90 @@ namespace Gearment.Timesheet.Controllers
             }
         }
 
+        [HttpPost("attendance")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public List<Models.AttendanceReport> GetTimesheetAttendanceData([FromBody] TimesheetDailyQuery Query)
+        {
+            List<Models.AttendanceReport> result = new List<Models.AttendanceReport>();
+
+            List<TimesheetData> data = new List<Models.TimesheetData>();
+
+            switch (Query.AttendanceStatus)
+            {
+                case "Present":
+                    data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) == Query.FromDate).ToList();
+                    break;
+                case "Absent":
+                    data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) != Query.FromDate).ToList();
+                    break;
+                default:
+                    data = _TimesheetRepository.GetAllTimesheetData().GroupBy(x => new { x.FirstName, x.LastName, x.Date }).Select(x => x.FirstOrDefault()).ToList();
+                    break;
+            }
+
+            var tempData = _TimesheetRepository.GetAllTimesheetData().FindAll(x => DateTime.Parse(x.Date) == Query.FromDate).ToList();
+
+            if (Query.Department != "All")
+            {
+                data = data.Where(x => x.Department == Query.Department).ToList();
+            }
+
+            foreach (var item in data)
+            {
+                AttendanceReport record = new AttendanceReport();
+                record.Date = Query.FromDate;
+                record.Name = item.FirstName + " " + item.LastName;
+                record.Department = item.Department;
+                if (Query.AttendanceStatus == "All")
+                {
+                    if(tempData.Any(x=>x.FirstName==item.FirstName && x.LastName==item.LastName))
+                    {
+                        if(!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
+                        {
+                            record.Present = "Yes";
+                            record.ArrivalTime = item.DailyStartTime.ToString("H:mm");
+                            result.Add(record);
+                        }
+                    }
+                    else
+                    {
+                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
+                        {
+                            record.Present = "No";
+                            //record.ArrivalTime = item.DailyStartTime.ToString("H:mm");
+                            result.Add(record);
+                        }
+                    }
+                }
+                else if(Query.AttendanceStatus == "Present")
+                {
+                    if (tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
+                    {
+                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
+                        {
+                            record.Present = "Yes";
+                            record.ArrivalTime = item.DailyStartTime.ToString("H:mm");                            
+                            result.Add(record);
+                        }
+                    }
+                }
+                else
+                {
+                    if (!tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
+                    {
+                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
+                        {
+                            record.Present = "No";
+                            //record.ArrivalTime = item.DailyStartTime.ToString("H:mm");                            
+                            result.Add(record);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         // POST api/<controller>
         [HttpPost]
         [Authorize(Policy = PolicyNames.EditModule)]

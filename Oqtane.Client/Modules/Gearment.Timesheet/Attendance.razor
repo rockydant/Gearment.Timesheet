@@ -1,0 +1,134 @@
+@namespace Gearment.Timesheet
+@using Gearment.Timesheet.Services
+@using Gearment.Employee.Services
+@using Gearment.Timesheet.Models
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+@using Gearment.Department.Models
+
+@inherits ModuleBase
+@inject NavigationManager NavigationManager
+@inject ITimesheetService TimesheetService
+@inject IFileService FileService
+@inject IFolderService FolderService
+@inject IEmployeeService EmployeeService
+
+<div class="form-group row">
+    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="input-group">
+            <SfDatePicker Width="100%" Placeholder="Date" @bind-Value="@_fromDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by department" DataSource="@departmentListFilter">
+            <DropDownListEvents ValueChange="@FilterChange" TValue="string" TItem="DepartmentViewModel"></DropDownListEvents>
+            <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+</div>
+<div class="form-group row">    
+    <label for="text" class="col-2 col-form-label">Attendance Status</label>
+    <div class="col-10">
+        <div class="input-group col-3">
+            <SfRadioButton Label="All" Name="AttendanceStatus" Value="All"  @bind-Checked="@AttendanceStatus"></SfRadioButton>
+        </div>
+        <div class="input-group col-3">
+            <SfRadioButton Label="Present" Name="AttendanceStatus" Value="Present"  @bind-Checked="@AttendanceStatus"></SfRadioButton>
+        </div>
+        <div class="input-group col-3">
+            <SfRadioButton Label="Absent" Name="AttendanceStatus" Value="Absent"  @bind-Checked="@AttendanceStatus"></SfRadioButton>
+        </div>
+    </div>
+</div>
+<br />
+<SfButton OnClick="Create" class="btn btn-primary" Content="Create"></SfButton>
+<SfButton OnClick="Export" class="btn btn-primary" Content="Export"></SfButton>
+<br />
+<br />
+<SfGrid DataSource="@_Timesheets" @ref="@Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+    @*<GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>*@
+    <GridColumns>
+        <GridColumn Field=@nameof(AttendanceReport.Date) HeaderText="Date" Type="ColumnType.Date" Format="d" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field=@nameof(AttendanceReport.Name) HeaderText="Name" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field=@nameof(AttendanceReport.Department) HeaderText="Department" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field=@nameof(AttendanceReport.Present) HeaderText="Present" TextAlign="TextAlign.Left" ></GridColumn>
+        <GridColumn Field=@nameof(AttendanceReport.ArrivalTime) HeaderText="ArrivalTime" TextAlign="TextAlign.Left" ></GridColumn>
+    </GridColumns>
+</SfGrid>
+@code { public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    List<AttendanceReport> _Timesheets;
+    private string AttendanceStatus = "All";
+
+    private SfGrid<AttendanceReport> Grid;
+    private List<Object> Toolbaritems = new List<Object>() { "Search", "Print" };
+
+    List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
+
+    DateTime _fromDate = DateTime.Now;    
+    string _department = "All";
+
+
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        departmentListFilter = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+    }
+
+    private async Task Delete(int TimesheetDataId)
+    {
+        try
+        {
+            await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
+            await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
+            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
+            AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+
+    private async Task FilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, DepartmentViewModel> args)
+    {
+        _department = args.Value;
+    }
+
+    private async Task Export()
+    {
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+
+        ExcelProperties.FileName = "AttendanceReport.xlsx";
+
+        await this.Grid.ExcelExport(ExcelProperties);
+    }
+
+    private async Task Create()
+    {
+
+        TimesheetDailyQuery timesheetDailyQuery = new TimesheetDailyQuery();
+        timesheetDailyQuery.FromDate = _fromDate;        
+        timesheetDailyQuery.Department = _department;
+        timesheetDailyQuery.AttendanceStatus = AttendanceStatus;
+        timesheetDailyQuery.EmployeeName = string.Empty;
+
+        _Timesheets = await TimesheetService.GetTimesheetAttendanceDataAsync(ModuleState.ModuleId, timesheetDailyQuery);
+
+        Grid.Refresh();
+    }
+}
+

@@ -17,7 +17,7 @@
 @inject IFolderService FolderService
 @inject IEmployeeService EmployeeService
 
-<SfTab CssClass="BlazorTab" Height="390" LoadOn="ContentLoad.Demand">
+<SfTab CssClass="BlazorTab" LoadOn="ContentLoad.Demand">
     <TabItems>
         <TabItem>
             <ChildContent>
@@ -53,38 +53,45 @@
                 </div>
                 <br />
                 <SfButton OnClick="Create" class="btn btn-primary" Content="Create"></SfButton>
+                <SfButton OnClick="Export" class="btn btn-secondary" Content="Export"></SfButton>
+                <br /><br />
                 <div class="form-group row">
-                    <SfGrid DataSource="@payrollList" @ref="@Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" AllowGrouping="true" Toolbar="Toolbaritems">
+                    <SfGrid DataSource="@payrollList" @ref="@Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
                         <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
                         @*<GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>*@
                         <GridColumns>
-                            <GridColumn Field=@nameof(PayrollViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-                            <GridColumn HeaderText="Detail" TextAlign="TextAlign.Left" Width="120">
+                            <GridColumn Field=@nameof(PayrollViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Left" AutoFit="true"></GridColumn>
+                            <GridColumn Field=@nameof(PayrollViewModel.Rate) Format="C2" HeaderText="Rate" TextAlign="TextAlign.Left" AutoFit="true"></GridColumn>
+                            <GridColumn HeaderText="Detail" TextAlign="TextAlign.Left">
                                 <Template>
-                                    <table class="table table-striped detailtable">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">Date</th>
-                                                <th scope="col">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @{ var timesheetData = (context as PayrollViewModel);
-                                                foreach (KeyValuePair<string, string> item in timesheetData.WorkingDates)
-                                                {
+                                    @{ var timesheetData = (context as PayrollViewModel);
+                                        <button data-toggle="collapse" class="btn btn-info" data-target="#@timesheetData.Id">...</button>
+                                        <div>
+                                            <table class="table table-striped detailtable">
+                                                <thead>
                                                     <tr>
-                                                        <td>@item.Key</td>
-                                                        <td>@item.Value</td>                                                       
+                                                        <th scope="col">Date</th>
+                                                        <th scope="col">Hours</th>
+                                                        <th scope="col">Payment Amount</th>
                                                     </tr>
-                                                }
-                                            }
+                                                </thead>
+                                                <tbody>
 
-                                        </tbody>
-                                        </table>
-                                   
+                                                    @foreach (var item in timesheetData.WorkingDates)
+                                                    {
+                                                        <tr>
+                                                            <td>@item[0]</td>
+                                                            <td>@item[1]</td>
+                                                            <td>$@item[2]</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field=@nameof(PayrollViewModel.TotalPay) HeaderText="Total Pay" Format="C2" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                            <GridColumn Field=@nameof(PayrollViewModel.TotalPay) HeaderText="Total Pay" Format="C2" TextAlign="TextAlign.Left" AutoFit="true"></GridColumn>
                         </GridColumns>
                     </SfGrid>
                 </div>
@@ -101,6 +108,11 @@
         </TabItem>
     </TabItems>
 </SfTab>
+<style>
+    tr.collapse.in {
+        display: table-row;
+    }
+</style>
 
 
 @code { public override List<Resource> Resources => new List<Resource>()
@@ -154,6 +166,30 @@
         _department = args.Value;
     }
 
+    private async Task Export()
+    {
+        if (!payrollList.Any())
+        {
+            return;
+        }
+
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+        ExcelProperties.DataSource = payrollList;
+
+        var columns = new List<GridColumn>();
+
+        columns.Add(new GridColumn() { Field = "Name" });
+        columns.Add(new GridColumn() { Field = "Rate" });
+        //columns.Add(new GridColumn() { Field = "WorkingDates"});
+        columns.Add(new GridColumn() { Field = "TotalPay" });
+
+
+        ExcelProperties.Columns = columns;
+        ExcelProperties.FileName = "DailySummary.xlsx";
+
+        await this.Grid.ExcelExport(ExcelProperties);
+    }
+
     private async Task Create()
     {
         if (DateTime.Compare(_fromDate, _toDate) > 0)
@@ -189,20 +225,22 @@
             {
                 PayrollViewModel payroll = new PayrollViewModel();
                 payroll.Name = row.Name;
-                payroll.WorkingDates = new Dictionary<string,string>();
-                payroll.WorkingDates.Add(row.Date, row.TotalPay.ToString());
+                payroll.Rate = item.Rate;
+                payroll.Id = Guid.NewGuid().ToString();
+                payroll.WorkingDates = new List<string[]>();
+                payroll.WorkingDates.Add(new string[] { row.Date, row.TotalWorkingHour.ToString(), row.TotalPay.ToString() });
                 payroll.TotalPay = row.TotalPay;
                 payrollList.Add(payroll);
             }
             else
             {
                 PayrollViewModel payroll = payrollList.FirstOrDefault(x => x.Name == row.Name);
-                payroll.WorkingDates.Add(row.Date, row.TotalPay.ToString());
+                payroll.WorkingDates.Add(new string[] { row.Date, row.TotalWorkingHour.ToString(), row.TotalPay.ToString() });
                 payroll.TotalPay += row.TotalPay;
             }
-
-            Grid.Refresh();
         }
+
+        Grid.Refresh();
     }
 }
 

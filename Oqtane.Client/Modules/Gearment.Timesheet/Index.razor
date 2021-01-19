@@ -84,6 +84,7 @@ else
             {
                 TimesheetDataExcelExport row = new TimesheetDataExcelExport();
                 row.Name = item.FirstName + " " + item.LastName;
+                row.TimesheetDataId = item.TimesheetDataId;
                 row.PayrollID = item.PayrollID;
                 row.DayOfWeek = item.DayOfWeek;
                 row.Date = item.Date;
@@ -112,8 +113,30 @@ else
         {
             await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
             await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
-            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
-            StateHasChanged();
+            _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+            exportData.Clear();
+
+            foreach (var item in _Timesheets)
+            {
+                TimesheetDataExcelExport row = new TimesheetDataExcelExport();
+                row.Name = item.FirstName + " " + item.LastName;
+                row.TimesheetDataId = item.TimesheetDataId;
+                row.PayrollID = item.PayrollID;
+                row.DayOfWeek = item.DayOfWeek;
+                row.Date = item.Date;
+                row.Rate = item.Rate;
+                row.DailyStartTime = item.DailyStartTime.ToString("hh:mm tt");
+                row.DailyEndTime = item.DailyEndTime.ToString("hh:mm tt");
+                row.BreakStartTime = item.BreakStartTime.ToString("hh:mm tt");
+                row.BreakEndTime = item.BreakEndTime.ToString("hh:mm tt");
+                row.TotalRestHour = item.TotalRestHour;
+                row.TotalWorkingHour = item.TotalWorkingHour;
+                row.TotalPay = item.Rate * item.TotalWorkingHour;
+
+                exportData.Add(row);
+            }
+
+            Grid.Refresh();
         }
         catch (Exception ex)
         {

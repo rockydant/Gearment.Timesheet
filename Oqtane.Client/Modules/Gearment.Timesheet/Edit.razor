@@ -140,6 +140,8 @@
                 Timesheet.DailyEndTime = _dailyEndTime;
                 Timesheet.BreakStartTime = _breakStartTime;
                 Timesheet.BreakEndTime = _breakEndTime;
+                Timesheet.TotalRestHour = (int)Math.Round((DateTime.Parse(Timesheet.BreakEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.BreakStartTime.ToString("H:mm"))).TotalMinutes / 60);
+                Timesheet.TotalWorkingHour = (int)Math.Round((DateTime.Parse(Timesheet.DailyEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.DailyStartTime.ToString("H:mm"))).TotalMinutes / 60);
 
                 Timesheet.ModifiedBy = PageState.User.Username;
                 Timesheet.ModifiedOn = DateTime.Now;

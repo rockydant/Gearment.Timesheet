@@ -81,7 +81,7 @@ namespace Gearment.Department.Controllers
         public void Delete(int id)
         {
             Models.Department Department = _DepartmentRepository.GetDepartment(id);
-            if (Department != null && Department.ModuleId == _entityId)
+            if (Department != null)
             {
                 _DepartmentRepository.DeleteDepartment(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Department Deleted {DepartmentId}", id);

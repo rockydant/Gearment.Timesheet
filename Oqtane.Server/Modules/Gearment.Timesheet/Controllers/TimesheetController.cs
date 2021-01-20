@@ -324,12 +324,12 @@ namespace Gearment.Timesheet.Controllers
                 record.Department = item.Department;
                 if (Query.AttendanceStatus == "All")
                 {
-                    if(tempData.Any(x=>x.FirstName==item.FirstName && x.LastName==item.LastName))
+                    if (tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
                     {
-                        if(!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
+                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
                         {
                             record.Present = "Yes";
-                            record.ArrivalTime = item.DailyStartTime.ToString("H:mm");
+                            record.ArrivalTime = item.DailyStartTime;
                             result.Add(record);
                         }
                     }
@@ -343,14 +343,14 @@ namespace Gearment.Timesheet.Controllers
                         }
                     }
                 }
-                else if(Query.AttendanceStatus == "Present")
+                else if (Query.AttendanceStatus == "Present")
                 {
                     if (tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
                     {
                         if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
                         {
                             record.Present = "Yes";
-                            record.ArrivalTime = item.DailyStartTime.ToString("H:mm");                            
+                            record.ArrivalTime = item.DailyStartTime;
                             result.Add(record);
                         }
                     }
@@ -364,6 +364,32 @@ namespace Gearment.Timesheet.Controllers
                             record.Present = "No";
                             //record.ArrivalTime = item.DailyStartTime.ToString("H:mm");                            
                             result.Add(record);
+                        }
+                    }
+                }
+            }
+
+
+            if (Query.AttendanceStatus != "Absent")
+            {
+                // Display Late/Early Status
+                foreach (var item in result)
+                {
+                    if (item.Present != "No")
+                    {
+                        var currentHour = item.ArrivalTime.Hour;
+                        var currentMinute = item.ArrivalTime.Minute;
+                        if (currentMinute <= 30 && currentMinute >= 15)
+                        {
+                            item.Status = "Late";
+                        }
+                        else if (currentMinute > 30 && currentMinute <= 45)
+                        {
+                            item.Status = "Early";
+                        }
+                        else
+                        {
+                            item.Status = "On-time";
                         }
                     }
                 }

@@ -121,6 +121,7 @@ namespace Gearment.Timesheet.Models
         public string Name { get; set; }
         public string Department { get; set; }
         public string Present { get; set; }
-        public string ArrivalTime { get; set; }
+        public DateTime ArrivalTime { get; set; }
+        public string Status { get; set; }
     }
 }

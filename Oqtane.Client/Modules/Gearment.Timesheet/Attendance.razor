@@ -63,7 +63,8 @@
         <GridColumn Field=@nameof(AttendanceReport.Status) HeaderText="Note" TextAlign="TextAlign.Left"></GridColumn>
     </GridColumns>
 </SfGrid>
-@code { public override List<Resource> Resources => new List<Resource>()
+@code { 
+    public override List<Resource> Resources => new List<Resource>()
 {
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
         new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
@@ -79,9 +80,6 @@
 
     DateTime _fromDate = DateTime.Now;
     string _department = "All";
-
-
-    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
 
     protected override async Task OnInitializedAsync()
     {

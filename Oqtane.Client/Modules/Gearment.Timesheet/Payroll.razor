@@ -147,9 +147,6 @@
 
     double _TotalAmount = 0;
 
-
-    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
-
     protected override async Task OnInitializedAsync()
     {
         departmentListFilter = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);

@@ -16,10 +16,10 @@
     <p><em>Loading...</em></p> }
 else
 {
-    <ActionLink Action="Upload" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
+    <ActionLink Action="Upload" Security="SecurityAccessLevel.Edit" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
     <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
-    <ActionLink Action="Payroll" class="btn btn-secondary" Text="Daily Summary" />
-    <ActionLink Action="Attendance" class="btn btn-secondary" Text="Daily Attendance" />
+    <ActionLink Action="Payroll" Security="SecurityAccessLevel.Edit" class="btn btn-secondary" Text="Daily Summary" />
+    <ActionLink Action="Attendance" Security="SecurityAccessLevel.Edit" class="btn btn-secondary" Text="Daily Attendance" />
     <br />
     <br />
     <SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
@@ -61,7 +61,7 @@ else
 
     private SfGrid<TimesheetDataExcelExport> Grid;
     List<TimesheetData> _Timesheets;
-    private int _folderId = 1;
+    private int _folderId = 2;
     private List<Object> Toolbaritems = new List<Object>() { "Search" };
 
     private bool ImportExcelDialogEnable { get; set; } = false;

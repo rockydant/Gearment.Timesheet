@@ -70,12 +70,13 @@
 <br />
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
 
-@code { private string url = string.Empty;
+@code { 
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.View;
+
+    private string url = string.Empty;
     private int _folderId = -1;
     private List<File> _files { get; set; }
     List<string> _fileType = new List<string>() { "csv", "xls", "xlsx" };
-
-    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
 
     private List<Timesheet> _Timesheets { get; set; }
     private List<Employee.Models.Employee> _MissingEmployee { get; set; }

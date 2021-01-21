@@ -21,7 +21,7 @@ namespace Gearment.Timesheet.Services
 
         Task<List<Models.TimesheetData>> GetTimesheetDataAsync(int ModuleId);
 
-        Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
+        Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);        
 
         Task<List<Models.AttendanceReport>> GetTimesheetAttendanceDataAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
     }

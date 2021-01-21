@@ -112,6 +112,7 @@ namespace Gearment.Timesheet.Models
         public string Name { get; set; }
         public double Rate { get; set; }
         public List<string[]> WorkingDates { get; set; }
+        public int TotalWorkingHours { get; set; }
         public double TotalPay { get; set; }
     }
 

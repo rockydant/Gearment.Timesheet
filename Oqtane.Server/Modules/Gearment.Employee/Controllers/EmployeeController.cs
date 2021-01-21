@@ -128,7 +128,7 @@ namespace Gearment.Employee.Controllers
         public void Delete(int id)
         {
             Models.Employee Employee = _EmployeeRepository.GetEmployee(id);
-            if (Employee != null && Employee.ModuleId == _entityId)
+            if (Employee != null)
             {
                 _EmployeeRepository.DeleteEmployee(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Employee Deleted {EmployeeId}", id);

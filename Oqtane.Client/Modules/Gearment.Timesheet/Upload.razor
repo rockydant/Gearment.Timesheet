@@ -74,7 +74,7 @@
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.View;
 
     private string url = string.Empty;
-    private int _folderId = -1;
+    private int _folderId = 2;
     private List<File> _files { get; set; }
     List<string> _fileType = new List<string>() { "csv", "xls", "xlsx" };
 
@@ -90,7 +90,6 @@
         if (PageState.QueryString.ContainsKey("id"))
         {
             _folderId = int.Parse(PageState.QueryString["id"]);
-
 
             await GetFiles();
         }

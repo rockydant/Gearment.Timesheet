@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Oqtane.Shared;
 using Oqtane.Enums;
-using Oqtane.Models;
 using Oqtane.Infrastructure;
 using Gearment.Timesheet.Models;
 using Gearment.Timesheet.Repository;
@@ -16,7 +15,6 @@ using System.Data;
 using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using Gearment.Employee.Repository;
-using Gearment.Employee.Models;
 using Gearment.Department.Repository;
 using System;
 
@@ -29,13 +27,14 @@ namespace Gearment.Timesheet.Controllers
         private readonly ILogManager _logger;
         protected int _entityId = -1;
         private readonly IFileRepository _files;
+        private readonly IFolderRepository _folders;
         private readonly IUserPermissions _userPermissions;
         private readonly IWebHostEnvironment _environment;
         private readonly ITenantResolver _tenants;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IDepartmentRepository _departmentRepository;
 
-        public TimesheetController(ITimesheetRepository TimesheetRepository, IEmployeeRepository EmployeeRepository, IDepartmentRepository DepartmentRepository, IWebHostEnvironment environment, ITenantResolver tenants, IUserPermissions userPermissions, IFileRepository files, ILogManager logger, IHttpContextAccessor accessor)
+        public TimesheetController(ITimesheetRepository TimesheetRepository, IEmployeeRepository EmployeeRepository, IFolderRepository Folders, IDepartmentRepository DepartmentRepository, IWebHostEnvironment environment, ITenantResolver tenants, IUserPermissions userPermissions, IFileRepository files, ILogManager logger, IHttpContextAccessor accessor)
         {
             _TimesheetRepository = TimesheetRepository;
             _logger = logger;
@@ -45,6 +44,7 @@ namespace Gearment.Timesheet.Controllers
             _tenants = tenants;
             _employeeRepository = EmployeeRepository;
             _departmentRepository = DepartmentRepository;
+            _folders = Folders;
 
             if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
             {
@@ -296,79 +296,84 @@ namespace Gearment.Timesheet.Controllers
 
             List<TimesheetData> data = new List<Models.TimesheetData>();
 
-            switch (Query.AttendanceStatus)
-            {
-                case "Present":
-                    data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) == Query.FromDate).ToList();
-                    break;
-                case "Absent":
-                    data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) != Query.FromDate).ToList();
-                    break;
-                default:
-                    data = _TimesheetRepository.GetAllTimesheetData().GroupBy(x => new { x.FirstName, x.LastName, x.Date }).Select(x => x.FirstOrDefault()).ToList();
-                    break;
-            }
+            data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= DateTime.Parse(x.Date)).ToList();
 
-            var tempData = _TimesheetRepository.GetAllTimesheetData().FindAll(x => DateTime.Parse(x.Date) == Query.FromDate).ToList();
+            var employees = _employeeRepository.GetEmployees();
 
             if (Query.Department != "All")
             {
                 data = data.Where(x => x.Department == Query.Department).ToList();
+                employees = employees.Where(x => x.Department == Query.Department).ToList();
             }
 
-            foreach (var item in data)
+            if (Query.AttendanceStatus == "All")
             {
-                AttendanceReport record = new AttendanceReport();
-                record.Date = Query.FromDate;
-                record.Name = item.FirstName + " " + item.LastName;
-                record.Department = item.Department;
-                if (Query.AttendanceStatus == "All")
+                foreach (var item in data)
                 {
-                    if (tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
-                    {
-                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
-                        {
-                            record.Present = "Yes";
-                            record.ArrivalTime = item.DailyStartTime;
-                            result.Add(record);
-                        }
-                    }
-                    else
-                    {
-                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
-                        {
-                            record.Present = "No";
-                            //record.ArrivalTime = item.DailyStartTime.ToString("H:mm");
-                            result.Add(record);
-                        }
-                    }
+                    AttendanceReport record = new AttendanceReport();
+                    record.Date = DateTime.Parse(item.Date);
+                    record.Name = item.FirstName + " " + item.LastName;
+                    record.Department = item.Department;
+
+                    record.Present = "Yes";
+                    record.ArrivalTime = item.DailyStartTime;
+                    result.Add(record);
                 }
-                else if (Query.AttendanceStatus == "Present")
+
+                var dateList = result.Select(x => x.Date).Distinct().ToList();
+
+                foreach (var item in dateList)
                 {
-                    if (tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
+                    var currentList = data.Where(x => DateTime.Parse(x.Date) == item).ToList();
+                    var absentList = employees.Where(x => !currentList.Any(y => y.FirstName + " " + y.LastName == x.Name));
+
+                    foreach (var employee in absentList)
                     {
-                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
-                        {
-                            record.Present = "Yes";
-                            record.ArrivalTime = item.DailyStartTime;
-                            result.Add(record);
-                        }
-                    }
-                }
-                else
-                {
-                    if (!tempData.Any(x => x.FirstName == item.FirstName && x.LastName == item.LastName))
-                    {
-                        if (!result.Any(x => x.Name == item.FirstName + " " + item.LastName))
-                        {
-                            record.Present = "No";
-                            //record.ArrivalTime = item.DailyStartTime.ToString("H:mm");                            
-                            result.Add(record);
-                        }
+                        AttendanceReport record = new AttendanceReport();
+                        record.Date = item;
+                        record.Name = employee.Name;
+                        record.Department = employee.Department;
+
+                        record.Present = "No";
+                        result.Add(record);
                     }
                 }
             }
+            else if (Query.AttendanceStatus == "Present")
+            {
+                foreach (var item in data)
+                {
+                    AttendanceReport record = new AttendanceReport();
+                    record.Date = DateTime.Parse(item.Date);
+                    record.Name = item.FirstName + " " + item.LastName;
+                    record.Department = item.Department;
 
+                    record.Present = "Yes";
+                    record.ArrivalTime = item.DailyStartTime;
+                    result.Add(record);
+                }
+            }
+            else
+            {
+                var dateList = data.Select(x => DateTime.Parse(x.Date)).Distinct().ToList();
+
+                foreach (var item in dateList)
+                {
+                    var currentList = data.Where(x => DateTime.Parse(x.Date) == item).ToList();
+                    var absentList = employees.Where(x => !currentList.Any(y => y.FirstName + " " + y.LastName == x.Name));
+
+                    foreach (var employee in absentList)
+                    {
+                        AttendanceReport record = new AttendanceReport();
+                        record.Date = item;
+                        record.Name = employee.Name;
+                        record.Department = employee.Department;
+
+                        record.Present = "No";
+                        result.Add(record);
+                    }
+                }
+            }
 
             if (Query.AttendanceStatus != "Absent")
             {
@@ -439,7 +444,8 @@ namespace Gearment.Timesheet.Controllers
 
         private string ResolveApplicationPath(Oqtane.Models.File file)
         {
-            return Utilities.PathCombine(_environment.ContentRootPath, "Content", "Tenants", _tenants.GetTenant().TenantId.ToString(), "Sites", file.FolderId.ToString(), file.Name);
+            file.Folder = _folders.GetFolder(file.FolderId);
+            return Utilities.PathCombine(_environment.ContentRootPath, "Content", "Tenants", _tenants.GetTenant().TenantId.ToString(), "Sites", file.Folder.SiteId.ToString(), file.Folder.Path, file.Name);
         }
 
         private List<Models.Timesheet> ExportDataFromExcelSheet(IWorksheet sheet, int startRowIndex, int startColumnIndex, int lastRowIndex, int moduleId)

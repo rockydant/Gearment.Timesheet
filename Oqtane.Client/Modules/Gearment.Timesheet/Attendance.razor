@@ -17,10 +17,15 @@
 @inject IFolderService FolderService
 @inject IEmployeeService EmployeeService
 
-<div class="form-group row">
-    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+<div class="form-group row">    
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
         <div class="input-group">
-            <SfDatePicker Width="100%" Placeholder="Date" @bind-Value="@_fromDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+            <SfDatePicker Width="100%" Placeholder="From Date" @bind-Value="@_fromDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDatePicker Width="100%" Placeholder="To Date" @bind-Value="@_toDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
         </div>
     </div>
 </div>
@@ -79,6 +84,8 @@
     List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
 
     DateTime _fromDate = DateTime.Now;
+    DateTime _toDate = DateTime.Now;
+
     string _department = "All";
 
     protected override async Task OnInitializedAsync()
@@ -121,6 +128,7 @@
 
         TimesheetDailyQuery timesheetDailyQuery = new TimesheetDailyQuery();
         timesheetDailyQuery.FromDate = _fromDate;
+        timesheetDailyQuery.ToDate = _toDate;
         timesheetDailyQuery.Department = _department;
         timesheetDailyQuery.AttendanceStatus = AttendanceStatus;
         timesheetDailyQuery.EmployeeName = string.Empty;

@@ -15,6 +15,9 @@ namespace Gearment.Timesheet.Repository
 
         Models.TimesheetData AddTimesheetData(Models.TimesheetData Timesheet);
 
+        Models.TimesheetData GetTimesheetData(Models.TimesheetData Timesheet);
+        Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet);
+
         List<TimesheetData> GetAllTimesheetData();
 
         //void AddTimesheetFilter(GearmentTimesheetFilter filter);

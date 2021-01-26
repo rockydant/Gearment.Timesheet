@@ -234,9 +234,16 @@ namespace Gearment.Timesheet.Controllers
                             timesheetData.ModifiedBy = User.Identity.Name;
                             timesheetData.ModifiedOn = DateTime.Now;
 
-                            _TimesheetRepository.AddTimesheetData(timesheetData);
-
-
+                            // check if exist data of that day (login but not logout)
+                            var foundRecord = _TimesheetRepository.GetTimesheetData(timesheetData);
+                            if (foundRecord != null)
+                            {
+                                _TimesheetRepository.UpdateTimesheetData(timesheetData);
+                            }
+                            else
+                            {
+                                _TimesheetRepository.AddTimesheetData(timesheetData);
+                            }
                         }
                     }
 

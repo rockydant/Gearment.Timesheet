@@ -125,6 +125,7 @@
 
     private async Task Create()
     {
+        ShowProgressIndicator();
 
         TimesheetDailyQuery timesheetDailyQuery = new TimesheetDailyQuery();
         timesheetDailyQuery.FromDate = _fromDate;
@@ -136,6 +137,7 @@
         _Timesheets = await TimesheetService.GetTimesheetAttendanceDataAsync(ModuleState.ModuleId, timesheetDailyQuery);
 
         Grid.Refresh();
+        HideProgressIndicator();
     }
 
     public void RowBound(RowDataBoundEventArgs<AttendanceReport> args)

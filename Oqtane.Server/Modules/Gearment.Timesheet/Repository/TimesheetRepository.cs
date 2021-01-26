@@ -77,6 +77,18 @@ namespace Gearment.Timesheet.Repository
             return timesheetData;
         }
 
+        public TimesheetData GetTimesheetData(TimesheetData timesheetData)
+        {
+            return _db.TimesheetData.Where(item => item.FirstName == timesheetData.FirstName && item.LastName == timesheetData.LastName && item.Date == timesheetData.Date).FirstOrDefault();
+        }
+
+        public Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet)
+        {
+            _db.Entry(Timesheet).State = EntityState.Modified;
+            _db.SaveChanges();
+            return Timesheet;
+        }
+
         public List<TimesheetData> GetAllTimesheetData()
         {
             return _db.TimesheetData.ToList();

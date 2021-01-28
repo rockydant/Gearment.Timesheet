@@ -14,7 +14,7 @@ namespace Oqtane.Services
 
         protected ServiceBase(HttpClient client)
         {
-            _http = client;
+            _http = client;            
         }
 
         protected async Task GetAsync(string uri)

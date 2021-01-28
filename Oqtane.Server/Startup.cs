@@ -68,6 +68,8 @@ namespace Oqtane
                 {
                     options.DetailedErrors = true;
                 }
+
+                options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(15);
             });
 
             // setup HttpClient for server side in a client side compatible fashion ( with auth cookie )
@@ -85,6 +87,8 @@ namespace Oqtane
                         client.DefaultRequestHeaders.Add("Cookie", ".AspNetCore.Identity.Application=" + authToken);
                     }
                     client.BaseAddress = new Uri(navigationManager.Uri);
+                    client.Timeout = TimeSpan.FromMinutes(15);
+
                     return client;
                 });
             }

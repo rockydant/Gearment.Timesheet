@@ -1,0 +1,170 @@
+@namespace Gearment.Timesheet
+@using Gearment.Timesheet.Services
+@using Gearment.Employee.Services
+@using Gearment.Timesheet.Models
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+@using Gearment.Department.Models
+
+@inherits ModuleBase
+@inject NavigationManager NavigationManager
+@inject ITimesheetService TimesheetService
+@inject IFileService FileService
+@inject IFolderService FolderService
+@inject IEmployeeService EmployeeService
+
+<div class="form-group row">
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDatePicker Width="100%" Placeholder="From Date" @bind-Value="@_fromDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDatePicker Width="100%" Placeholder="To Date" @bind-Value="@_toDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+        </div>
+    </div>
+</div>
+<br />
+<SfButton OnClick="Query" class="btn btn-primary" Content="Query"></SfButton>
+<SfButton OnClick="Delete" class="btn btn-danger" Content="Delete"></SfButton>
+<br />
+<br />
+<SfGrid DataSource="@_Timesheets" @ref="@TimesheetDataGrid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>    
+    <GridColumns>
+        <GridColumn Field=@nameof(TimesheetData.Date) HeaderText="Date" Type="ColumnType.Date" Format="d" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field=@nameof(TimesheetData.FirstName) HeaderText="FName" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field=@nameof(TimesheetData.LastName) HeaderText="LName" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field=@nameof(TimesheetData.Department) HeaderText="Department" TextAlign="TextAlign.Left"></GridColumn>        
+        <GridColumn Field=@nameof(TimesheetData.Status) HeaderText="Note" TextAlign="TextAlign.Left"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+<SfGrid DataSource="@_RawData" @ref="@TimesheetGrid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(Timesheet.Date) HeaderText="Date" Type="ColumnType.Date" Format="d" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.FirstName) HeaderText="FName" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.LastName) HeaderText="LName" TextAlign="TextAlign.Left"></GridColumn>
+        <GridColumn Field=@nameof(Timesheet.TimesheetId) HeaderText="TimesheetId" TextAlign="TextAlign.Left"></GridColumn>        
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    List<TimesheetData> _Timesheets;
+    List<Timesheet> _RawData;
+    private string AttendanceStatus = "All";
+
+    private SfGrid<TimesheetData> TimesheetDataGrid;
+    private SfGrid<Timesheet> TimesheetGrid;
+
+    private List<Object> Toolbaritems = new List<Object>() { "Search", "Print" };
+
+    List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
+
+    DateTime _fromDate = DateTime.Now;
+    DateTime _toDate = DateTime.Now;
+
+    string _department = "All";
+
+    protected override async Task OnInitializedAsync()
+    {
+        departmentListFilter = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+    }
+
+    private async Task Delete1(int TimesheetDataId)
+    {
+        try
+        {
+            await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
+            await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
+            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
+            AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+
+    private async Task FilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, DepartmentViewModel> args)
+    {
+        _department = args.Value;
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            ShowProgressIndicator();
+
+            TimesheetDailyQuery timesheetDailyQuery = new TimesheetDailyQuery();
+            timesheetDailyQuery.FromDate = _fromDate;
+            timesheetDailyQuery.ToDate = _toDate;
+            timesheetDailyQuery.Department = _department;
+            timesheetDailyQuery.AttendanceStatus = AttendanceStatus;
+            timesheetDailyQuery.EmployeeName = string.Empty;
+
+            await TimesheetService.DeleteTimesheetByDateAsync(ModuleState.ModuleId, timesheetDailyQuery);
+            await logger.LogInformation("Timesheet Deleted {Timesheet}", timesheetDailyQuery);
+            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+
+            TimesheetDataGrid.Refresh();
+            TimesheetGrid.Refresh();
+            HideProgressIndicator();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Timesheet {Error}", ex.Message);
+            AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+
+    private async Task Query()
+    {
+        ShowProgressIndicator();
+
+        TimesheetDailyQuery timesheetDailyQuery = new TimesheetDailyQuery();
+        timesheetDailyQuery.FromDate = _fromDate;
+        timesheetDailyQuery.ToDate = _toDate;
+        timesheetDailyQuery.Department = _department;
+        timesheetDailyQuery.AttendanceStatus = AttendanceStatus;
+        timesheetDailyQuery.EmployeeName = string.Empty;
+
+        _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, timesheetDailyQuery);
+
+        _RawData = await TimesheetService.GetTimesheetByDateAsync(ModuleState.ModuleId, timesheetDailyQuery);
+
+        TimesheetDataGrid.Refresh();
+        TimesheetGrid.Refresh();
+
+        HideProgressIndicator();
+    }
+
+    public void RowBound(RowDataBoundEventArgs<TimesheetData> args)
+    {
+        if (args.Data.Status == "Late")
+        {
+            args.Row.AddClass(new string[] { "table-danger" });
+        }
+
+        if (args.Data.Status == "Early")
+        {
+            args.Row.AddClass(new string[] { "table-warning" });
+        }
+    }
+}
+

@@ -239,7 +239,7 @@ namespace Gearment.Employee.Controllers
                 record.ModuleId = moduleId;
 
                 record.Department = string.IsNullOrEmpty(sheet[r, startColumnIndex + 1].Text) ? string.Empty : sheet[r, startColumnIndex + 1].Text;
-                record.Rate = sheet[r, startColumnIndex + 2].Number;
+                record.Rate = (decimal)sheet[r, startColumnIndex + 2].Number;
 
                 result.Add(record);
             }

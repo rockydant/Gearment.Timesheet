@@ -42,13 +42,13 @@ namespace Gearment.Timesheet.Models
         public string PayrollID { get; set; }
         public string DayOfWeek { get; set; }
         public string Date { get; set; }
-        public double Rate { get; set; }
+        public decimal Rate { get; set; }
         public DateTime DailyStartTime { get; set; }
         public DateTime DailyEndTime { get; set; }
         public DateTime BreakStartTime { get; set; }
         public DateTime BreakEndTime { get; set; }
-        public int TotalRestHour { get; set; }
-        public int TotalWorkingHour { get; set; }
+        public decimal TotalRestHour { get; set; }
+        public decimal TotalWorkingHour { get; set; }
         public string Department { get; set; }
         public string Status { get; set; }
         public string CreatedBy { get; set; }
@@ -64,14 +64,14 @@ namespace Gearment.Timesheet.Models
         public string PayrollID { get; set; }
         public string DayOfWeek { get; set; }
         public string Date { get; set; }
-        public double Rate { get; set; }
-        public double TotalPay { get; set; }
+        public decimal Rate { get; set; }
+        public decimal TotalPay { get; set; }
         public string DailyStartTime { get; set; }
         public string DailyEndTime { get; set; }
         public string BreakStartTime { get; set; }
         public string BreakEndTime { get; set; }
-        public int TotalRestHour { get; set; }
-        public int TotalWorkingHour { get; set; }
+        public decimal TotalRestHour { get; set; }
+        public decimal TotalWorkingHour { get; set; }
         public string Department { get; set; }
         public string Status { get; set; }
         public string CreatedBy { get; set; }
@@ -110,10 +110,10 @@ namespace Gearment.Timesheet.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public double Rate { get; set; }
+        public decimal Rate { get; set; }
         public List<string[]> WorkingDates { get; set; }
-        public int TotalWorkingHours { get; set; }
-        public double TotalPay { get; set; }
+        public decimal TotalWorkingHours { get; set; }
+        public decimal TotalPay { get; set; }
     }
 
     public class AttendanceReport

@@ -84,10 +84,15 @@
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Input">
                         <Template>
-                            <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by department" DataSource="@departmentListFilter">
+                            <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by department" DataSource="@departmentListFilter" @bind-Value="@departmentFilter">
                                 <DropDownListEvents ValueChange="@FilterChange" TValue="string" TItem="DepartmentViewModel"></DropDownListEvents>
                                 <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
                             </SfDropDownList>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Input">
+                        <Template>
+                            <SfCheckBox Label="Active" @bind-Checked="isActive" @onchange="onChange"></SfCheckBox>
                         </Template>
                     </ToolbarItem>
                 </ToolbarItems>
@@ -130,7 +135,9 @@
     private bool RateDialogEnable { get; set; } = false;
     private bool DeptDialogEnable { get; set; } = false;
 
-    private List<Object> Toolbaritems = new List<Object>() { "Search"};
+    private bool isActive = true;
+    private string departmentFilter = "All";
+    private List<Object> Toolbaritems = new List<Object>() { "Search" };
     SfGrid<Employee> Grid;
     List<Employee> selectedEmployees = new List<Employee>();
     double _rate = 14;
@@ -221,11 +228,12 @@
     private async Task RefreshGrid()
     {
         Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+        Employees = Employees.FindAll(x => x.Status == "Active");
     }
 
     private async Task OnRateDialogSaveButtonClick()
     {
-        selectedEmployees.ForEach(x => x.Rate = _rate);
+        selectedEmployees.ForEach(x => x.Rate = (decimal)_rate);
         await Update(selectedEmployees);
         await RefreshGrid();
 
@@ -260,7 +268,33 @@
         else
         {
             Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
-            Employees = Employees.FindAll(x => x.Department.Contains(args.Value));
+            string temp = isActive ? "Active" : "InActive";
+            if (isActive)
+            {
+                Employees = Employees.FindAll(x => x.Department.Contains(args.Value) && x.Status == "Active");
+            }
+            else
+            {
+                Employees = Employees.FindAll(x => x.Department.Contains(args.Value));
+            }
+
         }
+    }
+
+    private async Task onChange(Microsoft.AspNetCore.Components.ChangeEventArgs args)
+    {
+        Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+
+        if (departmentFilter != "All")
+        {
+            Employees = Employees.FindAll(x => x.Department.Contains(departmentFilter));
+        }
+
+
+        if (isActive)
+        {
+            Employees = Employees.FindAll(x => x.Status == "Active");
+        }
+
     }
 }

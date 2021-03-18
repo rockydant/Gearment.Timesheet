@@ -47,6 +47,11 @@ namespace Gearment.Timesheet.Services
             await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/{TimesheetId}", ModuleId));
         }
 
+        public async Task DeleteTimesheetByDateAsync(int ModuleId, TimesheetDailyQuery Query)
+        {
+            await PostJsonAsync<TimesheetDailyQuery, List<Models.AttendanceReport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/correct", ModuleId), Query);
+        }
+
         public async Task<Models.TimesheetViewModel> ProcessFileAsync(int moduleId, int fileId)
         {
             return await GetJsonAsync<Models.TimesheetViewModel>($"{Apiurl}/process/{moduleId}/{fileId}");
@@ -62,7 +67,13 @@ namespace Gearment.Timesheet.Services
         {
             List<Models.TimesheetData> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId), Query);
             return Timesheets.OrderBy(item => item.Date).ToList();
-        }        
+        }
+
+        public async Task<List<Models.Timesheet>> GetTimesheetByDateAsync(int ModuleId, TimesheetDailyQuery Query)
+        {
+            List<Models.Timesheet> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.Timesheet>>(CreateAuthorizationPolicyUrl($"{Apiurl}/raw", ModuleId), Query);
+            return Timesheets.OrderBy(item => item.Date).ToList();
+        }
 
         public async Task<List<Models.AttendanceReport>> GetTimesheetAttendanceDataAsync(int ModuleId, TimesheetDailyQuery Query)
         {
@@ -71,3 +82,4 @@ namespace Gearment.Timesheet.Services
         }
     }
 }
+

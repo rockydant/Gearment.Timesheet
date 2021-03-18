@@ -59,11 +59,11 @@ namespace Gearment.Timesheet.Controllers
         {
             return _TimesheetRepository.GetTimesheets(int.Parse(moduleid));
         }
-        
+
         // GET api/<controller>/5
         [HttpGet("process/{moduleId}/{id}")]
         public Models.TimesheetViewModel Process(int moduleId, int id)
-        {            
+        {
             Oqtane.Models.File file = _files.GetFile(id);
             List<Models.Timesheet> timesheetList = new List<Models.Timesheet>();
             Models.TimesheetViewModel timesheetViewModel = new Models.TimesheetViewModel();
@@ -210,7 +210,7 @@ namespace Gearment.Timesheet.Controllers
                             if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
                             {
                                 //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                                timesheetData.TotalRestHour = (int)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60);
+                                timesheetData.TotalRestHour = (decimal)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60, 1);
                             }
                             else
                             {
@@ -219,8 +219,10 @@ namespace Gearment.Timesheet.Controllers
 
                             if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
                             {
-                                //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                                timesheetData.TotalWorkingHour = (int)Math.Round((timesheetData.DailyEndTime - timesheetData.DailyStartTime).TotalMinutes / 60);
+                                //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;                                
+                                //var dailyStartTime = timesheetData.DailyStartTime.TimeOfDay.Minutes <
+
+                                timesheetData.TotalWorkingHour = (decimal)Math.Round((timesheetData.DailyEndTime - timesheetData.DailyStartTime).TotalMinutes / 60, 1);
                             }
                             else
                             {
@@ -304,7 +306,7 @@ namespace Gearment.Timesheet.Controllers
 
             List<TimesheetData> data = new List<Models.TimesheetData>();
 
-            data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= DateTime.Parse(x.Date)).ToList();
+            data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate).ToList();
 
             var employees = _employeeRepository.GetEmployees();
 
@@ -409,6 +411,21 @@ namespace Gearment.Timesheet.Controllers
             }
 
             return result;
+        }
+
+        [HttpPost("raw")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public List<Models.Timesheet> GetTimesheetRawData([FromBody] TimesheetDailyQuery Query)
+        {
+            return _TimesheetRepository.GetAllTimesheet().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate).ToList();
+        }
+
+        [HttpPost("correct")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public void DeleteByDate([FromBody] TimesheetDailyQuery Query)
+        {
+            _TimesheetRepository.DeleteTimesheetByDateAsync(Query);
+            _logger.Log(LogLevel.Information, this, LogFunction.Delete, "TimesheetCorrection Deleted {Query}", Query);
         }
 
         // POST api/<controller>

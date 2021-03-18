@@ -39,7 +39,7 @@
     <label for="text" class="col-2 col-form-label">Department</label>
     <div class="col-10">
         <div class="input-group">
-            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList" >                
+            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
                 <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
             </SfDropDownList>
         </div>
@@ -76,7 +76,7 @@
 <br />
 @if (PageState.Action == "Edit")
 {
-<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
+    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
 
 @code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
@@ -121,7 +121,7 @@
                 {
                     _name = Employee.Name;
                     _payrollID = Employee.PayrollID;
-                    _rate = Employee.Rate;
+                    _rate = decimal.ToDouble(Employee.Rate);
                     _department = Employee.Department;
                     _status = Employee.Status;
                     _note = Employee.Note;
@@ -157,7 +157,7 @@
                 Employee.ModuleId = ModuleState.ModuleId;
                 Employee.Name = _name;
                 Employee.PayrollID = _payrollID;
-                Employee.Rate = _rate;
+                Employee.Rate = (decimal)_rate;
                 Employee.Department = _department;
                 Employee.Status = _status;
                 Employee.Note = _note;
@@ -171,7 +171,7 @@
                 Employee Employee = await EmployeeService.GetEmployeeAsync(_id, ModuleState.ModuleId);
                 Employee.Name = _name;
                 Employee.PayrollID = _payrollID;
-                Employee.Rate = _rate;
+                Employee.Rate = (decimal)_rate;
                 Employee.Department = _department;
                 Employee.Status = _status;
                 Employee.Note = _note;

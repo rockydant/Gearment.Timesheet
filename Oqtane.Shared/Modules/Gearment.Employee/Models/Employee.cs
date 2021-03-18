@@ -12,7 +12,7 @@ namespace Gearment.Employee.Models
         public string Name { get; set; }
 
         public int PayrollID { get; set; }
-        public double Rate { get; set; }
+        public decimal Rate { get; set; }
         public string Department { get; set; }
         public string Status { get; set; }
         public string Note { get; set; }

@@ -42,7 +42,7 @@
                     <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-users"></i></span>
 
                     <div class="info-box-content">
-                        <span class="info-box-text">Employees</span>
+                        <span class="info-box-text">Employees (Active)</span>
                         <span class="info-box-number">@_Employees.Count</span>
                     </div>
                     <!-- /.info-box-content -->
@@ -173,7 +173,7 @@
     List<DepartmentViewModel> _Departments = new List<DepartmentViewModel>();
     List<Employee> _Employees = new List<Employee>();
     List<TimesheetData> _Timesheets = new List<TimesheetData>();
-    int _totalWorkingHours = 0;
+    decimal _totalWorkingHours = 0;
     List<Employee> _LatestEmployees = new List<Employee>();
     List<DepartmentList> _DepartmentList = new List<DepartmentList>();
 
@@ -186,8 +186,9 @@
             _Departments = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
 
             _Employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+            _Employees = _Employees.FindAll(x => x.Status == "Active");
 
-            _LatestEmployees = _Employees.Where(x => x.CreatedOn >= DateTime.Now.Date.AddDays(-7)).ToList();
+            _LatestEmployees = _Employees.OrderByDescending(x => x.CreatedOn).Take(10).ToList();
 
             foreach (var item in _Employees)
             {

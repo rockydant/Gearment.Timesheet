@@ -13,12 +13,15 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData UpdateTimesheet(Models.TimesheetData Timesheet);
         void DeleteTimesheet(int TimesheetId);
 
+        void DeleteTimesheetByDateAsync(TimesheetDailyQuery Query);
+
         Models.TimesheetData AddTimesheetData(Models.TimesheetData Timesheet);
 
         Models.TimesheetData GetTimesheetData(Models.TimesheetData Timesheet);
         Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet);
 
         List<TimesheetData> GetAllTimesheetData();
+        List<Models.Timesheet> GetAllTimesheet();
 
         //void AddTimesheetFilter(GearmentTimesheetFilter filter);
     }

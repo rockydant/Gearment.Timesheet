@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Oqtane.Modules;
 using Gearment.Timesheet.Models;
 using Gearment.Employee.Models;
+using System;
 
 namespace Gearment.Timesheet.Repository
 {
@@ -92,6 +93,36 @@ namespace Gearment.Timesheet.Repository
         public List<TimesheetData> GetAllTimesheetData()
         {
             return _db.TimesheetData.ToList();
+        }
+
+        public List<Models.Timesheet> GetAllTimesheet()
+        {
+            return _db.Timesheet.ToList();
+        }
+
+        public List<Models.Timesheet> GetTimesheetByDate(TimesheetDailyQuery Query)
+        {            
+            var result = GetAllTimesheet().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate).ToList();
+            return result;
+        }
+
+        public void DeleteTimesheetByDateAsync(TimesheetDailyQuery Query)
+        {
+            var removeTimesheetList = _db.Timesheet.ToList().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate);
+           
+            foreach (var item in removeTimesheetList)
+            {
+                _db.Timesheet.Remove(item);
+            }
+
+            var removeTimesheetDataList = _db.TimesheetData.ToList().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate);
+            foreach (var item in removeTimesheetDataList)
+            {
+                _db.TimesheetData.Remove(item);
+            }
+
+            _db.SaveChanges();
+
         }
 
         public Models.TimesheetData UpdateTimesheet(Models.TimesheetData Timesheet)

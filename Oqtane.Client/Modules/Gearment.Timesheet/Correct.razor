@@ -122,9 +122,16 @@
             //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
             StateHasChanged();
 
+            _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, timesheetDailyQuery);
+
+            _RawData = await TimesheetService.GetTimesheetByDateAsync(ModuleState.ModuleId, timesheetDailyQuery);
+
             TimesheetDataGrid.Refresh();
             TimesheetGrid.Refresh();
+
             HideProgressIndicator();
+
+            AddModuleMessage("Data Removed Successfully.", MessageType.Success);
         }
         catch (Exception ex)
         {

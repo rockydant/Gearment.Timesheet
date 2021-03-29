@@ -211,6 +211,7 @@ namespace Gearment.Timesheet.Controllers
                             {
                                 //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
                                 timesheetData.TotalRestHour = (decimal)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60, 1);
+
                             }
                             else
                             {
@@ -220,9 +221,29 @@ namespace Gearment.Timesheet.Controllers
                             if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
                             {
                                 //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;                                
-                                //var dailyStartTime = timesheetData.DailyStartTime.TimeOfDay.Minutes <
+                                double startTime = timesheetData.DailyStartTime.TimeOfDay.Hours;
 
-                                timesheetData.TotalWorkingHour = (decimal)Math.Round((timesheetData.DailyEndTime - timesheetData.DailyStartTime).TotalMinutes / 60, 1);
+                                if (timesheetData.DailyStartTime.TimeOfDay.Minutes >= 45)
+                                {
+                                    startTime += 1;
+                                }
+                                else if (timesheetData.DailyStartTime.TimeOfDay.Minutes > 15 && timesheetData.DailyStartTime.TimeOfDay.Minutes < 45)
+                                {
+                                    startTime += 0.5;
+                                }
+
+                                double endTime = timesheetData.DailyEndTime.TimeOfDay.Hours;
+
+                                if (timesheetData.DailyEndTime.TimeOfDay.Minutes >= 45)
+                                {
+                                    endTime += 1;
+                                }
+                                else if (timesheetData.DailyEndTime.TimeOfDay.Minutes > 15 && timesheetData.DailyEndTime.TimeOfDay.Minutes < 45)
+                                {
+                                    endTime += 0.5;
+                                }
+
+                                timesheetData.TotalWorkingHour = (decimal)(endTime - startTime);
                             }
                             else
                             {

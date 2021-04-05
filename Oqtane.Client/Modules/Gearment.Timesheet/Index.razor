@@ -57,8 +57,9 @@ else
             <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
             <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="100"></GridColumn>
             <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Break Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetData.TotalBreakHour) HeaderText="Break Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>            
             <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
                 <Template>
                     @{ var timesheetData = (context as TimesheetDataExcelExport);
@@ -221,6 +222,8 @@ else
             row.TotalRestHour = item.TotalRestHour;
             row.TotalWorkingHour = item.TotalWorkingHour;
             row.TotalPay = item.Rate * item.TotalWorkingHour;
+            row.TotalBreakHour = item.TotalBreakHour;
+            row.Notes = item.Notes;
 
             exportData.Add(row);
         }

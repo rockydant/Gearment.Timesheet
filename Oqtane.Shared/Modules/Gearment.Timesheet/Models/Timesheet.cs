@@ -55,6 +55,8 @@ namespace Gearment.Timesheet.Models
         public DateTime CreatedOn { get; set; }
         public string ModifiedBy { get; set; }
         public DateTime ModifiedOn { get; set; }
+        public decimal TotalBreakHour { get; set; }
+        public string Notes { get; set; }
     }
 
     public class TimesheetDataExcelExport
@@ -74,6 +76,8 @@ namespace Gearment.Timesheet.Models
         public decimal TotalWorkingHour { get; set; }
         public string Department { get; set; }
         public string Status { get; set; }
+        public decimal TotalBreakHour { get; set; }
+        public string Notes { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public string ModifiedBy { get; set; }
@@ -124,5 +128,12 @@ namespace Gearment.Timesheet.Models
         public string Present { get; set; }
         public DateTime ArrivalTime { get; set; }
         public string Status { get; set; }
+    }
+
+    public class BreakTimes
+    {
+        public Guid Id { get; set; }
+        public DateTime From { get; set; }
+        public DateTime To { get; set; }
     }
 }

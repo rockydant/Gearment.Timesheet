@@ -2,6 +2,9 @@
 @using Gearment.Timesheet.Services
 @using Gearment.Timesheet.Models
 @using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Lists
+@using System.Text.Json
+@using Syncfusion.Blazor.Buttons
 
 @namespace Gearment.Timesheet
 @inherits ModuleBase
@@ -51,6 +54,55 @@
         </div>
     </div>
 </div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Extra Break Start Time</label>
+    <div class="col-3">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_extraBreakStart" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+    <label for="text" class="col-2 col-form-label">Extra Break End Time</label>
+    <div class="col-3">
+        <div class="input-group">
+            <SfTimePicker TValue="DateTime" @bind-Value="@_extraBreakEnd" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+        </div>
+    </div>
+    <button type="button" class="col-2 btn btn-success" @onclick="Add">+</button>
+</div>
+
+<SfListView Id="BreakHistoryListView"
+            DataSource="@_breaksTimeList"
+            HeaderTitle="Break History"
+            ShowHeader="true"
+            CssClass="e-list-template"
+            Width="350"
+            SortOrder="Syncfusion.Blazor.Lists.SortOrder.Ascending">
+    <ListViewFieldSettings TValue="BreakTimes" Id="Id" Text="ID"></ListViewFieldSettings>
+    <ListViewTemplates TValue="BreakTimes">
+        <Template>
+            <div class="e-list-wrapper e-list-multi-line e-list-avatar">
+                @{ var currentBreakTime = (context as BreakTimes);
+<span>From </span> @(currentBreakTime.From.TimeOfDay) <span>To </span> @(currentBreakTime.To.TimeOfDay    )
+                    <SfButton OnClick="@(async () => await Remove(currentBreakTime.Id))" class="btn btn-danger" Content="Remove"></SfButton> }
+            </div>
+        </Template>
+    </ListViewTemplates>
+</SfListView>
+
+@*<div class="form-group row">
+        <SfListView DataSource="@_breaksTimeList">
+            <ListViewTemplates TValue="BreakTimes">
+                <Template>
+                    @{ var currentBreakTime = (context as BreakTimes);
+    <span>From </span>
+    @(currentBreakTime.From.TimeOfDay)
+                        <span>To </span>
+                        @(currentBreakTime.To.TimeOfDay)
+                                            <button type="button" class="col-2 link btn-success" >-</button> }
+                </Template>
+            </ListViewTemplates>
+        </SfListView>
+    </div>*@
 
 <button type="button" class="btn btn-success" @onclick="Save">Save</button>
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
@@ -71,6 +123,7 @@
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
     };
 
+    SfListView<BreakTimes> BreakHistoryListView;
     int _id;
     string _name = string.Empty;
     string _payrollID = string.Empty;
@@ -81,6 +134,10 @@
     DateTime _dailyEndTime;
     DateTime _breakStartTime;
     DateTime _breakEndTime;
+    DateTime _extraBreakStart;
+    DateTime _extraBreakEnd;
+    List<BreakTimes> _breaksTimeList;
+    decimal _totalExtraBreak = 0;
 
     public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
     public DateTime MaxVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 23, 00, 00);
@@ -107,10 +164,19 @@
                     _breakStartTime = Timesheet.BreakStartTime;
                     _breakEndTime = Timesheet.BreakEndTime;
 
+                    _extraBreakStart = Timesheet.BreakStartTime;
+                    _extraBreakEnd = Timesheet.BreakEndTime;
+
                     _createdby = Timesheet.CreatedBy;
                     _createdon = Timesheet.CreatedOn;
                     _modifiedby = Timesheet.ModifiedBy;
                     _modifiedon = Timesheet.ModifiedOn;
+
+                    _totalExtraBreak = Timesheet.TotalBreakHour;
+
+                    _breaksTimeList = new List<BreakTimes>();
+                    _breaksTimeList = ConvertBreakTimeList(Timesheet.Notes);
+
                 }
             }
         }
@@ -118,6 +184,42 @@
         {
             await logger.LogError(ex, "Error Loading Timesheet {TimesheetId} {Error}", _id, ex.Message);
             AddModuleMessage("Error Loading Timesheet", MessageType.Error);
+        }
+    }
+
+    private List<BreakTimes> ConvertBreakTimeList(string notes)
+    {
+        if (!string.IsNullOrEmpty(notes))
+        {
+            _breaksTimeList = System.Text.Json.JsonSerializer.Deserialize<List<BreakTimes>>(notes);
+        }
+
+        return _breaksTimeList;
+    }
+
+    private void Add()
+    {
+        BreakTimes breakTime = new BreakTimes();
+        breakTime.Id = Guid.NewGuid();
+        breakTime.From = _extraBreakStart;
+        breakTime.To = _extraBreakEnd;
+
+        _breaksTimeList.Add(breakTime);
+        _totalExtraBreak += Math.Round((decimal)((_extraBreakEnd - _extraBreakStart).TotalMinutes / 60), 2);
+    }
+
+    private async Task Remove(Guid Id)
+    {
+        if (_breaksTimeList.Any())
+        {
+            var foundItem = _breaksTimeList.FirstOrDefault(x => x.Id == Id);
+            if (foundItem != null)
+            {
+                _totalExtraBreak -= Math.Round((decimal)((foundItem.To - foundItem.From).TotalMinutes / 60), 2);
+                _breaksTimeList.RemoveAll(x => x.Id == Id);
+
+                StateHasChanged();
+            }
         }
     }
 
@@ -141,6 +243,9 @@
                 Timesheet.BreakEndTime = _breakEndTime;
                 Timesheet.TotalRestHour = (decimal)Math.Round((DateTime.Parse(Timesheet.BreakEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.BreakStartTime.ToString("H:mm"))).TotalMinutes / 60);
                 Timesheet.TotalWorkingHour = (decimal)Math.Round((DateTime.Parse(Timesheet.DailyEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.DailyStartTime.ToString("H:mm"))).TotalMinutes / 60);
+                Timesheet.TotalBreakHour = _totalExtraBreak;
+                Timesheet.Notes = ConvertToNotes(_breaksTimeList);
+
 
                 Timesheet.ModifiedBy = PageState.User.Username;
                 Timesheet.ModifiedOn = DateTime.Now;
@@ -156,4 +261,9 @@
             await logger.LogError(ex, "Error Saving Timesheet {Error}", ex.Message);
             AddModuleMessage("Error Saving Timesheet", MessageType.Error);
         }
+    }
+
+    private string ConvertToNotes(List<BreakTimes> breakTimeList)
+    {
+        return System.Text.Json.JsonSerializer.Serialize(breakTimeList);
     } }

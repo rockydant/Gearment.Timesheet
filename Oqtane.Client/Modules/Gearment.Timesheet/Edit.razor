@@ -185,7 +185,7 @@
         //DataSource.RemoveAt(DataSource.ToList<ListDataModel>().FindIndex(e => e.Id == listDataModel.Id));
         _breaksTimeList.RemoveAt(_breaksTimeList.ToList<BreakTimes>().FindIndex(e => e.Id == listDataModel.Id));
         //_totalExtraBreak -= Math.Round((decimal)(listDataModel.To.TimeOfDay - listDataModel.From.TimeOfDay).TotalMinutes / 60, 2);
-        _totalExtraBreak -= (decimal)Math.Round((DateTime.Parse(_extraBreakEnd.ToString("H:mm")) - DateTime.Parse(_extraBreakStart.ToString("H:mm"))).TotalMinutes / 60, 2);
+        _totalExtraBreak -= (decimal)Math.Round((DateTime.Parse(listDataModel.To.ToString("H:mm")) - DateTime.Parse(listDataModel.From.ToString("H:mm"))).TotalMinutes / 60, 2);
     }
 
     private void Add()

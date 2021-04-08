@@ -4,7 +4,7 @@
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Lists
 @using System.Text.Json
-@using Syncfusion.Blazor.Buttons
+@using System.Collections.ObjectModel
 
 @namespace Gearment.Timesheet
 @inherits ModuleBase
@@ -55,55 +55,41 @@
     </div>
 </div>
 <div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Extra Break Start Time</label>
+    <label for="text" class="col-2 col-form-label">Extra Break: Start</label>
     <div class="col-3">
         <div class="input-group">
             <SfTimePicker TValue="DateTime" @bind-Value="@_extraBreakStart" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
         </div>
     </div>
-    <label for="text" class="col-2 col-form-label">Extra Break End Time</label>
+    <label for="text" class="col-2 col-form-label">End</label>
     <div class="col-3">
         <div class="input-group">
             <SfTimePicker TValue="DateTime" @bind-Value="@_extraBreakEnd" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
         </div>
     </div>
-    <button type="button" class="col-2 btn btn-success" @onclick="Add">+</button>
+    <button class="btn btn-outline-primary btn-sm" @onclick="@Add"><i class="fa fa-plus-circle"></i></button>
+    <button class="btn btn-outline-primary btn-sm" @onclick="@Reset"><i class="fa fa-trash-alt"></i></button>
 </div>
 
-<SfListView Id="BreakHistoryListView"
-            DataSource="@_breaksTimeList"
-            HeaderTitle="Break History"
-            ShowHeader="true"
-            CssClass="e-list-template"
-            Width="350"
-            SortOrder="Syncfusion.Blazor.Lists.SortOrder.Ascending">
-    <ListViewFieldSettings TValue="BreakTimes" Id="Id" Text="ID"></ListViewFieldSettings>
-    <ListViewTemplates TValue="BreakTimes">
-        <Template>
-            <div class="e-list-wrapper e-list-multi-line e-list-avatar">
-                @{ var currentBreakTime = (context as BreakTimes);
-<span>From </span> @(currentBreakTime.From.TimeOfDay) <span>To </span> @(currentBreakTime.To.TimeOfDay    )
-                    <SfButton OnClick="@(async () => await Remove(currentBreakTime.Id))" class="btn btn-danger" Content="Remove"></SfButton> }
-            </div>
-        </Template>
-    </ListViewTemplates>
-</SfListView>
-
-@*<div class="form-group row">
-        <SfListView DataSource="@_breaksTimeList">
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Total Break:</label>
+    <label for="text" class="col-3 col-form-label">@_totalExtraBreak</label>
+    <div class="col-5">
+        <SfListView DataSource="@_breaksTimeList"
+                    CssClass="e-list-template">
+            <ListViewFieldSettings TValue="BreakTimes" Id="Id" Text="Text"></ListViewFieldSettings>
             <ListViewTemplates TValue="BreakTimes">
                 <Template>
-                    @{ var currentBreakTime = (context as BreakTimes);
-    <span>From </span>
-    @(currentBreakTime.From.TimeOfDay)
-                        <span>To </span>
-                        @(currentBreakTime.To.TimeOfDay)
-                                            <button type="button" class="col-2 link btn-success" >-</button> }
+                    @{ BreakTimes item = context as BreakTimes;
+    <p>From @item.From.TimeOfDay To @item.To.TimeOfDay <button type="button" class="btn btn-outline-primary btn-sm" @onclick="@(() => { OnDelete(item); })"><i class="fa fa-minus-circle"></i></button></p> }
                 </Template>
             </ListViewTemplates>
         </SfListView>
-    </div>*@
+    </div>
+</div>
 
+
+<br />
 <button type="button" class="btn btn-success" @onclick="Save">Save</button>
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
 <br />
@@ -123,7 +109,6 @@
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
     };
 
-    SfListView<BreakTimes> BreakHistoryListView;
     int _id;
     string _name = string.Empty;
     string _payrollID = string.Empty;
@@ -136,7 +121,7 @@
     DateTime _breakEndTime;
     DateTime _extraBreakStart;
     DateTime _extraBreakEnd;
-    List<BreakTimes> _breaksTimeList;
+    ObservableCollection<BreakTimes> _breaksTimeList = new ObservableCollection<BreakTimes>();
     decimal _totalExtraBreak = 0;
 
     public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
@@ -173,8 +158,6 @@
                     _modifiedon = Timesheet.ModifiedOn;
 
                     _totalExtraBreak = Timesheet.TotalBreakHour;
-
-                    _breaksTimeList = new List<BreakTimes>();
                     _breaksTimeList = ConvertBreakTimeList(Timesheet.Notes);
 
                 }
@@ -187,14 +170,22 @@
         }
     }
 
-    private List<BreakTimes> ConvertBreakTimeList(string notes)
+    private ObservableCollection<BreakTimes> ConvertBreakTimeList(string notes)
     {
         if (!string.IsNullOrEmpty(notes))
         {
-            _breaksTimeList = System.Text.Json.JsonSerializer.Deserialize<List<BreakTimes>>(notes);
+            _breaksTimeList = System.Text.Json.JsonSerializer.Deserialize<ObservableCollection<BreakTimes>>(notes);
         }
 
         return _breaksTimeList;
+    }
+
+    void OnDelete(BreakTimes listDataModel)
+    {
+        //DataSource.RemoveAt(DataSource.ToList<ListDataModel>().FindIndex(e => e.Id == listDataModel.Id));
+        _breaksTimeList.RemoveAt(_breaksTimeList.ToList<BreakTimes>().FindIndex(e => e.Id == listDataModel.Id));
+        //_totalExtraBreak -= Math.Round((decimal)(listDataModel.To.TimeOfDay - listDataModel.From.TimeOfDay).TotalMinutes / 60, 2);
+        _totalExtraBreak -= (decimal)Math.Round((DateTime.Parse(_extraBreakEnd.ToString("H:mm")) - DateTime.Parse(_extraBreakStart.ToString("H:mm"))).TotalMinutes / 60, 2);
     }
 
     private void Add()
@@ -205,22 +196,14 @@
         breakTime.To = _extraBreakEnd;
 
         _breaksTimeList.Add(breakTime);
-        _totalExtraBreak += Math.Round((decimal)((_extraBreakEnd - _extraBreakStart).TotalMinutes / 60), 2);
+        //_totalExtraBreak += Math.Round((decimal)((_extraBreakEnd - _extraBreakStart).TotalMinutes / 60), 2);
+        _totalExtraBreak += (decimal)Math.Round((DateTime.Parse(_extraBreakEnd.ToString("H:mm")) - DateTime.Parse(_extraBreakStart.ToString("H:mm"))).TotalMinutes / 60, 2);
     }
 
-    private async Task Remove(Guid Id)
+    private void Reset()
     {
-        if (_breaksTimeList.Any())
-        {
-            var foundItem = _breaksTimeList.FirstOrDefault(x => x.Id == Id);
-            if (foundItem != null)
-            {
-                _totalExtraBreak -= Math.Round((decimal)((foundItem.To - foundItem.From).TotalMinutes / 60), 2);
-                _breaksTimeList.RemoveAll(x => x.Id == Id);
-
-                StateHasChanged();
-            }
-        }
+        _breaksTimeList.Clear();
+        _totalExtraBreak = 0;
     }
 
     private async Task Save()
@@ -229,13 +212,6 @@
         {
             if (PageState.Action == "Edit")
             {
-                //if (_dailyEndTime < _dailyStartTime || _breakEndTime < _breakStartTime || _breakEndTime > _dailyEndTime || _breakStartTime < _dailyStartTime)
-                //    (TimeSpan.Compare(_dailyEndTime, _dailyStartTime)>)
-                //{
-                //    AddModuleMessage("Invalid Time Range", MessageType.Warning);
-                //    return;
-                //}
-
                 TimesheetData Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
                 Timesheet.DailyStartTime = _dailyStartTime;
                 Timesheet.DailyEndTime = _dailyEndTime;
@@ -263,7 +239,7 @@
         }
     }
 
-    private string ConvertToNotes(List<BreakTimes> breakTimeList)
+    private string ConvertToNotes(ObservableCollection<BreakTimes> breakTimeList)
     {
         return System.Text.Json.JsonSerializer.Serialize(breakTimeList);
     } }

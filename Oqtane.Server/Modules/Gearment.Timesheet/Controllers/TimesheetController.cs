@@ -256,6 +256,8 @@ namespace Gearment.Timesheet.Controllers
                             timesheetData.CreatedOn = DateTime.Now;
                             timesheetData.ModifiedBy = User.Identity.Name;
                             timesheetData.ModifiedOn = DateTime.Now;
+                            timesheetData.Notes = string.Empty;
+                            timesheetData.TotalBreakHour = 0;
                             _TimesheetRepository.AddTimesheetData(timesheetData);
 
                             //// check if exist data of that day (login but not logout)

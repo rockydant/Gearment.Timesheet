@@ -22,12 +22,6 @@
         <ActionLink Action="Upload" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
         <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
     </div>
-    @*<div class="col-lg-6">
-            <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by department" DataSource="@departmentListFilter">
-                <DropDownListEvents ValueChange="@FilterChange" TValue="string" TItem="DepartmentViewModel"></DropDownListEvents>
-                <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
-            </SfDropDownList>
-        </div>*@
 </div>
 
 <SfDialog Width="335px" Target="#target" IsModal="true" @bind-Visible="RateDialogEnable">

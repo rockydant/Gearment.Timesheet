@@ -93,6 +93,8 @@ namespace Gearment.Timesheet.Models
         public string Date { get; set; }       
         public List<DateTime> InRecords { get; set; }
         public List<DateTime> OutRecords { get; set; }
+        public List<decimal> Hours { get; set; }
+        public List<decimal> BreakHours { get; set; }
     }
 
     public class TimesheetViewModel

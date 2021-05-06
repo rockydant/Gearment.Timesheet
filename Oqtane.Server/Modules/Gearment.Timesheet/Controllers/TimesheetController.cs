@@ -116,6 +116,11 @@ namespace Gearment.Timesheet.Controllers
                                 {
                                     foundRecord.OutRecords.Add(DateTime.Parse(item.Out));
                                 }
+
+                                if (item.Hours != null)
+                                {
+                                    foundRecord.Hours.Add(decimal.Parse(item.Hours.Split(':').First()) + (decimal.Parse(item.Hours.Split(':').Last()) / 60));
+                                }
                             }
                             else
                             {
@@ -128,6 +133,7 @@ namespace Gearment.Timesheet.Controllers
                                 foundRecord.PayrollID = item.PayRollID;
                                 foundRecord.Date = item.Date;
                                 foundRecord.DayOfWeek = item.DayOfWeek;
+
                                 if (!string.IsNullOrEmpty(item.In))
                                 {
                                     foundRecord.InRecords.Add(DateTime.Parse(item.In));
@@ -136,6 +142,13 @@ namespace Gearment.Timesheet.Controllers
                                 if (!string.IsNullOrEmpty(item.Out))
                                 {
                                     foundRecord.OutRecords.Add(DateTime.Parse(item.Out));
+                                }
+
+
+                                if (item.Hours != null)
+                                {
+                                    foundRecord.Hours = new List<decimal>();
+                                    foundRecord.Hours.Add(decimal.Parse(item.Hours.Split(':').First()) + (decimal.Parse(item.Hours.Split(':').Last()) / 60));
                                 }
 
                                 dataViewModel.Add(foundRecord);
@@ -188,67 +201,86 @@ namespace Gearment.Timesheet.Controllers
                             timesheetData.DayOfWeek = item.DayOfWeek;
                             timesheetData.Department = employee.Department;
 
-                            if (item.InRecords.Any())
+                            DateTime limitStartTime = DateTime.Parse("2012/12/12 10:00:00.000");
+                            DateTime nightShiftStartTime = DateTime.Parse("2012/12/12 15:00:00.000");
+                            DateTime limitEndTime = DateTime.Parse("2012/12/12 19:00:00.000");
+
+                            if (item.InRecords.Any() && item.OutRecords.Any())
                             {
-                                timesheetData.DailyStartTime = item.InRecords.Min();
-                                if (item.InRecords.Count > 1)
+                                if ((item.InRecords.Min().TimeOfDay < limitStartTime.TimeOfDay && item.InRecords.Max().TimeOfDay > limitEndTime.TimeOfDay) || (item.InRecords.Min().TimeOfDay > nightShiftStartTime.TimeOfDay && item.InRecords.Max().TimeOfDay > limitEndTime.TimeOfDay))
                                 {
-                                    timesheetData.BreakEndTime = item.InRecords.Max();
+                                    timesheetData.DailyStartTime = item.InRecords.Min();
+                                    timesheetData.DailyEndTime = item.OutRecords.Last();
+
+                                    timesheetData.TotalWorkingHour = item.Hours.Sum();
+                                }
+                                else
+                                {
+                                    if (item.InRecords.Any())
+                                    {
+                                        timesheetData.DailyStartTime = item.InRecords.Min();
+                                        if (item.InRecords.Count > 1)
+                                        {
+                                            timesheetData.BreakEndTime = item.InRecords.Max();
+                                        }
+                                    }
+
+                                    if (item.OutRecords.Any())
+                                    {
+                                        timesheetData.DailyEndTime = item.OutRecords.Max();
+                                        if (item.OutRecords.Count > 1)
+                                        {
+                                            timesheetData.BreakStartTime = item.OutRecords.Min();
+                                        }
+
+                                    }
+
+                                    if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
+                                    {
+                                        //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
+                                        timesheetData.TotalRestHour = (decimal)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60, 1);
+
+                                    }
+                                    else
+                                    {
+                                        timesheetData.TotalRestHour = 0;
+                                    }
+
+                                    if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
+                                    {
+                                        //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;                                
+                                        double startTime = timesheetData.DailyStartTime.TimeOfDay.Hours;
+
+                                        if (timesheetData.DailyStartTime.TimeOfDay.Minutes >= 45)
+                                        {
+                                            startTime += 1;
+                                        }
+                                        else if (timesheetData.DailyStartTime.TimeOfDay.Minutes > 15 && timesheetData.DailyStartTime.TimeOfDay.Minutes < 45)
+                                        {
+                                            startTime += 0.5;
+                                        }
+
+                                        double endTime = timesheetData.DailyEndTime.TimeOfDay.Hours;
+
+                                        if (timesheetData.DailyEndTime.TimeOfDay.Minutes >= 45)
+                                        {
+                                            endTime += 1;
+                                        }
+                                        else if (timesheetData.DailyEndTime.TimeOfDay.Minutes > 15 && timesheetData.DailyEndTime.TimeOfDay.Minutes < 45)
+                                        {
+                                            endTime += 0.5;
+                                        }
+
+                                        timesheetData.TotalWorkingHour = (decimal)(endTime - startTime);
+                                    }
+                                    else
+                                    {
+                                        timesheetData.TotalWorkingHour = 0;
+                                    }
                                 }
                             }
 
-                            if (item.OutRecords.Any())
-                            {
-                                timesheetData.DailyEndTime = item.OutRecords.Max();
-                                if (item.OutRecords.Count > 1)
-                                {
-                                    timesheetData.BreakStartTime = item.OutRecords.Min();
-                                }
 
-                            }
-
-                            if (timesheetData.BreakEndTime != null || timesheetData.BreakStartTime != null)
-                            {
-                                //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                                timesheetData.TotalRestHour = (decimal)Math.Round((timesheetData.BreakEndTime - timesheetData.BreakStartTime).TotalMinutes / 60, 1);
-
-                            }
-                            else
-                            {
-                                timesheetData.TotalRestHour = 0;
-                            }
-
-                            if (timesheetData.DailyEndTime != null || timesheetData.DailyStartTime != null)
-                            {
-                                //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;                                
-                                double startTime = timesheetData.DailyStartTime.TimeOfDay.Hours;
-
-                                if (timesheetData.DailyStartTime.TimeOfDay.Minutes >= 45)
-                                {
-                                    startTime += 1;
-                                }
-                                else if (timesheetData.DailyStartTime.TimeOfDay.Minutes > 15 && timesheetData.DailyStartTime.TimeOfDay.Minutes < 45)
-                                {
-                                    startTime += 0.5;
-                                }
-
-                                double endTime = timesheetData.DailyEndTime.TimeOfDay.Hours;
-
-                                if (timesheetData.DailyEndTime.TimeOfDay.Minutes >= 45)
-                                {
-                                    endTime += 1;
-                                }
-                                else if (timesheetData.DailyEndTime.TimeOfDay.Minutes > 15 && timesheetData.DailyEndTime.TimeOfDay.Minutes < 45)
-                                {
-                                    endTime += 0.5;
-                                }
-
-                                timesheetData.TotalWorkingHour = (decimal)(endTime - startTime);
-                            }
-                            else
-                            {
-                                timesheetData.TotalWorkingHour = 0;
-                            }
 
                             timesheetData.Status = employee.Status;
 

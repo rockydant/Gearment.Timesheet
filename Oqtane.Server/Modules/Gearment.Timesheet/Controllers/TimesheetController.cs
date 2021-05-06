@@ -202,7 +202,7 @@ namespace Gearment.Timesheet.Controllers
                             timesheetData.Department = employee.Department;
 
                             DateTime limitStartTime = DateTime.Parse("2012/12/12 10:00:00.000");
-                            DateTime nightShiftStartTime = DateTime.Parse("2012/12/12 15:00:00.000");
+                            DateTime nightShiftStartTime = DateTime.Parse("2012/12/12 13:30:00.000");
                             DateTime limitEndTime = DateTime.Parse("2012/12/12 19:00:00.000");
 
                             if (item.InRecords.Any() && item.OutRecords.Any())

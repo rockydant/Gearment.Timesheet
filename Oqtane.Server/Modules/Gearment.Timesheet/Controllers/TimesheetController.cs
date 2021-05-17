@@ -213,6 +213,8 @@ namespace Gearment.Timesheet.Controllers
                                     timesheetData.DailyEndTime = item.OutRecords.Last();
 
                                     timesheetData.TotalWorkingHour = item.Hours.Sum();
+
+                                    timesheetData.TotalBreakHour = (decimal)Math.Round((item.OutRecords.Last() - item.InRecords.Min()).TotalMinutes / 60, 1) - timesheetData.TotalWorkingHour;
                                 }
                                 else
                                 {

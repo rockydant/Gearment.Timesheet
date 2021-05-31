@@ -62,6 +62,10 @@ namespace Gearment.Timesheet.Services
             List<Models.TimesheetData> Timesheets = await GetJsonAsync<List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId));
             return Timesheets.OrderBy(item => item.Date).ToList();
         }
+        public async Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataAsync(int ModuleId, bool IsWarning)
+        {
+            return await GetJsonAsync<List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/{IsWarning}", ModuleId));            
+        }
 
         public async Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery Query)
         {

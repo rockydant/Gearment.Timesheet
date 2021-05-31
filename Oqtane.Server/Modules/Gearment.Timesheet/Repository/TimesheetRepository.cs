@@ -101,7 +101,7 @@ namespace Gearment.Timesheet.Repository
         }
 
         public List<Models.Timesheet> GetTimesheetByDate(TimesheetDailyQuery Query)
-        {            
+        {
             var result = GetAllTimesheet().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate).ToList();
             return result;
         }
@@ -109,7 +109,7 @@ namespace Gearment.Timesheet.Repository
         public void DeleteTimesheetByDateAsync(TimesheetDailyQuery Query)
         {
             var removeTimesheetList = _db.Timesheet.ToList().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate);
-           
+
             foreach (var item in removeTimesheetList)
             {
                 _db.Timesheet.Remove(item);
@@ -139,6 +139,56 @@ namespace Gearment.Timesheet.Repository
             _db.SaveChanges();
         }
 
+        public Employee_FaceRegEvent GetEmployee_FaceRegEvent(Employee_FaceRegEvent Employee_FaceRegEvent)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(bool IsWarning)
+        {
+            List<Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
+            var faceRegEvent = _db.Employee_FaceRegEvent.ToList();
+            if (IsWarning)
+            {
+                faceRegEvent = faceRegEvent.Where(x => x.IsWarning).ToList();
+            }
+
+            foreach (var item in faceRegEvent)
+            {
+                var employee = _db.Employee.FirstOrDefault(x => x.EmployeeId == item.EmployeeId);
+                if (employee != null)
+                {
+                    Employee_FaceRegEventDetail employeeDetail = new Employee_FaceRegEventDetail();
+                    employeeDetail.EventId = item.EventId;
+                    employeeDetail.EventTime = item.EventTime;
+                    employeeDetail.EventType = item.EventType;
+                    employeeDetail.FaceScore = item.FaceScore;
+                    employeeDetail.Station = item.Station;
+
+                    employeeDetail.EmployeeId = item.EmployeeId;
+                    employeeDetail.Name = employee.Name;
+                    employeeDetail.PayrollID = employee.PayrollID;
+                    employeeDetail.Rate = employee.Rate;
+                    employeeDetail.Department = employee.Department;
+                    employeeDetail.Status = employee.Status;
+                    employeeDetail.Note = employee.Note;
+                    employeeDetail.StartDate = employee.StartDate;
+
+                    if (IsWarning)
+                    {
+                        employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.Month + "-" + item.EventTime.Day + "/" + item.EventId + ".jpg";
+                    }
+                    else
+                    {
+                        employeeDetail.ImageUrl = string.Empty;
+                    }
+
+                    result.Add(employeeDetail);
+                }
+            }
+
+            return result;
+        }
         //public void AddTimesheetFilter(GearmentTimesheetFilter filter)
         //{
         //    _db.TimesheetFilter.Add(filter);

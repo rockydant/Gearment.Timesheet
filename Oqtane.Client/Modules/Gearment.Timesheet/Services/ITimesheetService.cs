@@ -29,5 +29,7 @@ namespace Gearment.Timesheet.Services
         Task<List<Models.AttendanceReport>> GetTimesheetAttendanceDataAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
 
         Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataAsync(int ModuleId, bool IsWarning);
+
+        Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
     }
 }

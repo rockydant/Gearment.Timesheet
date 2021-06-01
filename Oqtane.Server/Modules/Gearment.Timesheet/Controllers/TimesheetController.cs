@@ -374,9 +374,12 @@ namespace Gearment.Timesheet.Controllers
                     newItem.Name = item.Name;
                     newItem.EmployeeId = item.EmployeeId;
                     newItem.Department = item.Department;
-                    newItem.Date = item.EventTime.Date.ToString();
+                    newItem.Date = item.EventTime.Date.ToString("MM/dd/yyyy");
                     newItem.EventTimeLine = new List<Employee_FaceRegEventDetail>();
                     newItem.EventTimeLine.Add(item);
+                    newItem.DayOfWeek = item.EventTime.DayOfWeek.ToString();
+                    newItem.Rate = item.Rate;
+                    newItem.PayrollID = item.PayrollID.ToString();
 
                     summary.Add(newItem);
                 }
@@ -386,15 +389,15 @@ namespace Gearment.Timesheet.Controllers
             {
                 if (item.EventTimeLine != null)
                 {
-                    var inList = item.EventTimeLine.Where(x => x.EventType == "In").ToList();
-                    var outList = item.EventTimeLine.Where(x => x.EventType == "Out").ToList();
-                    var breakList = item.EventTimeLine.Where(x => x.EventType == "Break").ToList();
-                    var endBreakList = item.EventTimeLine.Where(x => x.EventType == "End-Break").ToList();
+                    var inList = item.EventTimeLine.Where(x => x.EventType == "In").OrderBy(x => x.EventTime).ToList();
+                    var outList = item.EventTimeLine.Where(x => x.EventType == "Out").OrderBy(x => x.EventTime).ToList();
+                    var breakList = item.EventTimeLine.Where(x => x.EventType == "Break").OrderBy(x => x.EventTime).ToList();
+                    var endBreakList = item.EventTimeLine.Where(x => x.EventType == "End-Break").OrderBy(x => x.EventTime).ToList();
 
                     if (inList.Any())
                     {
-                        item.DailyStartTime = inList.OrderBy(x => x.EventTime).First().EventTime.TimeOfDay.ToString();
-                        
+                        item.DailyStartTime = inList.First().EventTime.ToString("hh:mm tt");
+
                     }
                     else
                     {
@@ -403,7 +406,7 @@ namespace Gearment.Timesheet.Controllers
 
                     if (outList.Any())
                     {
-                        item.DailyEndTime = outList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.ToString();
+                        item.DailyEndTime = outList.Last().EventTime.ToString("hh:mm tt");
                     }
                     else
                     {
@@ -412,7 +415,7 @@ namespace Gearment.Timesheet.Controllers
 
                     if (breakList.Any())
                     {
-                        item.BreakStartTime = breakList.OrderBy(x => x.EventTime).First().EventTime.TimeOfDay.ToString();
+                        item.BreakStartTime = breakList.First().EventTime.ToString("hh:mm tt");
                     }
                     else
                     {
@@ -421,7 +424,7 @@ namespace Gearment.Timesheet.Controllers
 
                     if (endBreakList.Any())
                     {
-                        item.BreakEndTime = endBreakList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.ToString();                        
+                        item.BreakEndTime = endBreakList.Last().EventTime.ToString("hh:mm tt");
                     }
                     else
                     {
@@ -432,35 +435,41 @@ namespace Gearment.Timesheet.Controllers
                     if (item.BreakEndTime != "N/A" && item.BreakStartTime != "N/A")
                     {
                         //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;
-                        item.TotalRestHour = (decimal)Math.Round((breakList.OrderBy(x => x.EventTime).Last().EventTime - endBreakList.OrderBy(x => x.EventTime).First().EventTime).TotalMinutes / 60, 1);
+                        item.TotalRestHour = (decimal)Math.Round((endBreakList.First().EventTime - breakList.First().EventTime).TotalMinutes / 60, 1);
 
                     }
-                    else
+                    else if (item.BreakEndTime == "N/A" && item.BreakStartTime == "N/A")
                     {
-                        item.TotalRestHour = 0;
+                        if (inList.Count() > 1 && outList.Count() > 1)
+                        {
+                            item.BreakStartTime = outList[0].EventTime.ToString("hh:mm tt");
+                            item.BreakEndTime = inList[1].EventTime.ToString("hh:mm tt");
+
+                            item.TotalRestHour = (decimal)Math.Round((inList[1].EventTime - outList[0].EventTime).TotalMinutes / 60, 1);
+                        }
                     }
 
                     if (item.DailyEndTime != "N/A" && item.DailyStartTime != "N/A")
                     {
                         //timesheetData.TotalRestHour = timesheetData.BreakEndTime.Hour - timesheetData.BreakStartTime.Hour;                                
-                        double startTime = inList.OrderBy(x => x.EventTime).First().EventTime.TimeOfDay.Hours;
+                        double startTime = inList.First().EventTime.TimeOfDay.Hours;
 
-                        if (inList.OrderBy(x => x.EventTime).First().EventTime.TimeOfDay.Minutes >= 45)
+                        if (inList.First().EventTime.TimeOfDay.Minutes >= 45)
                         {
                             startTime += 1;
                         }
-                        else if (inList.OrderBy(x => x.EventTime).First().EventTime.TimeOfDay.Minutes > 15 && outList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.Minutes < 45)
+                        else if (inList.First().EventTime.TimeOfDay.Minutes > 15 && outList.Last().EventTime.TimeOfDay.Minutes < 45)
                         {
                             startTime += 0.5;
                         }
 
-                        double endTime = outList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.Hours;
+                        double endTime = outList.Last().EventTime.TimeOfDay.Hours;
 
-                        if (outList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.Minutes >= 45)
+                        if (outList.Last().EventTime.TimeOfDay.Minutes >= 45)
                         {
                             endTime += 1;
                         }
-                        else if (outList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.Minutes > 15 && outList.OrderBy(x => x.EventTime).Last().EventTime.TimeOfDay.Minutes < 45)
+                        else if (outList.Last().EventTime.TimeOfDay.Minutes > 15 && outList.Last().EventTime.TimeOfDay.Minutes < 45)
                         {
                             endTime += 0.5;
                         }
@@ -475,6 +484,121 @@ namespace Gearment.Timesheet.Controllers
             }
 
             return summary;
+        }
+
+        [HttpPost("attendance/log")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public List<Models.AttendanceReport> GetTimesheetAttendanceData([FromBody] TimesheetDailyQuery Query)
+        {
+            List<Models.AttendanceReport> result = new List<Models.AttendanceReport>();
+
+            List<TimesheetData> data = new List<Models.TimesheetData>();
+
+            data = _TimesheetRepository.GetAllTimesheetData().Where(x => DateTime.Parse(x.Date) >= Query.FromDate && DateTime.Parse(x.Date) <= Query.ToDate).ToList();
+
+            var employees = _employeeRepository.GetEmployees();
+
+            if (Query.Department != "All")
+            {
+                data = data.Where(x => x.Department == Query.Department).ToList();
+                employees = employees.Where(x => x.Department == Query.Department).ToList();
+            }
+
+            if (Query.AttendanceStatus == "All")
+            {
+                foreach (var item in data)
+                {
+                    AttendanceReport record = new AttendanceReport();
+                    record.Date = DateTime.Parse(item.Date);
+                    record.Name = item.FirstName + " " + item.LastName;
+                    record.Department = item.Department;
+
+                    record.Present = "Yes";
+                    record.ArrivalTime = item.DailyStartTime;
+                    result.Add(record);
+                }
+
+                var dateList = result.Select(x => x.Date).Distinct().ToList();
+
+                foreach (var item in dateList)
+                {
+                    var currentList = data.Where(x => DateTime.Parse(x.Date) == item).ToList();
+                    var absentList = employees.Where(x => !currentList.Any(y => y.FirstName + " " + y.LastName == x.Name));
+
+                    foreach (var employee in absentList)
+                    {
+                        AttendanceReport record = new AttendanceReport();
+                        record.Date = item;
+                        record.Name = employee.Name;
+                        record.Department = employee.Department;
+
+                        record.Present = "No";
+                        result.Add(record);
+                    }
+                }
+            }
+            else if (Query.AttendanceStatus == "Present")
+            {
+                foreach (var item in data)
+                {
+                    AttendanceReport record = new AttendanceReport();
+                    record.Date = DateTime.Parse(item.Date);
+                    record.Name = item.FirstName + " " + item.LastName;
+                    record.Department = item.Department;
+
+                    record.Present = "Yes";
+                    record.ArrivalTime = item.DailyStartTime;
+                    result.Add(record);
+                }
+            }
+            else
+            {
+                var dateList = data.Select(x => DateTime.Parse(x.Date)).Distinct().ToList();
+
+                foreach (var item in dateList)
+                {
+                    var currentList = data.Where(x => DateTime.Parse(x.Date) == item).ToList();
+                    var absentList = employees.Where(x => !currentList.Any(y => y.FirstName + " " + y.LastName == x.Name));
+
+                    foreach (var employee in absentList)
+                    {
+                        AttendanceReport record = new AttendanceReport();
+                        record.Date = item;
+                        record.Name = employee.Name;
+                        record.Department = employee.Department;
+
+                        record.Present = "No";
+                        result.Add(record);
+                    }
+                }
+            }
+
+            if (Query.AttendanceStatus != "Absent")
+            {
+                // Display Late/Early Status
+                foreach (var item in result)
+                {
+                    if (item.Present != "No")
+                    {
+                        var currentHour = item.ArrivalTime.Hour;
+                        var currentMinute = item.ArrivalTime.Minute;
+                        if (currentMinute <= 30 && currentMinute >= 15)
+                        {
+                            item.Status = "Late";
+                        }
+                        else if (currentMinute > 30 && currentMinute <= 45)
+                        {
+                            item.Status = "Early";
+                        }
+                        else
+                        {
+                            item.Status = "On-time";
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         [HttpPost("raw")]

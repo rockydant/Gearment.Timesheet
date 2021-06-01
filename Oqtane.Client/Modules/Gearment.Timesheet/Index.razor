@@ -72,23 +72,36 @@ else
             </GridColumn>
         </GridColumns>
     </SfGrid>
+    <br />
+    <br />
     <div class="form-group row">
-        <Label>Attendance</Label>
-        <SfCheckBox class="form-control" @bind-Checked="@_isWarningChecked" Label="Manually Check" @onchange="IsWarningChange"></SfCheckBox>
-        <SfGrid DataSource="@_attendance" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+            <div class="input-group">
+                <Label>Attendance</Label>
+            </div>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+            <div class="input-group">
+                <SfCheckBox class="form-control" @bind-Checked="@_isWarningChecked" Label="Manually Check" @onchange="IsWarningChange"></SfCheckBox>
+            </div>
+        </div>
+
+        <SfGrid DataSource="@_attendance" @ref="_attendanceGrid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="@(new List<string>() { "ExcelExport", "CsvExport", "PdfExport" })">
+            <GridEvents OnToolbarClick="ToolbarClick" TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
             <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
             <GridColumns>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.EmployeeId) HeaderText="Employee ID" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.EmployeeId) HeaderText="ID" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                 <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                 <GridColumn Field=@nameof(TimesheetDataExcelExport.Department) HeaderText="Department" TextAlign="TextAlign.Left" Width="100"></GridColumn>
                 <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                @*<GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
                 <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
                 <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>*@
-                <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetData.TotalBreakHour) HeaderText="Extra Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalBreakHour) HeaderText="Extra Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
                 <GridColumn HeaderText="Detail" TextAlign="TextAlign.Left">
                     <Template>
                         @{ var timesheetData = (context as TimesheetDataExcelExport);
@@ -110,21 +123,32 @@ else
                                         <tbody>
                                             @foreach (var item in timesheetData.EventTimeLine)
                                             {
-                                                <tr>
-                                                    <td>@item.EventId</td>
-                                                    <td>@item.EventType</td>
-                                                    <td>@item.EventTime</td>
-                                                    <td>@item.Station</td>
-                                                    <td>@item.FaceScore</td>
-                                                    @{ if (item.IsWarning)
-                                                        {
-                                                            <td>
-                                                                <div class="image">
-                                                                    <img src="@item.ImageUrl" alt="@item.EmployeeId" />
-                                                                </div>
-                                                            </td>
-                                                        }}
-                                                </tr>
+                                                if (item.IsWarning)
+                                                {
+                                                    <tr class="table-warning">
+                                                        <td>@item.EventId</td>
+                                                        <td>@item.EventType</td>
+                                                        <td>@item.EventTime</td>
+                                                        <td>@item.Station</td>
+                                                        <td>@item.FaceScore</td>
+                                                        <td>
+                                                            <div class="image">
+                                                                <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td>@item.EventId</td>
+                                                        <td>@item.EventType</td>
+                                                        <td>@item.EventTime</td>
+                                                        <td>@item.Station</td>
+                                                        <td>@item.FaceScore</td>
+                                                    </tr>
+                                                }
+
                                             }
                                         </tbody>
                                     </table>
@@ -152,6 +176,8 @@ else
     };
 
     private SfGrid<TimesheetDataExcelExport> Grid;
+    private SfGrid<TimesheetDataExcelExport> _attendanceGrid;
+    private string imagePrefix = "https://attendance.geatech.net/log-images/";
     List<TimesheetData> _Timesheets;
     List<TimesheetDataExcelExport> _attendance;
     private int _folderId = 2;
@@ -246,6 +272,45 @@ else
         {
             await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
             AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+
+    public void ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Id.Contains("pdfexport"))
+        {
+            this._attendanceGrid.PdfExport();
+        }
+        if (args.Item.Id.Contains("excelexport"))
+        {
+            ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+            ExcelProperties.DataSource = _attendance;
+
+            var columns = new List<GridColumn>();
+
+            columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
+            columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+
+
+            ExcelProperties.Columns = columns;
+            ExcelProperties.FileName = "DetailReport.xlsx";
+            this.Grid.ExcelExport(ExcelProperties);
+        }
+        if (args.Item.Id.Contains("csvexport"))
+        {
+            this._attendanceGrid.CsvExport();
         }
     }
 

@@ -162,7 +162,7 @@ namespace Gearment.Timesheet.Repository
                     employeeDetail.EventId = item.EventId;
                     employeeDetail.EventTime = item.EventTime;
                     employeeDetail.EventType = item.EventType;
-                    employeeDetail.FaceScore = item.FaceScore;
+                    employeeDetail.FaceScore = Math.Round(item.FaceScore, 2);
                     employeeDetail.Station = item.Station;
 
                     employeeDetail.EmployeeId = item.EmployeeId;
@@ -173,10 +173,11 @@ namespace Gearment.Timesheet.Repository
                     employeeDetail.Status = employee.Status;
                     employeeDetail.Note = employee.Note;
                     employeeDetail.StartDate = employee.StartDate;
+                    employeeDetail.IsWarning = item.IsWarning;
 
                     if (IsWarning)
                     {
-                        employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.Month + "-" + item.EventTime.Day + "/" + item.EventId + ".jpg";
+                        employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.Day + "/" + item.EventId + ".jpg";
                     }
                     else
                     {

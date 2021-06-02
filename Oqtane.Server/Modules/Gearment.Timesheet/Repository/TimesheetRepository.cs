@@ -147,7 +147,7 @@ namespace Gearment.Timesheet.Repository
         public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(bool IsWarning)
         {
             List<Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
-            var faceRegEvent = _db.Employee_FaceRegEvent.ToList();
+            var faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= DateTime.Parse("05/31/2021")).ToList();
             if (IsWarning)
             {
                 faceRegEvent = faceRegEvent.Where(x => x.IsWarning).ToList();

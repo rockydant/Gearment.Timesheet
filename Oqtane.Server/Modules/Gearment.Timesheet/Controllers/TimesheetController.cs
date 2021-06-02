@@ -389,6 +389,19 @@ namespace Gearment.Timesheet.Controllers
             {
                 if (item.EventTimeLine != null)
                 {
+                    item.EventTimeLine.OrderBy(x => x.EventTime);
+
+                    var checkPoint = item.EventTimeLine.First();
+                    if (checkPoint.EventType == "Out")
+                    {
+                        var foundRecord = summary.FirstOrDefault(x => x.EmployeeId == item.EmployeeId && x.Date == checkPoint.EventTime.Date.AddDays(-1).ToString("MM/dd/yyyy"));
+                        if (foundRecord != null)
+                        {
+                            foundRecord.EventTimeLine.Add(checkPoint);
+                            item.EventTimeLine.Remove(checkPoint);
+                        }
+                    }
+
                     var inList = item.EventTimeLine.Where(x => x.EventType == "In").OrderBy(x => x.EventTime).ToList();
                     var outList = item.EventTimeLine.Where(x => x.EventType == "Out").OrderBy(x => x.EventTime).ToList();
                     var breakList = item.EventTimeLine.Where(x => x.EventType == "Break").OrderBy(x => x.EventTime).ToList();

@@ -150,6 +150,8 @@ namespace Gearment.Timesheet.Models
         public string Department { get; set; }
         public string EmployeeName { get; set; }
         public string AttendanceStatus { get; set; }
+
+        public bool IsWarning { get; set; }
     }
 
     public class PayrollViewModel

@@ -21,8 +21,7 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet);
 
         Models.Employee_FaceRegEvent GetEmployee_FaceRegEvent(Models.Employee_FaceRegEvent Employee_FaceRegEvent);
-        List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(bool IsWarning);
-        
+        List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query);
 
         //void AddTimesheetFilter(GearmentTimesheetFilter filter);
     }

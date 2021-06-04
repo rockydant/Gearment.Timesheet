@@ -144,11 +144,11 @@ namespace Gearment.Timesheet.Repository
             throw new NotImplementedException();
         }
 
-        public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(bool IsWarning)
+        public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query)
         {
             List<Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
-            var faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= DateTime.Parse("05/31/2021")).ToList();
-            if (IsWarning)
+            var faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= Query.FromDate && x.EventTime.Date <= Query.ToDate).ToList();
+            if (Query.IsWarning)
             {
                 faceRegEvent = faceRegEvent.Where(x => x.IsWarning).ToList();
             }
@@ -175,7 +175,7 @@ namespace Gearment.Timesheet.Repository
                     employeeDetail.StartDate = employee.StartDate;
                     employeeDetail.IsWarning = item.IsWarning;
 
-                    if (IsWarning)
+                    if (Query.IsWarning)
                     {
                         employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.Day + "/" + item.EventId + ".jpg";
                     }

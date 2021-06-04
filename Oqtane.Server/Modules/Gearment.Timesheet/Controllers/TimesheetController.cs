@@ -356,10 +356,10 @@ namespace Gearment.Timesheet.Controllers
         }
 
 
-        [HttpGet("attendance/{IsWarning}")]
-        public List<Models.TimesheetDataExcelExport> GetAttendanceData(bool IsWarning)
+        [HttpPost("attendance")]
+        public List<Models.TimesheetDataExcelExport> GetAttendanceData([FromBody] TimesheetDailyQuery Query)
         {
-            var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(IsWarning);
+            var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(Query);
             List<TimesheetDataExcelExport> summary = new List<TimesheetDataExcelExport>();
             foreach (var item in data)
             {
@@ -391,17 +391,31 @@ namespace Gearment.Timesheet.Controllers
                 {
                     item.EventTimeLine.OrderBy(x => x.EventTime);
 
-                    var checkPoint = item.EventTimeLine.First();
-                    if (checkPoint.EventType == "Out")
+                    if (item.EventTimeLine.Any())
                     {
-                        var foundRecord = summary.FirstOrDefault(x => x.EmployeeId == item.EmployeeId && x.Date == checkPoint.EventTime.Date.AddDays(-1).ToString("MM/dd/yyyy"));
-                        if (foundRecord != null)
+                        var checkpointList = new List<Employee_FaceRegEventDetail>();
+
+                        while (item.EventTimeLine.First().EventType != "In")
                         {
-                            foundRecord.EventTimeLine.Add(checkPoint);
-                            item.EventTimeLine.Remove(checkPoint);
+                            checkpointList.Add(item.EventTimeLine.First());
+                            item.EventTimeLine.Remove(item.EventTimeLine.First());
+                        }
+                        if (checkpointList.Any())
+                        {
+                            var foundRecord = summary.Where(x => x.EmployeeId == item.EmployeeId && DateTime.Parse(x.Date) < checkpointList.First().EventTime.Date).OrderBy(x => DateTime.Parse(x.Date)).FirstOrDefault();
+                            if (foundRecord != null)
+                            {
+                                foundRecord.EventTimeLine.AddRange(checkpointList);
+                            }
                         }
                     }
+                }
+            }
 
+            foreach (var item in summary)
+            {
+                if (item.EventTimeLine != null)
+                {   
                     var inList = item.EventTimeLine.Where(x => x.EventType == "In").OrderBy(x => x.EventTime).ToList();
                     var outList = item.EventTimeLine.Where(x => x.EventType == "Out").OrderBy(x => x.EventTime).ToList();
                     var breakList = item.EventTimeLine.Where(x => x.EventType == "Break").OrderBy(x => x.EventTime).ToList();
@@ -478,6 +492,11 @@ namespace Gearment.Timesheet.Controllers
 
                         double endTime = outList.Last().EventTime.TimeOfDay.Hours;
 
+                        if (endTime < 1)
+                        {
+                            endTime = 24;
+                        }
+
                         if (outList.Last().EventTime.TimeOfDay.Minutes >= 45)
                         {
                             endTime += 1;
@@ -499,7 +518,7 @@ namespace Gearment.Timesheet.Controllers
             return summary;
         }
 
-        [HttpPost("attendance/log")]
+        [HttpPost("report")]
         [Authorize(Policy = PolicyNames.ViewModule)]
         public List<Models.AttendanceReport> GetTimesheetAttendanceData([FromBody] TimesheetDailyQuery Query)
         {

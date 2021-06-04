@@ -62,9 +62,9 @@ namespace Gearment.Timesheet.Services
             List<Models.TimesheetData> Timesheets = await GetJsonAsync<List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId));
             return Timesheets.OrderBy(item => item.Date).ToList();
         }
-        public async Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataAsync(int ModuleId, bool IsWarning)
+        public async Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery)
         {
-            return await GetJsonAsync<List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/{IsWarning}", ModuleId));            
+            return await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/", ModuleId), TimesheetDailyQuery);                     
         }
 
         public async Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery Query)
@@ -81,15 +81,15 @@ namespace Gearment.Timesheet.Services
 
         public async Task<List<Models.AttendanceReport>> GetTimesheetAttendanceDataAsync(int ModuleId, TimesheetDailyQuery Query)
         {
-            List<Models.AttendanceReport> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.AttendanceReport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/log", ModuleId), Query);
+            List<Models.AttendanceReport> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.AttendanceReport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/report/", ModuleId), Query);
             return Timesheets.OrderBy(item => item.Date).ToList();
         }
 
-        public async Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery)
-        {
-            List<Models.TimesheetDataExcelExport> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/date", ModuleId), TimesheetDailyQuery);
-            return Timesheets.OrderBy(item => item.Date).ToList();
-        }
+        //public async Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery)
+        //{
+        //    List<Models.TimesheetDataExcelExport> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/date", ModuleId), TimesheetDailyQuery);
+        //    return Timesheets.OrderBy(item => item.Date).ToList();
+        //}
     }
 }
 

@@ -391,7 +391,7 @@ namespace Gearment.Timesheet.Controllers
                 {
                     item.EventTimeLine.OrderBy(x => x.EventTime);
 
-                    if (item.EventTimeLine.Any())
+                    if (item.EventTimeLine.Count() > 1)
                     {
                         var checkpointList = new List<Employee_FaceRegEventDetail>();
 
@@ -415,7 +415,7 @@ namespace Gearment.Timesheet.Controllers
             foreach (var item in summary)
             {
                 if (item.EventTimeLine != null)
-                {   
+                {
                     var inList = item.EventTimeLine.Where(x => x.EventType == "In").OrderBy(x => x.EventTime).ToList();
                     var outList = item.EventTimeLine.Where(x => x.EventType == "Out").OrderBy(x => x.EventTime).ToList();
                     var breakList = item.EventTimeLine.Where(x => x.EventType == "Break").OrderBy(x => x.EventTime).ToList();

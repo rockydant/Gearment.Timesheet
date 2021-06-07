@@ -177,7 +177,7 @@ namespace Gearment.Timesheet.Repository
 
                     if (Query.IsWarning)
                     {
-                        employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.Day + "/" + item.EventId + ".jpg";
+                        employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.ToString("dd") + "/" + item.EventId + ".jpg";
                     }
                     else
                     {

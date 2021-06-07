@@ -88,12 +88,15 @@
     DateTime _dailyEndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 16, 00, 00);
     DateTime _breakStartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 10, 00, 00);
     DateTime _breakEndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 12, 00, 00);
-    int _totalRestHour = 1;    
+    int _totalRestHour = 1;
 
     string _createdby;
     DateTime _createdon;
     string _modifiedby;
     DateTime _modifiedon;
+
+    private List<Department> _Departments;
+    //private List<Employee> _Employees;
 
     public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
     public DateTime MaxVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 23, 00, 00);

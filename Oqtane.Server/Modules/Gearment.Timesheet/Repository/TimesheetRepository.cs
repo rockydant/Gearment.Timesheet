@@ -147,7 +147,7 @@ namespace Gearment.Timesheet.Repository
         public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query)
         {
             List<Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
-            var faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= Query.FromDate && x.EventTime.Date <= Query.ToDate).ToList();
+            var faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= Query.FromDate.Date && x.EventTime.Date <= Query.ToDate.Date).ToList();
             if (Query.IsWarning)
             {
                 faceRegEvent = faceRegEvent.Where(x => x.IsWarning).ToList();

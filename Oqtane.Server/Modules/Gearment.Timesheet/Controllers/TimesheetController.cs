@@ -395,7 +395,7 @@ namespace Gearment.Timesheet.Controllers
                     {
                         var checkpointList = new List<Employee_FaceRegEventDetail>();
 
-                        while (item.EventTimeLine.First().EventType != "In")
+                        while (item.EventTimeLine.FirstOrDefault().EventType != "In")
                         {
                             checkpointList.Add(item.EventTimeLine.First());
                             item.EventTimeLine.Remove(item.EventTimeLine.First());

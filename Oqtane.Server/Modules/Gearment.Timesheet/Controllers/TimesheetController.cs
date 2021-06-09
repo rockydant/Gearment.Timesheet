@@ -402,7 +402,7 @@ namespace Gearment.Timesheet.Controllers
                         }
                         if (checkpointList.Any())
                         {
-                            var foundRecord = summary.Where(x => x.EmployeeId == item.EmployeeId && DateTime.Parse(x.Date) < checkpointList.First().EventTime.Date).OrderBy(x => DateTime.Parse(x.Date)).FirstOrDefault();
+                            var foundRecord = summary.Where(x => x.EmployeeId == item.EmployeeId && DateTime.Parse(x.Date) == checkpointList.First().EventTime.Date.AddDays(-1)).OrderBy(x => DateTime.Parse(x.Date)).FirstOrDefault();
                             if (foundRecord != null)
                             {
                                 foundRecord.EventTimeLine.AddRange(checkpointList);
@@ -698,6 +698,13 @@ namespace Gearment.Timesheet.Controllers
                 _TimesheetRepository.DeleteFaceRegEvent(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Event Deleted {TimesheetId}", id);
             }
+        }
+
+        [HttpGet("attendance/{id}")]
+        [Authorize(Policy = PolicyNames.ViewModule)]
+        public Models.Employee_FaceRegEventDetail GetEvent(int id)
+        {
+            return _TimesheetRepository.GetEmployee_FaceRegEvent(id);
         }
 
         private string ResolveApplicationPath(Oqtane.Models.File file)

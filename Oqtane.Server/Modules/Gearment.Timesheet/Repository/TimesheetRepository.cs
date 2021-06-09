@@ -146,15 +146,61 @@ namespace Gearment.Timesheet.Repository
             _db.SaveChanges();
         }
 
-        public Employee_FaceRegEvent GetEmployee_FaceRegEvent(int EventId)
+        public Employee_FaceRegEventDetail GetEmployee_FaceRegEvent(int EventId)
         {
-            return _db.Employee_FaceRegEvent.Find(EventId);
+            Employee_FaceRegEventDetail employeeDetail = new Employee_FaceRegEventDetail();
+
+            var foundRecord = _db.Employee_FaceRegEvent.Find(EventId);
+            if (foundRecord != null)
+            {
+                var employee = _db.Employee.FirstOrDefault(x => x.EmployeeId == foundRecord.EmployeeId);
+
+                if (employee != null)
+                {
+                    employeeDetail.EventId = foundRecord.EventId;
+                    employeeDetail.EventTime = foundRecord.EventTime;
+                    employeeDetail.EventType = foundRecord.EventType;
+                    employeeDetail.FaceScore = Math.Round(foundRecord.FaceScore, 2);
+                    employeeDetail.Station = foundRecord.Station;
+
+                    employeeDetail.EmployeeId = foundRecord.EmployeeId;
+                    employeeDetail.Name = employee.Name;
+                    employeeDetail.PayrollID = employee.PayrollID;
+                    employeeDetail.Rate = employee.Rate;
+                    employeeDetail.Department = employee.Department;
+                    employeeDetail.Status = employee.Status;
+                    employeeDetail.Note = employee.Note;
+                    employeeDetail.StartDate = employee.StartDate;
+                    employeeDetail.IsWarning = foundRecord.IsWarning;
+
+                    if (employeeDetail.IsWarning)
+                    {
+                        employeeDetail.ImageUrl = foundRecord.EventTime.Year + "-" + foundRecord.EventTime.ToString("MM") + "-" + foundRecord.EventTime.ToString("dd") + "/" + foundRecord.EventId + ".jpg";
+                    }
+                    else
+                    {
+                        employeeDetail.ImageUrl = string.Empty;
+                    }
+                }
+            }
+
+            return employeeDetail;
         }
 
         public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query)
         {
             List<Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
-            var faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= Query.FromDate.Date && x.EventTime.Date <= Query.ToDate.Date).ToList();
+
+            List<Employee_FaceRegEvent> faceRegEvent = new List<Employee_FaceRegEvent>();
+            if (Query.EventId != 0)
+            {
+                faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventId == Query.EventId).ToList();
+            }
+            else
+            {
+                faceRegEvent = _db.Employee_FaceRegEvent.Where(x => x.EventTime.Date >= Query.FromDate.Date && x.EventTime.Date <= Query.ToDate.Date).ToList();
+            }
+
             if (Query.IsWarning)
             {
                 faceRegEvent = faceRegEvent.Where(x => x.IsWarning).ToList();
@@ -197,10 +243,5 @@ namespace Gearment.Timesheet.Repository
 
             return result;
         }
-        //public void AddTimesheetFilter(GearmentTimesheetFilter filter)
-        //{
-        //    _db.TimesheetFilter.Add(filter);
-        //    _db.SaveChanges();
-        //}
     }
 }

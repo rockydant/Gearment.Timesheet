@@ -30,8 +30,8 @@ namespace Gearment.Timesheet.Services
 
         Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
 
-        Task DeleteAttendanceDataAsync(int EventId, int ModuleId);
+        Task<Models.Employee_FaceRegEventDetail> GetAttendanceDataAsync(int EventId, int ModuleId);
 
-        //Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
+        Task DeleteAttendanceDataAsync(int EventId, int ModuleId);
     }
 }

@@ -145,6 +145,7 @@ namespace Gearment.Timesheet.Models
 
     public class TimesheetDailyQuery
     {
+        public int EventId { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
         public string Department { get; set; }

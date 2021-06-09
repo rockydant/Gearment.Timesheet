@@ -20,71 +20,13 @@
     </div>
 </div>
 <div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Start Time</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfTimePicker TValue="DateTime" @bind-Value="@_dailyStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
-        </div>
-    </div>
-</div>
-
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">End Time</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfTimePicker TValue="DateTime" @bind-Value="@_dailyEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
-        </div>
-    </div>
-</div>
-
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Break Start Time</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfTimePicker TValue="DateTime" @bind-Value="@_breakStartTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
-        </div>
-    </div>
-</div>
-
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Break End Time</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfTimePicker TValue="DateTime" @bind-Value="@_breakEndTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Extra Break: Start</label>
+    <label for="text" class="col-3 col-form-label">Event Type</label>
+    <label for="text" class="col-3 col-form-label">@_eventType</label>
+    <label for="text" class="col-3 col-form-label">Event Time</label>
     <div class="col-3">
         <div class="input-group">
-            <SfTimePicker TValue="DateTime" @bind-Value="@_extraBreakStart" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
+            <SfTimePicker TValue="DateTime" @bind-Value="@_eventTime" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
         </div>
-    </div>
-    <label for="text" class="col-2 col-form-label">End</label>
-    <div class="col-3">
-        <div class="input-group">
-            <SfTimePicker TValue="DateTime" @bind-Value="@_extraBreakEnd" Format="HH:mm" Min="@MinVal" Max="@MaxVal"></SfTimePicker>
-        </div>
-    </div>
-    <button class="btn btn-outline-primary btn-sm" @onclick="@Add"><i class="fa fa-plus-circle"></i></button>
-    <button class="btn btn-outline-primary btn-sm" @onclick="@Reset"><i class="fa fa-trash-alt"></i></button>
-</div>
-
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Total Break:</label>
-    <label for="text" class="col-3 col-form-label">@_totalExtraBreak</label>
-    <div class="col-5">
-        <SfListView DataSource="@_breaksTimeList"
-                    CssClass="e-list-template">
-            <ListViewFieldSettings TValue="BreakTimes" Id="Id" Text="Text"></ListViewFieldSettings>
-            <ListViewTemplates TValue="BreakTimes">
-                <Template>
-                    @{ BreakTimes item = context as BreakTimes;
-    <p>From @item.From.TimeOfDay To @item.To.TimeOfDay <button type="button" class="btn btn-outline-primary btn-sm" @onclick="@(() => { OnDelete(item); })"><i class="fa fa-minus-circle"></i></button></p> }
-                </Template>
-            </ListViewTemplates>
-        </SfListView>
     </div>
 </div>
 
@@ -94,9 +36,6 @@
 <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
 <br />
 <br />
-@if (PageState.Action == "Edit")
-{
-<AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
 
 @code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
 
@@ -115,14 +54,9 @@
     string _createdby = string.Empty;
     string _date = string.Empty;
     string _department = string.Empty;
-    DateTime _dailyStartTime = new DateTime();
-    DateTime _dailyEndTime;
-    DateTime _breakStartTime;
-    DateTime _breakEndTime;
-    DateTime _extraBreakStart;
-    DateTime _extraBreakEnd;
-    ObservableCollection<BreakTimes> _breaksTimeList = new ObservableCollection<BreakTimes>();
-    decimal _totalExtraBreak = 0;
+    string _eventType = string.Empty;
+
+    DateTime _eventTime = new DateTime();
 
     public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
     public DateTime MaxVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 23, 00, 00);
@@ -138,28 +72,14 @@
             if (PageState.Action == "Edit")
             {
                 _id = Int32.Parse(PageState.QueryString["id"]);
-                TimesheetData Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
-                if (Timesheet != null)
+
+                var eventDetail = await TimesheetService.GetAttendanceDataAsync(_id, ModuleState.ModuleId);
+                if (eventDetail != null)
                 {
-                    _name = Timesheet.FirstName + " " + Timesheet.LastName;
-                    _date = Timesheet.Date;
-                    _department = Timesheet.Department;
-                    _dailyStartTime = Timesheet.DailyStartTime;
-                    _dailyEndTime = Timesheet.DailyEndTime;
-                    _breakStartTime = Timesheet.BreakStartTime;
-                    _breakEndTime = Timesheet.BreakEndTime;
-
-                    _extraBreakStart = Timesheet.BreakStartTime;
-                    _extraBreakEnd = Timesheet.BreakEndTime;
-
-                    _createdby = Timesheet.CreatedBy;
-                    _createdon = Timesheet.CreatedOn;
-                    _modifiedby = Timesheet.ModifiedBy;
-                    _modifiedon = Timesheet.ModifiedOn;
-
-                    _totalExtraBreak = Timesheet.TotalBreakHour;
-                    _breaksTimeList = ConvertBreakTimeList(Timesheet.Notes);
-
+                    _name = eventDetail.Name;
+                    _eventType = eventDetail.EventType;
+                    _department = eventDetail.Department;
+                    _eventTime = eventDetail.EventTime;
                 }
             }
             else
@@ -174,42 +94,6 @@
         }
     }
 
-    private ObservableCollection<BreakTimes> ConvertBreakTimeList(string notes)
-    {
-        if (!string.IsNullOrEmpty(notes))
-        {
-            _breaksTimeList = System.Text.Json.JsonSerializer.Deserialize<ObservableCollection<BreakTimes>>(notes);
-        }
-
-        return _breaksTimeList;
-    }
-
-    void OnDelete(BreakTimes listDataModel)
-    {
-        //DataSource.RemoveAt(DataSource.ToList<ListDataModel>().FindIndex(e => e.Id == listDataModel.Id));
-        _breaksTimeList.RemoveAt(_breaksTimeList.ToList<BreakTimes>().FindIndex(e => e.Id == listDataModel.Id));
-        //_totalExtraBreak -= Math.Round((decimal)(listDataModel.To.TimeOfDay - listDataModel.From.TimeOfDay).TotalMinutes / 60, 2);
-        _totalExtraBreak -= (decimal)Math.Round((DateTime.Parse(listDataModel.To.ToString("H:mm")) - DateTime.Parse(listDataModel.From.ToString("H:mm"))).TotalMinutes / 60, 2);
-    }
-
-    private void Add()
-    {
-        BreakTimes breakTime = new BreakTimes();
-        breakTime.Id = Guid.NewGuid();
-        breakTime.From = _extraBreakStart;
-        breakTime.To = _extraBreakEnd;
-
-        _breaksTimeList.Add(breakTime);
-        //_totalExtraBreak += Math.Round((decimal)((_extraBreakEnd - _extraBreakStart).TotalMinutes / 60), 2);
-        _totalExtraBreak += (decimal)Math.Round((DateTime.Parse(_extraBreakEnd.ToString("H:mm")) - DateTime.Parse(_extraBreakStart.ToString("H:mm"))).TotalMinutes / 60, 2);
-    }
-
-    private void Reset()
-    {
-        _breaksTimeList.Clear();
-        _totalExtraBreak = 0;
-    }
-
     private async Task Save()
     {
         try
@@ -217,14 +101,14 @@
             if (PageState.Action == "Edit")
             {
                 TimesheetData Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
-                Timesheet.DailyStartTime = _dailyStartTime;
-                Timesheet.DailyEndTime = _dailyEndTime;
-                Timesheet.BreakStartTime = _breakStartTime;
-                Timesheet.BreakEndTime = _breakEndTime;
-                Timesheet.TotalRestHour = (decimal)Math.Round((DateTime.Parse(Timesheet.BreakEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.BreakStartTime.ToString("H:mm"))).TotalMinutes / 60);
-                Timesheet.TotalWorkingHour = (decimal)Math.Round((DateTime.Parse(Timesheet.DailyEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.DailyStartTime.ToString("H:mm"))).TotalMinutes / 60);
-                Timesheet.TotalBreakHour = _totalExtraBreak;
-                Timesheet.Notes = ConvertToNotes(_breaksTimeList);
+                //Timesheet.DailyStartTime = _dailyStartTime;
+                //Timesheet.DailyEndTime = _dailyEndTime;
+                //Timesheet.BreakStartTime = _breakStartTime;
+                //Timesheet.BreakEndTime = _breakEndTime;
+                //Timesheet.TotalRestHour = (decimal)Math.Round((DateTime.Parse(Timesheet.BreakEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.BreakStartTime.ToString("H:mm"))).TotalMinutes / 60);
+                //Timesheet.TotalWorkingHour = (decimal)Math.Round((DateTime.Parse(Timesheet.DailyEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.DailyStartTime.ToString("H:mm"))).TotalMinutes / 60);
+                //Timesheet.TotalBreakHour = _totalExtraBreak;
+                //Timesheet.Notes = ConvertToNotes(_breaksTimeList);
 
 
                 Timesheet.ModifiedBy = PageState.User.Username;

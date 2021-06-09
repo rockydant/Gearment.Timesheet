@@ -20,8 +20,10 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData AddTimesheetData(Models.TimesheetData Timesheet);
         Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet);
 
-        Models.Employee_FaceRegEvent GetEmployee_FaceRegEvent(Models.Employee_FaceRegEvent Employee_FaceRegEvent);
+        Models.Employee_FaceRegEvent GetEmployee_FaceRegEvent(int EventId);
         List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query);
+
+        void DeleteFaceRegEvent(int EventId);
 
         //void AddTimesheetFilter(GearmentTimesheetFilter filter);
     }

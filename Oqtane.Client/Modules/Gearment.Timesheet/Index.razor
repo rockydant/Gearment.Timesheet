@@ -46,14 +46,11 @@ else
     <br />
 
     <div class="form-group row">
-        <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-            <div class="input-group">
-                <Label>Attendance</Label>
-            </div>
-        </div>
         <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
             <label class="form-label" style="padding: 10px 5px 10px 40px"> Manually Check </label>
             <SfSwitch @bind-Checked="_isWarningChecked" OffLabel="OFF" OnLabel="ON" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
             <ActionLink Action="Add" Class="fa fa-minus-circle" />
         </div>
     </div>
@@ -83,7 +80,7 @@ else
                                 <div class="card card-body">
                                     <table class="table table-striped detailtable">
                                         <thead>
-                                            <tr>                                                
+                                            <tr>
                                                 <th scope="col">EventType</th>
                                                 <th scope="col">EventTime</th>
                                                 <th scope="col"></th>
@@ -109,7 +106,7 @@ else
                                                                 <span id="txt">@item.EventType</span>
                                                             </SfTooltip>
                                                         </td>
-                                                        <td>@item.EventTime</td>                                                        
+                                                        <td>@item.EventTime</td>
                                                         <td></td>
                                                     </tr>
                                                 }
@@ -127,7 +124,10 @@ else
                                                             </SfTooltip>
                                                         </td>
                                                         <td>@item.EventTime</td>
-                                                        <td></td>
+                                                        <td>
+                                                            <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
+                                                            <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId+" record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
+                                                        </td>
                                                     </tr>
                                                 }
 
@@ -264,6 +264,7 @@ else
             query.FromDate = _fromDate;
             query.ToDate = _toDate;
             query.Department = "All";
+            query.IsWarning = _isWarningChecked;
 
             _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, query);
             _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
@@ -300,6 +301,33 @@ else
             AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
         }
     }
+
+    private async Task DeleteEvent(int EventId)
+    {
+        try
+        {
+            ShowProgressIndicator();
+
+            TimesheetDailyQuery query = new TimesheetDailyQuery();
+            query.FromDate = _fromDate;
+            query.ToDate = _toDate;
+            query.Department = "All";
+            query.IsWarning = _isWarningChecked;
+
+            await TimesheetService.DeleteAttendanceDataAsync(EventId, ModuleState.ModuleId);
+            await logger.LogInformation("Event Deleted {Timesheet}", EventId);
+            _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+            _attendanceGrid.Refresh();
+
+            HideProgressIndicator();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Attendance Event {Timesheet} {Error}", EventId, ex.Message);
+            AddModuleMessage("Error Deleting Attendance Event", MessageType.Error);
+        }
+    }
+
 
     public void ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
     {

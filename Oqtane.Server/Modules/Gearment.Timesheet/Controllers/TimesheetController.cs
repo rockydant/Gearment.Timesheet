@@ -687,6 +687,19 @@ namespace Gearment.Timesheet.Controllers
             }
         }
 
+        // DELETE api/<controller>/5
+        [HttpDelete("attendance/{id}")]
+        [Authorize(Policy = PolicyNames.EditModule)]
+        public void DeleteEvent(int id)
+        {
+            var recordFound = _TimesheetRepository.GetEmployee_FaceRegEvent(id);
+            if (recordFound != null)
+            {
+                _TimesheetRepository.DeleteFaceRegEvent(id);
+                _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Event Deleted {TimesheetId}", id);
+            }
+        }
+
         private string ResolveApplicationPath(Oqtane.Models.File file)
         {
             file.Folder = _folders.GetFolder(file.FolderId);

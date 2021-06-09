@@ -85,6 +85,11 @@ namespace Gearment.Timesheet.Services
             return Timesheets.OrderBy(item => item.Date).ToList();
         }
 
+        public async Task DeleteAttendanceDataAsync(int EventId, int ModuleId)
+        {
+            await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/{EventId}", ModuleId));
+        }
+
         //public async Task<List<Models.TimesheetDataExcelExport>> GetAttendanceDataByDateAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery)
         //{
         //    List<Models.TimesheetDataExcelExport> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/date", ModuleId), TimesheetDailyQuery);

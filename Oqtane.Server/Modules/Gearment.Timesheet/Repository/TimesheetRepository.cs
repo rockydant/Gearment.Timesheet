@@ -139,9 +139,16 @@ namespace Gearment.Timesheet.Repository
             _db.SaveChanges();
         }
 
-        public Employee_FaceRegEvent GetEmployee_FaceRegEvent(Employee_FaceRegEvent Employee_FaceRegEvent)
+        public void DeleteFaceRegEvent(int EventId)
         {
-            throw new NotImplementedException();
+            Models.Employee_FaceRegEvent eventFound = _db.Employee_FaceRegEvent.Find(EventId);
+            _db.Employee_FaceRegEvent.Remove(eventFound);
+            _db.SaveChanges();
+        }
+
+        public Employee_FaceRegEvent GetEmployee_FaceRegEvent(int EventId)
+        {
+            return _db.Employee_FaceRegEvent.Find(EventId);
         }
 
         public List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query)

@@ -132,6 +132,13 @@ namespace Gearment.Timesheet.Repository
             return Timesheet;
         }
 
+        public Models.Employee_FaceRegEventDetail UpdateEvent(Models.Employee_FaceRegEventDetail Timesheet)
+        {
+            _db.Entry(Timesheet).State = EntityState.Modified;
+            _db.SaveChanges();
+            return Timesheet;
+        }
+
         public void DeleteTimesheet(int TimesheetId)
         {
             Models.TimesheetData Timesheet = _db.TimesheetData.Find(TimesheetId);

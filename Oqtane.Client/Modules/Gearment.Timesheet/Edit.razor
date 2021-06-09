@@ -100,22 +100,12 @@
         {
             if (PageState.Action == "Edit")
             {
-                TimesheetData Timesheet = await TimesheetService.GetTimesheetAsync(_id, ModuleState.ModuleId);
-                //Timesheet.DailyStartTime = _dailyStartTime;
-                //Timesheet.DailyEndTime = _dailyEndTime;
-                //Timesheet.BreakStartTime = _breakStartTime;
-                //Timesheet.BreakEndTime = _breakEndTime;
-                //Timesheet.TotalRestHour = (decimal)Math.Round((DateTime.Parse(Timesheet.BreakEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.BreakStartTime.ToString("H:mm"))).TotalMinutes / 60);
-                //Timesheet.TotalWorkingHour = (decimal)Math.Round((DateTime.Parse(Timesheet.DailyEndTime.ToString("H:mm")) - DateTime.Parse(Timesheet.DailyStartTime.ToString("H:mm"))).TotalMinutes / 60);
-                //Timesheet.TotalBreakHour = _totalExtraBreak;
-                //Timesheet.Notes = ConvertToNotes(_breaksTimeList);
+                var eventDetail = await TimesheetService.GetAttendanceDataAsync(_id, ModuleState.ModuleId);
 
+                eventDetail.EventTime = _eventTime;                
 
-                Timesheet.ModifiedBy = PageState.User.Username;
-                Timesheet.ModifiedOn = DateTime.Now;
-
-                await TimesheetService.UpdateTimesheetAsync(Timesheet, ModuleState.ModuleId);
-                await logger.LogInformation("Timesheet Updated {Timesheet}", Timesheet);
+                await TimesheetService.UpdateAttendanceDataAsync(eventDetail, ModuleState.ModuleId);
+                await logger.LogInformation("Event Updated {Timesheet}", eventDetail);
             }
 
             NavigationManager.NavigateTo(NavigateUrl());

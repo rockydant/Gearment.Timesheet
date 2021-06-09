@@ -23,6 +23,8 @@ namespace Gearment.Timesheet.Repository
         Models.Employee_FaceRegEventDetail GetEmployee_FaceRegEvent(int EventId);
         List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query);
 
+        Models.Employee_FaceRegEventDetail UpdateEvent(Models.Employee_FaceRegEventDetail Timesheet);
+
         void DeleteFaceRegEvent(int EventId);
     }
 }

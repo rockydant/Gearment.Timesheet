@@ -707,6 +707,18 @@ namespace Gearment.Timesheet.Controllers
             return _TimesheetRepository.GetEmployee_FaceRegEvent(id);
         }
 
+        [HttpPut("attendance/{id}")]
+        [Authorize(Policy = PolicyNames.EditModule)]
+        public Models.Employee_FaceRegEventDetail PutEvent(int id, [FromBody] Models.Employee_FaceRegEventDetail eventDetail)
+        {
+            if (ModelState.IsValid)
+            {
+                eventDetail = _TimesheetRepository.UpdateEvent(eventDetail);
+                _logger.Log(LogLevel.Information, this, LogFunction.Update, "Timesheet Updated {Timesheet}", eventDetail);
+            }
+            return eventDetail;
+        }
+
         private string ResolveApplicationPath(Oqtane.Models.File file)
         {
             file.Folder = _folders.GetFolder(file.FolderId);

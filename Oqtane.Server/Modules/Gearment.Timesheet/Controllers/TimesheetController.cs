@@ -359,7 +359,8 @@ namespace Gearment.Timesheet.Controllers
         [HttpPost("attendance")]
         public List<Models.TimesheetDataExcelExport> GetAttendanceData([FromBody] TimesheetDailyQuery Query)
         {
-            var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(Query);
+            var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(Query);            
+
             List<TimesheetDataExcelExport> summary = new List<TimesheetDataExcelExport>();
             foreach (var item in data)
             {
@@ -389,7 +390,7 @@ namespace Gearment.Timesheet.Controllers
             {
                 if (item.EventTimeLine != null)
                 {
-                    item.EventTimeLine.OrderBy(x => x.EventTime);
+                    item.EventTimeLine = item.EventTimeLine.OrderBy(x => x.EventTime).ToList();
 
                     if (item.EventTimeLine.Count() > 1)
                     {

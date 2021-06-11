@@ -46,8 +46,16 @@ namespace Gearment.Timesheet.Repository
 
             return data.FirstOrDefault();
         }
+        public Models.Employee_FaceRegEvent AddEvent(Models.Employee_FaceRegEvent Employee_FaceRegEvent)
+        {
+            if (!_db.Employee_FaceRegEvent.Any(x => x.EventTime == Employee_FaceRegEvent.EventTime && x.EventType == Employee_FaceRegEvent.EventType && x.EmployeeId == Employee_FaceRegEvent.EmployeeId))
+            {
+                _db.Employee_FaceRegEvent.Add(Employee_FaceRegEvent);
+                _db.SaveChanges();
+            }
 
-
+            return Employee_FaceRegEvent;
+        }
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)
         {
             if (!_db.Timesheet.Any(x =>

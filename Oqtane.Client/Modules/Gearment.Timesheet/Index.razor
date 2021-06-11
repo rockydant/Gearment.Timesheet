@@ -46,14 +46,14 @@ else
     <br />
 
     <div class="form-group row">
-        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-            <label class="form-label" style="padding: 10px 5px 10px 40px"> Manually Check </label>
-            <SfSwitch @bind-Checked="_isWarningChecked" OffLabel="OFF" OnLabel="ON" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
+        <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
+            <SfSwitch @bind-Checked="_isWarningChecked" OffLabel="Check" OnLabel="Check" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
         </div>
-        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-            <ActionLink Action="Add" Class="fa fa-minus-circle" />
+        <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
+            <ActionLink Action="Add" Class="fa fa-add-circle" />
         </div>
     </div>
+
     <div class="form-group row">
         <SfGrid DataSource="@_attendance" @ref="_attendanceGrid" AllowResizing="true" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="@(new List<string>() { "ExcelExport", "CsvExport", "PdfExport", "Search" })">
             <GridEvents OnToolbarClick="ToolbarClick" TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
@@ -130,8 +130,12 @@ else
                                                         </td>
                                                     </tr>
                                                 }
-
                                             }
+                                            <tr>
+                                                <td colspan="3">
+                                                    <ActionLink Action="Add" Text="add more..." Class="btn btn-link" Parameters="@($"id=" + timesheetData.EventTimeLine.FirstOrDefault().EventId)" />
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>

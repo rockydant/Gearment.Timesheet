@@ -720,6 +720,16 @@ namespace Gearment.Timesheet.Controllers
             return eventDetail;
         }
 
+        [HttpPost("attendance/add")]
+        [Authorize(Policy = PolicyNames.EditModule)]
+        public Models.Employee_FaceRegEvent PostEvent([FromBody] Models.Employee_FaceRegEvent Employee_FaceRegEvent)
+        {
+            Employee_FaceRegEvent = _TimesheetRepository.AddEvent(Employee_FaceRegEvent);
+            _logger.Log(LogLevel.Information, this, LogFunction.Create, "Event Added {Employee_FaceRegEvent}", Employee_FaceRegEvent);
+
+            return Employee_FaceRegEvent;
+        }
+
         private string ResolveApplicationPath(Oqtane.Models.File file)
         {
             file.Folder = _folders.GetFolder(file.FolderId);

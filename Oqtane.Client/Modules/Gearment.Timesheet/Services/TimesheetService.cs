@@ -98,7 +98,11 @@ namespace Gearment.Timesheet.Services
         public async Task<Models.Employee_FaceRegEventDetail> UpdateAttendanceDataAsync(Models.Employee_FaceRegEventDetail eventDetail, int ModuleId)
         {
             return await PutJsonAsync<Models.Employee_FaceRegEventDetail>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/{eventDetail.EventId}", ModuleId), eventDetail);
-        }        
+        }
+        public async Task<Models.Employee_FaceRegEvent> AddAttendanceDataAsync(Models.Employee_FaceRegEvent eventDetail, int ModuleId)
+        {
+            return await PostJsonAsync<Models.Employee_FaceRegEvent>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/add/", ModuleId), eventDetail);
+        }
     }
 }
 

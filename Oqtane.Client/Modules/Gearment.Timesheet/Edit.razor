@@ -5,6 +5,7 @@
 @using Syncfusion.Blazor.Lists
 @using System.Text.Json
 @using System.Collections.ObjectModel
+@using Syncfusion.Blazor.DropDowns
 
 @namespace Gearment.Timesheet
 @inherits ModuleBase
@@ -21,7 +22,9 @@
 </div>
 <div class="form-group row">
     <label for="text" class="col-3 col-form-label">Event Type</label>
-    <label for="text" class="col-3 col-form-label">@_eventType</label>
+    <SfDropDownList CssClass="col-3 col-form-label" TValue="string" TItem="string" Placeholder="Event Type" DataSource="@EnumValues" Enabled="@IsAdded" @bind-Value="_eventType">
+        <DropDownListFieldSettings Text="Name" Value="Code"></DropDownListFieldSettings>
+    </SfDropDownList>
     <label for="text" class="col-3 col-form-label">Event Time</label>
     <div class="col-3">
         <div class="input-group">
@@ -56,6 +59,19 @@
     string _department = string.Empty;
     string _eventType = string.Empty;
 
+    bool IsAdded;
+    public string[] EnumValues = Enum.GetNames(typeof(Values));
+    public Values eventTypeValue { get; set; }
+    private Employee_FaceRegEventDetail eventDetail;
+
+    public enum Values
+    {
+        In,
+        Out,
+        Break,
+        EndBreak
+    }
+
     DateTime _eventTime = new DateTime();
 
     public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
@@ -69,22 +85,34 @@
     {
         try
         {
+            _id = Int32.Parse(PageState.QueryString["id"]);
+            eventDetail = await TimesheetService.GetAttendanceDataAsync(_id, ModuleState.ModuleId);
+
+            if (eventDetail != null)
+            {
+                _name = eventDetail.Name;
+                _eventType = eventDetail.EventType;
+                _department = eventDetail.Department;
+                _eventTime = eventDetail.EventTime;
+            }
+
             if (PageState.Action == "Edit")
             {
-                _id = Int32.Parse(PageState.QueryString["id"]);
+                IsAdded = false;
 
-                var eventDetail = await TimesheetService.GetAttendanceDataAsync(_id, ModuleState.ModuleId);
-                if (eventDetail != null)
+                if (_eventType == "End-Break")
                 {
-                    _name = eventDetail.Name;
-                    _eventType = eventDetail.EventType;
-                    _department = eventDetail.Department;
-                    _eventTime = eventDetail.EventTime;
+                    eventTypeValue = Values.EndBreak;
+                }
+                else
+                {
+                    eventTypeValue = (Values)Enum.Parse(typeof(Values), _eventType);
                 }
             }
             else
             {
-
+                IsAdded = true;
+                eventTypeValue = Values.In;
             }
         }
         catch (Exception ex)
@@ -106,6 +134,20 @@
                 eventDetail.EventTime = eventDetail.EventTime.Date + pickedTime;
 
                 await TimesheetService.UpdateAttendanceDataAsync(eventDetail, ModuleState.ModuleId);
+                await logger.LogInformation("Event Updated {Timesheet}", eventDetail);
+            }
+            else
+            {
+                Employee_FaceRegEvent newEvent = new Employee_FaceRegEvent();
+
+                TimeSpan pickedTime = _eventTime.TimeOfDay;
+                newEvent.EventTime = eventDetail.EventTime.Date + pickedTime;
+
+                newEvent.EventType = _eventType == "EndBreak" ? "End-Break" : _eventType;
+
+                newEvent.EmployeeId = eventDetail.EmployeeId;
+
+                await TimesheetService.AddAttendanceDataAsync(newEvent, ModuleState.ModuleId);
                 await logger.LogInformation("Event Updated {Timesheet}", eventDetail);
             }
 

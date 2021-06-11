@@ -50,7 +50,7 @@ else
             <SfSwitch @bind-Checked="_isWarningChecked" OffLabel="Check" OnLabel="Check" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
         </div>
         <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
-            <ActionLink Action="Add" Class="fa fa-add-circle" />
+            <ActionLink Action="Event" Security="SecurityAccessLevel.Edit" class="btn btn-secondary" Text="Add" />
         </div>
     </div>
 
@@ -197,6 +197,7 @@ else
     private int _folderId = 2;
     private List<Object> Toolbaritems = new List<Object>() { "Search" };
     private bool _isWarningChecked = false;
+    private bool IsVisible { get; set; } = false;
 
     private bool ImportExcelDialogEnable { get; set; } = false;
     List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
@@ -215,6 +216,11 @@ else
     {
         return new Query()
         .Where("EmployeeId", "equal", value.EmployeeId);
+    }
+
+    private void OpenDialog()
+    {
+        this.IsVisible = true;
     }
 
     protected override async Task OnInitializedAsync()

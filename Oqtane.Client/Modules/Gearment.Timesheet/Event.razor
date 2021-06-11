@@ -1,0 +1,144 @@
+@namespace Gearment.Timesheet
+@using Gearment.Timesheet.Services
+@using Gearment.Employee.Services
+@using Gearment.Employee.Models
+@using Gearment.Timesheet.Models
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+@using Gearment.Department.Models
+
+@inherits ModuleBase
+@inject NavigationManager NavigationManager
+@inject ITimesheetService TimesheetService
+@inject IFileService FileService
+@inject IFolderService FolderService
+@inject IEmployeeService EmployeeService
+
+<div class="form-group row">
+    <label for="text" class="col-3 col-form-label">Employee</label>
+    <SfDropDownList TValue="string" TItem="Employee" Placeholder="Select Employee" AllowFiltering="true" DataSource="@employees">
+        <DropDownListFieldSettings Text="Name" Value="EmployeeId" GroupBy="Department"></DropDownListFieldSettings>
+    </SfDropDownList>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-3 col-form-label">Event Type</label>
+    <SfDropDownList TValue="string" TItem="string" Placeholder="Event Type" DataSource="@EnumValues" @bind-Value="@_eventType">
+        <DropDownListFieldSettings Text="Name" Value="Code"></DropDownListFieldSettings>
+    </SfDropDownList>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-3 col-form-label">Event Time</label>
+    <div class="col-3">
+        <div class="input-group">
+            <SfDateTimePicker TValue="DateTime" @bind-Value="@_eventTime" Min="@MinVal" Max="@MaxVal"></SfDateTimePicker>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-3">
+        <div class="input-group">
+            <SfButton OnClick="Add" class="btn btn-info" Content="Add"></SfButton>
+            <SfButton OnClick="Remove" class="btn btn-info" Content="Remove"></SfButton>
+        </div>
+    </div>
+    <SfGrid @ref="Grid" DataSource="@eventTimeline" AllowSelection="true">
+        <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
+        <GridColumns>
+            <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+            <GridColumn Field=@nameof(Employee_FaceRegEventDetail.EventType) HeaderText="Event" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+            <GridColumn Field=@nameof(Employee_FaceRegEventDetail.EventTime) HeaderText="Time" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+<div class="form-group row">
+    <div class="col-3">
+        <div class="input-group">
+            <SfButton OnClick="Save" class="btn btn-info" Content="Save"></SfButton>
+        </div>
+    </div>
+</div>
+
+
+@code { public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+
+    private SfGrid<Employee_FaceRegEventDetail> Grid;
+
+    private List<Employee> employees = new List<Employee>();
+    string _eventType = string.Empty;
+
+    bool IsAdded;
+    public string[] EnumValues = Enum.GetNames(typeof(Values));
+    public Values eventTypeValue { get; set; }
+    public enum Values
+    {
+        In,
+        Out,
+        Break,
+        EndBreak
+    }
+
+    public DateTime MinVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 06, 00, 00);
+    public DateTime MaxVal { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 15, 23, 00, 00);
+
+    DateTime _eventTime = new DateTime();
+
+    List<Employee_FaceRegEventDetail> eventTimeline = new List<Employee_FaceRegEventDetail>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+    }
+
+    private void Add()
+    {
+        Employee_FaceRegEventDetail newEvent = new Employee_FaceRegEventDetail();
+        newEvent.EventTime = _eventTime;
+        newEvent.EventType = _eventType;
+
+        eventTimeline.Add(newEvent);
+        Grid.Refresh();
+    }
+
+    private void Remove()
+    {
+        if (eventTimeline.Any())
+        {
+            var selected = this.Grid.GetSelectedRowIndexes().Result.ToArray();
+            
+        }
+
+        Grid.Refresh();
+    }
+
+
+    private void Save()
+    {
+
+    }
+
+    private async Task Delete(int TimesheetDataId)
+    {
+        try
+        {
+            await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
+            await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
+            //_Timesheets = await TimesheetService.GetTimesheetsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
+            AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+}
+

@@ -25,7 +25,7 @@ namespace Gearment.Timesheet.Repository
 
         Models.Employee_FaceRegEventDetail UpdateEvent(Models.Employee_FaceRegEventDetail Timesheet);
 
-        Models.Employee_FaceRegEvent AddEvent(Models.Employee_FaceRegEvent Employee_FaceRegEvent);
+        Models.Employee_FaceRegEvent AddEvent(Models.Employee_FaceRegEvent Employee_FaceRegEvent);        
 
         void DeleteFaceRegEvent(int EventId);
     }

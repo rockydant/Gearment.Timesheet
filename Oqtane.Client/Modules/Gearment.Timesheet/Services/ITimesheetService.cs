@@ -32,7 +32,7 @@ namespace Gearment.Timesheet.Services
 
         Task<Models.Employee_FaceRegEventDetail> GetAttendanceDataAsync(int EventId, int ModuleId);
         Task<Models.Employee_FaceRegEventDetail> UpdateAttendanceDataAsync(Models.Employee_FaceRegEventDetail eventDetail, int ModuleId);
-        Task<Models.Employee_FaceRegEvent> AddAttendanceDataAsync(Models.Employee_FaceRegEvent eventDetail, int ModuleId);
+        Task<Models.Employee_FaceRegEvent> AddAttendanceDataAsync(Models.Employee_FaceRegEvent eventDetail, int ModuleId);        
         Task DeleteAttendanceDataAsync(int EventId, int ModuleId);
     }
 }

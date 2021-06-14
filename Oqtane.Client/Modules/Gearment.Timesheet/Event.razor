@@ -20,19 +20,27 @@
 
 <div class="form-group row">
     <label for="text" class="col-3 col-form-label">Employee</label>
-    <SfDropDownList TValue="string" TItem="Employee" Placeholder="Select Employee" AllowFiltering="true" DataSource="@employees">
-        <DropDownListFieldSettings Text="Name" Value="EmployeeId" GroupBy="Department"></DropDownListFieldSettings>
-    </SfDropDownList>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDropDownList TValue="string" TItem="Employee" Placeholder="Select Employee" AllowFiltering="true" DataSource="@employees" @bind-Value="@_employeeId">
+                <DropDownListFieldSettings Text="Name" Value="EmployeeId" GroupBy="Department"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+    </div>
 </div>
 <div class="form-group row">
     <label for="text" class="col-3 col-form-label">Event Type</label>
-    <SfDropDownList TValue="string" TItem="string" Placeholder="Event Type" DataSource="@EnumValues" @bind-Value="@_eventType">
-        <DropDownListFieldSettings Text="Name" Value="Code"></DropDownListFieldSettings>
-    </SfDropDownList>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDropDownList TValue="string" TItem="string" Placeholder="Event Type" DataSource="@EnumValues" @bind-Value="@_eventType">
+                <DropDownListFieldSettings Text="Name" Value="Code"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+    </div>
 </div>
 <div class="form-group row">
     <label for="text" class="col-3 col-form-label">Event Time</label>
-    <div class="col-3">
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
         <div class="input-group">
             <SfDateTimePicker TValue="DateTime" @bind-Value="@_eventTime" Min="@MinVal" Max="@MaxVal"></SfDateTimePicker>
         </div>
@@ -42,15 +50,20 @@
     <div class="col-3">
         <div class="input-group">
             <SfButton OnClick="Add" class="btn btn-info" Content="Add"></SfButton>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="input-group">
             <SfButton OnClick="Remove" class="btn btn-info" Content="Remove"></SfButton>
         </div>
     </div>
+    <br /><br />
     <SfGrid @ref="Grid" DataSource="@eventTimeline" AllowSelection="true">
         <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
         <GridColumns>
             <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-            <GridColumn Field=@nameof(Employee_FaceRegEventDetail.EventType) HeaderText="Event" TextAlign="TextAlign.Left" Width="60"></GridColumn>
-            <GridColumn Field=@nameof(Employee_FaceRegEventDetail.EventTime) HeaderText="Time" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+            <GridColumn Field=@nameof(Employee_FaceRegEvent.EventType) HeaderText="Event" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+            <GridColumn Field=@nameof(Employee_FaceRegEvent.EventTime) HeaderText="Time" TextAlign="TextAlign.Left" Width="120"></GridColumn>
         </GridColumns>
     </SfGrid>
 </div>
@@ -70,10 +83,11 @@
     };
 
 
-    private SfGrid<Employee_FaceRegEventDetail> Grid;
+    private SfGrid<Employee_FaceRegEvent> Grid;
 
     private List<Employee> employees = new List<Employee>();
     string _eventType = string.Empty;
+    string _employeeId = string.Empty;
 
     bool IsAdded;
     public string[] EnumValues = Enum.GetNames(typeof(Values));
@@ -91,11 +105,12 @@
 
     DateTime _eventTime = new DateTime();
 
-    List<Employee_FaceRegEventDetail> eventTimeline = new List<Employee_FaceRegEventDetail>();
+    List<Employee_FaceRegEvent> eventTimeline = new List<Employee_FaceRegEvent>();
 
     protected override async Task OnInitializedAsync()
     {
         employees = await EmployeeService.GetAllEmployeesAsync(ModuleState.ModuleId);
+        _employeeId = employees.FirstOrDefault().EmployeeId.ToString();
     }
 
     private void Add()
@@ -103,26 +118,49 @@
         Employee_FaceRegEventDetail newEvent = new Employee_FaceRegEventDetail();
         newEvent.EventTime = _eventTime;
         newEvent.EventType = _eventType;
+        newEvent.EmployeeId = int.Parse(_employeeId);
 
         eventTimeline.Add(newEvent);
+        eventTimeline = eventTimeline.OrderBy(x => x.EventTime).ToList();
+
         Grid.Refresh();
     }
 
-    private void Remove()
+    private async Task Remove()
     {
         if (eventTimeline.Any())
         {
-            var selected = this.Grid.GetSelectedRowIndexes().Result.ToArray();
-            
+            var selectedRows = await this.Grid.GetSelectedRecords();
+
+            if (selectedRows != null)
+            {
+                foreach (var item in selectedRows)
+                {
+                    eventTimeline.Remove(item);
+                }
+            }
+        }
+
+        if (eventTimeline.Any())
+        {
+            eventTimeline = eventTimeline.OrderBy(x => x.EventTime).ToList();
         }
 
         Grid.Refresh();
     }
 
 
-    private void Save()
+    private async Task Save()
     {
+        if (eventTimeline.Any())
+        {
+            foreach (var item in eventTimeline)
+            {
+                await TimesheetService.AddAttendanceDataAsync(item, ModuleState.ModuleId);
+            }
+        }
 
+        AddModuleMessage("Timesheet Added", MessageType.Success);
     }
 
     private async Task Delete(int TimesheetDataId)

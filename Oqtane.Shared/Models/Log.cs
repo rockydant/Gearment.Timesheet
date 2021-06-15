@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Oqtane.Models
 {
@@ -20,5 +20,6 @@ namespace Oqtane.Models
         public string MessageTemplate { get; set; }
         public string Exception { get; set; }
         public string Properties { get; set; }
+        public string IPAdress { get; set; }
     }
 }

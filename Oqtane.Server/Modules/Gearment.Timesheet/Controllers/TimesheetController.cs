@@ -425,7 +425,6 @@ namespace Gearment.Timesheet.Controllers
                     if (inList.Any())
                     {
                         item.DailyStartTime = inList.First().EventTime.ToString("hh:mm tt");
-
                     }
                     else
                     {

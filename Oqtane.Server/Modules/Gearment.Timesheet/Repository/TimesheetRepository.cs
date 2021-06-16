@@ -187,15 +187,7 @@ namespace Gearment.Timesheet.Repository
                     employeeDetail.Note = employee.Note;
                     employeeDetail.StartDate = employee.StartDate;
                     employeeDetail.IsWarning = foundRecord.IsWarning;
-
-                    if (employeeDetail.IsWarning)
-                    {
-                        employeeDetail.ImageUrl = foundRecord.EventTime.Year + "-" + foundRecord.EventTime.ToString("MM") + "-" + foundRecord.EventTime.ToString("dd") + "/" + foundRecord.EventId + ".jpg";
-                    }
-                    else
-                    {
-                        employeeDetail.ImageUrl = string.Empty;
-                    }
+                    employeeDetail.ImageUrl = foundRecord.EventTime.Year + "-" + foundRecord.EventTime.ToString("MM") + "-" + foundRecord.EventTime.ToString("dd") + "/" + foundRecord.EventId + ".jpg";
                 }
             }
 
@@ -242,15 +234,7 @@ namespace Gearment.Timesheet.Repository
                     employeeDetail.Note = employee.Note;
                     employeeDetail.StartDate = employee.StartDate;
                     employeeDetail.IsWarning = item.IsWarning;
-
-                    if (Query.IsWarning)
-                    {
-                        employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.ToString("dd") + "/" + item.EventId + ".jpg";
-                    }
-                    else
-                    {
-                        employeeDetail.ImageUrl = string.Empty;
-                    }
+                    employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.ToString("dd") + "/" + item.EventId + ".jpg";
 
                     result.Add(employeeDetail);
                 }

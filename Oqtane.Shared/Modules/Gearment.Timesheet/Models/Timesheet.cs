@@ -116,6 +116,7 @@ namespace Gearment.Timesheet.Models
         public string Status { get; set; }
         public decimal TotalBreakHour { get; set; }
         public string Notes { get; set; }
+        public string Present { get; set; }
 
         public List<Employee_FaceRegEventDetail> EventTimeLine { get; set; }
         public string CreatedBy { get; set; }

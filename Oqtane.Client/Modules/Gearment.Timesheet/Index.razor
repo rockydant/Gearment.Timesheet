@@ -1,4 +1,5 @@
 @using Gearment.Timesheet.Services
+@using Gearment.Employee.Services
 @using Gearment.Timesheet.Models
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Calendars
@@ -6,149 +7,165 @@
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Data
 @using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.DropDowns
+@using Gearment.Department.Models
 
 @namespace Gearment.Timesheet
 @inherits ModuleBase
 @inject ITimesheetService TimesheetService
 @inject NavigationManager NavigationManager
 @inject IFolderService FolderService
-
-@if (_Timesheets == null)
-{
-    <p><em>Loading...</em></p> }
-else
-{
-    <ActionLink Action="Upload" Security="SecurityAccessLevel.Edit" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
+@inject IEmployeeService EmployeeService
+@inject IUserRoleService UserRoleService
+@*<ActionLink Action="Upload" Security="SecurityAccessLevel.Edit" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
     <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
     <ActionLink Action="Payroll" Security="SecurityAccessLevel.Edit" class="btn btn-secondary" Text="Daily Summary" />
     <ActionLink Action="Attendance" Security="SecurityAccessLevel.Edit" class="btn btn-secondary" Text="Daily Attendance" />
-    <ActionLink Action="Correct" Security="SecurityAccessLevel.Edit" class="btn btn-danger" Text="Data Correction" />
-    <br />
-    <br />
-    <div class="form-group row">
-        <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
-            <div class="input-group">
-                <SfDatePicker Width="100%" Placeholder="From Date" @bind-Value="@_fromDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+    <ActionLink Action="Correct" Security="SecurityAccessLevel.Edit" class="btn btn-danger" Text="Data Correction" />*@
+
+<div class="form-group row">
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDatePicker Width="100%" Placeholder="From Date" @bind-Value="@_fromDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div class="input-group">
+            <SfDatePicker Width="100%" Placeholder="To Date" @bind-Value="@_toDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="Filter by department" DataSource="@departmentListFilter">
+            <DropDownListEvents ValueChange="@FilterChange" TValue="string" TItem="DepartmentViewModel"></DropDownListEvents>
+            <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+</div>
+@*<div class="form-group row">
+        <label for="text" class="col-2 col-form-label">Attendance Status</label>
+        <div class="col-10">
+            <div class="input-group col-3">
+                <SfRadioButton Label="All" Name="AttendanceStatus" Value="All" @bind-Checked="@AttendanceStatus"></SfRadioButton>
+            </div>
+            <div class="input-group col-3">
+                <SfRadioButton Label="Present" Name="AttendanceStatus" Value="Present" @bind-Checked="@AttendanceStatus"></SfRadioButton>
+            </div>
+            <div class="input-group col-3">
+                <SfRadioButton Label="Absent" Name="AttendanceStatus" Value="Absent" @bind-Checked="@AttendanceStatus"></SfRadioButton>
             </div>
         </div>
-        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-            <div class="input-group">
-                <SfDatePicker Width="100%" Placeholder="To Date" @bind-Value="@_toDate" FloatLabelType="FloatLabelType.Auto"></SfDatePicker>
-            </div>
-        </div>
-
+    </div>*@
+<div class="form-group row">
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfButton OnClick="Search" class="btn btn-info" Content="Search"></SfButton>
     </div>
-    <div class="form-group row">
-        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-            <SfButton OnClick="Search" class="btn btn-info" Content="Search"></SfButton>
-        </div>
-    </div>
-    <br />
+</div>
+<br />
+<label for="checked" style="padding: 10px 10px 10px 0">Manual Check</label>
+<SfSwitch @bind-Checked="_isWarningChecked" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
+<ActionLink Action="Event" Security="SecurityAccessLevel.Edit" class="btn btn-primary" Text="Add" />
+<br />
 
-    <div class="form-group row">
-        <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
-            <SfSwitch @bind-Checked="_isWarningChecked" OffLabel="Check" OnLabel="Check" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
-        </div>
-        <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
-            <ActionLink Action="Event" Security="SecurityAccessLevel.Edit" class="btn btn-primary" Text="Add" />
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <SfGrid DataSource="@_attendance" @ref="_attendanceGrid" AllowResizing="true" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="@(new List<string>() { "ExcelExport", "CsvExport", "PdfExport", "Search" })">
-            <GridEvents OnToolbarClick="ToolbarClick" TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
-            <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
-            <GridColumns>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.EmployeeId) HeaderText="ID" TextAlign="TextAlign.Left" Width="60"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.Department) HeaderText="Department" TextAlign="TextAlign.Left" Width="60"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="80"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="80"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="80"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="80"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalBreakHour) HeaderText="Extra Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
-                <GridColumn HeaderText="Detail" TextAlign="TextAlign.Left">
-                    <Template>
-                        @{ var timesheetData = (context as TimesheetDataExcelExport);
-                            @*<button data-toggle="collapse" class="btn btn-info" data-target="#@timesheetData.Id" aria-expanded="false" aria-controls="@timesheetData.Id">View Detail</button>*@
-                            <br />
-                            <div>
-                                <div class="card card-body">
-                                    <table class="table table-striped detailtable">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">EventType</th>
-                                                <th scope="col">EventTime</th>
-                                                <th scope="col"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in timesheetData.EventTimeLine)
+<div class="form-group row">
+    <SfGrid DataSource="@_attendance" @ref="_attendanceGrid" AllowResizing="true" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="@(new List<string>() { "ExcelExport", "Search" })">
+        <GridEvents OnToolbarClick="ToolbarClick" TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
+        <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+        <GridColumns>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.EmployeeId) HeaderText="ID" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Department) HeaderText="Department" TextAlign="TextAlign.Left" Width="60"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="80"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalBreakHour) HeaderText="Extra Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Status) HeaderText="Status" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn HeaderText="Detail" TextAlign="TextAlign.Left">
+                <Template>
+                    @{ var timesheetData = (context as TimesheetDataExcelExport);
+                        @*<button data-toggle="collapse" class="btn btn-info" data-target="#@timesheetData.Id" aria-expanded="false" aria-controls="@timesheetData.Id">View Detail</button>*@
+                        <br />
+                        <div>
+                            <div class="card card-body">
+                                <table class="table table-striped detailtable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">EventType</th>
+                                            <th scope="col">EventTime</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in timesheetData.EventTimeLine)
+                                        {
+                                            if (item.IsWarning)
                                             {
-                                                if (item.IsWarning)
-                                                {
-                                                    <tr class="table-warning">
-                                                        <td>
-                                                            <SfTooltip Target="#txt" @key="@item.EventId">
-                                                                <TooltipTemplates>
-                                                                    <Content>
-                                                                        <b>EventId:</b> @item.EventId -
-                                                                        <b>Station:</b> @item.Station
-                                                                        <div class="image">
-                                                                            <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
-                                                                        </div>
-                                                                    </Content>
-                                                                </TooltipTemplates>
-                                                                <span id="txt">@item.EventType</span>
-                                                            </SfTooltip>
-                                                        </td>
-                                                        <td>@item.EventTime</td>
-                                                        <td></td>
-                                                    </tr>
-                                                }
-                                                else
-                                                {
-                                                    <tr>
-                                                        <td>
-                                                            <SfTooltip Target="#txt" @key="@item.EventId">
-                                                                <TooltipTemplates>
-                                                                    <Content>
-                                                                        <span id="txt"><b>EventId:</b> @item.EventId - <b>Station:</b> @item.Station</span>
-                                                                    </Content>
-                                                                </TooltipTemplates>
-                                                                <span id="txt">@item.EventType</span>
-                                                            </SfTooltip>
-                                                        </td>
-                                                        <td>@item.EventTime</td>
-                                                        <td>
-                                                            <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
-                                                            <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId+" record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
-                                                        </td>
-                                                    </tr>
-                                                }
+                                                <tr class="table-warning">
+                                                    <td>
+                                                        <SfTooltip Target="#txt" @key="@item.EventId">
+                                                            <TooltipTemplates>
+                                                                <Content>
+                                                                    <b>EventId:</b> @item.EventId -
+                                                                    <b>Station:</b> @item.Station
+                                                                    <div class="image">
+                                                                        <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
+                                                                    </div>
+                                                                </Content>
+                                                            </TooltipTemplates>
+                                                            <span id="txt">@item.EventType</span>
+                                                        </SfTooltip>
+                                                    </td>
+                                                    <td>@item.EventTime</td>
+                                                    <td></td>
+                                                </tr>
                                             }
-                                            <tr>
-                                                <td colspan="3">
-                                                    <ActionLink Action="Add" Text="add more..." Class="btn btn-link" Parameters="@($"id=" + timesheetData.EventTimeLine.FirstOrDefault().EventId)" />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            else
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <SfTooltip Target="#txt" @key="@item.EventId">
+                                                            <TooltipTemplates>
+                                                                <Content>
+                                                                    <span id="txt"><b>EventId:</b> @item.EventId - <b>Station:</b> @item.Station</span>
+                                                                    <div class="image">
+                                                                        <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
+                                                                    </div>
+                                                                </Content>
+                                                            </TooltipTemplates>
+                                                            <span id="txt">@item.EventType</span>
+                                                        </SfTooltip>
+                                                    </td>
+                                                    <td>@item.EventTime</td>
+                                                    <td>
+                                                        <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
+                                                        <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId+" record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        <tr>
+                                            <td colspan="3">
+                                                <ActionLink Action="Add" Text="add more..." Class="btn btn-link" Parameters="@($"id=" + timesheetData.EventTimeLine.FirstOrDefault().EventId)" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                        }
-                    </Template>
-                </GridColumn>
-            </GridColumns>
-        </SfGrid>
-    </div>
-    <br />
-    <br />
-    <SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+<br />
+<br />
+@*<SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
         <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
         <GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
         <GridColumns>
@@ -173,12 +190,7 @@ else
                 </Template>
             </GridColumn>
         </GridColumns>
-    </SfGrid>
-    <br />
-}
-
-<!-- The content below is for informational purposes only and can be safely removed -->
-
+    </SfGrid>*@
 <br />
 <br />
 <!-- The content above is for informational purposes only and can be safely removed -->
@@ -197,13 +209,17 @@ else
     private int _folderId = 2;
     private List<Object> Toolbaritems = new List<Object>() { "Search" };
     private bool _isWarningChecked = false;
-    private bool IsVisible { get; set; } = false;
+    List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
 
+
+    private string AttendanceStatus = "All";
     private bool ImportExcelDialogEnable { get; set; } = false;
     List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
 
     DateTime _fromDate = DateTime.Now;
     DateTime _toDate = DateTime.Now;
+
+    string _department = "All";
 
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
 
@@ -218,9 +234,10 @@ else
         .Where("EmployeeId", "equal", value.EmployeeId);
     }
 
-    private void OpenDialog()
+    private async Task FilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, DepartmentViewModel>
+    args)
     {
-        this.IsVisible = true;
+        _department = args.Value;
     }
 
     protected override async Task OnInitializedAsync()
@@ -233,15 +250,18 @@ else
 
         try
         {
+            departmentListFilter = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+
             TimesheetDailyQuery query = new TimesheetDailyQuery();
             query.FromDate = _fromDate;
             query.ToDate = _toDate;
             query.Department = "All";
+            query.AttendanceStatus = AttendanceStatus;
 
-            _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+            //_Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
             _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
 
-            UpdateExportData();
+            //UpdateExportData();
             HideProgressIndicator();
         }
         catch (Exception ex)
@@ -251,14 +271,16 @@ else
         }
     }
 
-    private async Task IsWarningChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+    private async Task IsWarningChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool>
+        args)
     {
         ShowProgressIndicator();
         TimesheetDailyQuery query = new TimesheetDailyQuery();
         query.FromDate = _fromDate;
         query.ToDate = _toDate;
-        query.Department = "All";
+        query.Department = _department;
         query.IsWarning = _isWarningChecked;
+        query.AttendanceStatus = AttendanceStatus;
 
         _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
         HideProgressIndicator();
@@ -273,8 +295,9 @@ else
             TimesheetDailyQuery query = new TimesheetDailyQuery();
             query.FromDate = _fromDate;
             query.ToDate = _toDate;
-            query.Department = "All";
+            query.Department = _department;
             query.IsWarning = _isWarningChecked;
+            query.AttendanceStatus = AttendanceStatus;
 
             _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, query);
             _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
@@ -322,8 +345,9 @@ else
             TimesheetDailyQuery query = new TimesheetDailyQuery();
             query.FromDate = _fromDate;
             query.ToDate = _toDate;
-            query.Department = "All";
+            query.Department = _department;
             query.IsWarning = _isWarningChecked;
+            query.AttendanceStatus = AttendanceStatus;
 
             await TimesheetService.DeleteAttendanceDataAsync(EventId, ModuleState.ModuleId);
             await logger.LogInformation("Event Deleted {Timesheet}", EventId);
@@ -339,19 +363,16 @@ else
         }
     }
 
-
     public void ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
     {
-        if (args.Item.Id.Contains("pdfexport"))
-        {
-            this._attendanceGrid.PdfExport();
-        }
-        if (args.Item.Id.Contains("excelexport"))
+        var roleList = PageState.User.Roles.Split(';');
+        if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x== "Accountant") && _attendance != null))
         {
             ExcelExportProperties ExcelProperties = new ExcelExportProperties();
             ExcelProperties.DataSource = _attendance;
 
-            var columns = new List<GridColumn>();
+            var columns = new List<GridColumn>
+                ();
 
             columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
             columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
@@ -371,11 +392,7 @@ else
 
             ExcelProperties.Columns = columns;
             ExcelProperties.FileName = "DetailReport.xlsx";
-            this.Grid.ExcelExport(ExcelProperties);
-        }
-        if (args.Item.Id.Contains("csvexport"))
-        {
-            this._attendanceGrid.CsvExport();
+            this._attendanceGrid.ExcelExport(ExcelProperties);
         }
     }
 
@@ -386,7 +403,8 @@ else
         ExcelExportProperties ExcelProperties = new ExcelExportProperties();
         ExcelProperties.DataSource = exportData;
 
-        var columns = new List<GridColumn>();
+        var columns = new List<GridColumn>
+            ();
 
         columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
         columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
@@ -410,9 +428,10 @@ else
         await this.Grid.ExcelExport(ExcelProperties);
     }
 
-    public void RowBound(RowDataBoundEventArgs<TimesheetDataExcelExport> args)
+    public void RowBound(RowDataBoundEventArgs<TimesheetDataExcelExport>
+        args)
     {
-        if (args.Data.TotalWorkingHour > 8)
+        if (args.Data.TotalWorkingHour > 8 || args.Data.Status == "Late" || args.Data.Status == "Early")
         {
             args.Row.AddClass(new string[] { "table-warning" });
         }

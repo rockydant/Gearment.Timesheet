@@ -359,9 +359,15 @@ namespace Gearment.Timesheet.Controllers
         [HttpPost("attendance")]
         public List<Models.TimesheetDataExcelExport> GetAttendanceData([FromBody] TimesheetDailyQuery Query)
         {
-            var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(Query);            
+            var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(Query);
+
+            if (Query.Department != "All")
+            {
+                data = data.Where(x => x.Department == Query.Department).ToList();
+            }
 
             List<TimesheetDataExcelExport> summary = new List<TimesheetDataExcelExport>();
+
             foreach (var item in data)
             {
                 var foundItem = summary.FirstOrDefault(x => x.EmployeeId == item.EmployeeId && DateTime.Parse(x.Date) == item.EventTime.Date);
@@ -514,6 +520,36 @@ namespace Gearment.Timesheet.Controllers
                     }
                 }
             }
+
+            if (Query.AttendanceStatus == "All")
+            {
+                foreach (var item in summary)
+                {
+                    if (!item.DailyStartTime.Contains("N/A"))
+                    {
+                        var currentHour = DateTime.Parse(item.DailyStartTime).Hour;
+                        var currentMinute = DateTime.Parse(item.DailyStartTime).Minute;
+                        if (currentMinute <= 30 && currentMinute >= 15)
+                        {
+                            item.Status = "Late";
+                        }
+                        else if (currentMinute > 30 && currentMinute <= 45)
+                        {
+                            item.Status = "Early";
+                        }
+                        else
+                        {
+                            item.Status = "On-time";
+                        }
+                    }
+                    else
+                    {
+                        item.Status = "N/A";
+                    }
+                    
+                }
+            }
+            
 
             return summary;
         }

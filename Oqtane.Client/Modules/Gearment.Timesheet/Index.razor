@@ -9,6 +9,7 @@
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.DropDowns
 @using Gearment.Department.Models
+@using Syncfusion.Blazor.Navigations
 
 @namespace Gearment.Timesheet
 @inherits ModuleBase
@@ -69,7 +70,7 @@
 <br />
 
 <div class="form-group row">
-    <SfGrid DataSource="@_attendance" @ref="_attendanceGrid" AllowResizing="true" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="@(new List<string>() { "ExcelExport", "Search" })">
+    <SfGrid DataSource="@_attendance" @ref="_attendanceGrid" AllowResizing="true" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="ToolbarItems">
         <GridEvents OnToolbarClick="ToolbarClick" TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
         <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
         <GridColumns>
@@ -143,7 +144,7 @@
                                                     <td>@item.EventTime</td>
                                                     <td>
                                                         <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
-                                                        <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId+" record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
+                                                        <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId + " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
                                                     </td>
                                                 </tr>
                                             }
@@ -216,10 +217,12 @@
     private bool ImportExcelDialogEnable { get; set; } = false;
     List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
 
-    DateTime _fromDate = DateTime.Now;
+    DateTime _fromDate = DateTime.Now.AddDays(-1);
     DateTime _toDate = DateTime.Now;
 
     string _department = "All";
+
+    private List<Object> ToolbarItems = new List<Object>() { "Search", new ItemModel() { Text = "Payroll Report", TooltipText = "Payroll Report", PrefixIcon = "Excel_Export" }, new ItemModel() { Text = "Late Report", TooltipText = "Late Report", PrefixIcon = "e-chart" } };
 
     public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
 
@@ -243,6 +246,7 @@
     protected override async Task OnInitializedAsync()
     {
         ShowProgressIndicator();
+        
         if (PageState.QueryString.ContainsKey("id"))
         {
             _folderId = int.Parse(PageState.QueryString["id"]);
@@ -250,7 +254,8 @@
 
         try
         {
-            departmentListFilter = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+            var listDepartment = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+            departmentListFilter.AddRange(listDepartment);
 
             TimesheetDailyQuery query = new TimesheetDailyQuery();
             query.FromDate = _fromDate;
@@ -365,34 +370,68 @@
 
     public void ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
     {
-        var roleList = PageState.User.Roles.Split(';');
-        if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x== "Accountant") && _attendance != null))
+        if (args.Item.Text == "Payroll Report")
         {
-            ExcelExportProperties ExcelProperties = new ExcelExportProperties();
-            ExcelProperties.DataSource = _attendance;
+            var roleList = PageState.User.Roles.Split(';');
+            if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x == "Accountant") && _attendance != null))
+            {
+                ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+                ExcelProperties.DataSource = _attendance;
 
-            var columns = new List<GridColumn>
-                ();
+                var columns = new List<GridColumn>
+                    ();
 
-            columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
 
 
-            ExcelProperties.Columns = columns;
-            ExcelProperties.FileName = "DetailReport.xlsx";
-            this._attendanceGrid.ExcelExport(ExcelProperties);
+                ExcelProperties.Columns = columns;
+                ExcelProperties.FileName = "DetailReport.xlsx";
+                this._attendanceGrid.ExcelExport(ExcelProperties);
+            }
+        }
+        else if (args.Item.Text == "Late Report")
+        {
+            var roleList = PageState.User.Roles.Split(';');
+            if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x == "Accountant") && _attendance != null))
+            {
+                ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+                ExcelProperties.DataSource = _attendance;
+
+                var columns = new List<GridColumn>
+                    ();
+
+                columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Status", Width = "120px" });
+
+
+                ExcelProperties.Columns = columns;
+                ExcelProperties.FileName = "LateReport.xlsx";
+                this._attendanceGrid.ExcelExport(ExcelProperties);
+            }
         }
     }
 

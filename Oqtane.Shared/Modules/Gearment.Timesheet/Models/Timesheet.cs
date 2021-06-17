@@ -42,6 +42,12 @@ namespace Gearment.Timesheet.Models
         public bool IsWarning { get; set; }
     }
 
+    public class API_FaceMatch
+    {
+        public string EmployeeId { get; set; }
+        public float Similarity { get; set; }
+    }
+
     public class Employee_FaceRegEventDetail : Employee_FaceRegEvent
     {
         public string Name { get; set; }

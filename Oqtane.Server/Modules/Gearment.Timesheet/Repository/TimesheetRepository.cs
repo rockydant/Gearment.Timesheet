@@ -242,5 +242,10 @@ namespace Gearment.Timesheet.Repository
 
             return result;
         }
+
+        public Models.GearmentEmployee_FaceReg GetEmployee_FaceReg(int employeeId)
+        {
+            return _db.Employee_FaceReg.Find(employeeId);
+        }
     }
 }

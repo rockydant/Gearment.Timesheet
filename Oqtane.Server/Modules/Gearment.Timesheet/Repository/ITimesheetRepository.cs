@@ -21,6 +21,7 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet);
 
         Models.Employee_FaceRegEventDetail GetEmployee_FaceRegEvent(int EventId);
+        Models.GearmentEmployee_FaceReg GetEmployee_FaceReg(int employeeId);
         List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query);
 
         Models.Employee_FaceRegEventDetail UpdateEvent(Models.Employee_FaceRegEventDetail Timesheet);

@@ -67,6 +67,11 @@ namespace Gearment.Timesheet.Services
             return await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetDataExcelExport>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/", ModuleId), TimesheetDailyQuery);                     
         }
 
+        public async Task<List<Models.Employee_FaceRegEventDetail>> GetEmployeeByEvenIdAsync(int ModuleId, int eventId)
+        {
+            return await GetJsonAsync<List<Models.Employee_FaceRegEventDetail>>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/event/{eventId}", ModuleId));            
+        }
+
         public async Task<List<Models.TimesheetData>> GetTimesheetDataByDateAsync(int ModuleId, TimesheetDailyQuery Query)
         {
             List<Models.TimesheetData> Timesheets = await PostJsonAsync<TimesheetDailyQuery, List<Models.TimesheetData>>(CreateAuthorizationPolicyUrl($"{Apiurl}/data", ModuleId), Query);

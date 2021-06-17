@@ -17,6 +17,10 @@ using System.Linq;
 using Gearment.Employee.Repository;
 using Gearment.Department.Repository;
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using RestWrapper;
+using System.Threading.Tasks;
 
 namespace Gearment.Timesheet.Controllers
 {
@@ -355,6 +359,37 @@ namespace Gearment.Timesheet.Controllers
             }
         }
 
+        [HttpGet("attendance/event/{eventId}")]
+        public async Task<List<Models.Employee_FaceRegEventDetail>> GetEmployeeByEvenIdAsync(int eventId)
+        {
+            List<Models.Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
+
+            RestRequest apiConsume = new RestRequest("https://attendance.geatech.net/api/face/event/" + eventId, RestWrapper.HttpMethod.GET);
+            RestResponse apiResponse = await apiConsume.SendAsync();
+            if (apiResponse.StatusCode == 200)
+            {
+                List<API_FaceMatch> foundDataList = apiResponse.DataFromJson<List<API_FaceMatch>>();
+                if (foundDataList.Any())
+                {
+                    foundDataList = foundDataList.GroupBy(x => x.EmployeeId).Select(y => y.FirstOrDefault()).ToList();
+                    foreach (var item in foundDataList)
+                    {
+                        Employee_FaceRegEventDetail employeeDetail = new Employee_FaceRegEventDetail();
+
+                        var employeFaceReg = _TimesheetRepository.GetEmployee_FaceReg(int.Parse(item.EmployeeId));
+                        var info = _employeeRepository.GetEmployee(int.Parse(item.EmployeeId));
+                        employeeDetail.EmployeeId = employeFaceReg.EmployeeId;
+                        employeeDetail.Department = info.Department;
+                        employeeDetail.PhotoJpg = employeFaceReg.FacePhoto1;
+                        employeeDetail.Name = info.Name;
+
+                        result.Add(employeeDetail);
+                    }
+                }
+            }
+
+            return result;
+        }
 
         [HttpPost("attendance")]
         public List<Models.TimesheetDataExcelExport> GetAttendanceData([FromBody] TimesheetDailyQuery Query)
@@ -546,10 +581,10 @@ namespace Gearment.Timesheet.Controllers
                     {
                         item.Status = "N/A";
                     }
-                    
+
                 }
             }
-            
+
 
             return summary;
         }

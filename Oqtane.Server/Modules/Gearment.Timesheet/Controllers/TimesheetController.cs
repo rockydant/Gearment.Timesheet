@@ -437,13 +437,24 @@ namespace Gearment.Timesheet.Controllers
                     {
                         var checkpointList = new List<Employee_FaceRegEventDetail>();
 
-                        while (item.EventTimeLine.FirstOrDefault().EventType != "In")
+                        if (item.EventTimeLine.Any())
                         {
-                            checkpointList.Add(item.EventTimeLine.First());
-                            item.EventTimeLine.Remove(item.EventTimeLine.First());
+                            foreach (var checkpoint in item.EventTimeLine)
+                            {
+                                if (checkpoint.EventType != "In")
+                                {
+                                    checkpointList.Add(checkpoint);
+                                }
+                            }
                         }
+
                         if (checkpointList.Any())
                         {
+                            foreach (var checkpoint in checkpointList)
+                            {
+                                item.EventTimeLine.Remove(checkpoint);
+                            }
+
                             var foundRecord = summary.Where(x => x.EmployeeId == item.EmployeeId && DateTime.Parse(x.Date) == checkpointList.First().EventTime.Date.AddDays(-1)).OrderBy(x => DateTime.Parse(x.Date)).FirstOrDefault();
                             if (foundRecord != null)
                             {

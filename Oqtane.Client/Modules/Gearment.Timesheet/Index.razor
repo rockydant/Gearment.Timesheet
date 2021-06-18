@@ -102,61 +102,65 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var item in timesheetData.EventTimeLine)
+                                        @if (timesheetData.EventTimeLine.Any())
                                         {
-                                            if (item.IsWarning)
+                                            @foreach (var item in timesheetData.EventTimeLine)
                                             {
-                                                <tr class="table-warning">
-                                                    <td>
-                                                        <SfTooltip Target="#txt" @key="@item.EventId">
-                                                            <TooltipTemplates>
-                                                                <Content>
-                                                                    <b>EventId:</b> @item.EventId -
-                                                                    <b>Station:</b> @item.Station
-                                                                    <div class="image">
-                                                                        <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
-                                                                    </div>
-                                                                </Content>
-                                                            </TooltipTemplates>
-                                                            <span id="txt">@item.EventType</span>
-                                                        </SfTooltip>
-                                                    </td>
-                                                    <td>
-                                                        @item.EventTime
-                                                    </td>
-                                                    <td></td>
-                                                </tr>
+                                                if (item.IsWarning)
+                                                {
+                                                    <tr class="table-warning">
+                                                        <td>
+                                                            <SfTooltip Target="#txt" @key="@item.EventId">
+                                                                <TooltipTemplates>
+                                                                    <Content>
+                                                                        <b>EventId:</b> @item.EventId -
+                                                                        <b>Station:</b> @item.Station
+                                                                        <div class="image">
+                                                                            <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
+                                                                        </div>
+                                                                    </Content>
+                                                                </TooltipTemplates>
+                                                                <span id="txt">@item.EventType</span>
+                                                            </SfTooltip>
+                                                        </td>
+                                                        <td>
+                                                            @item.EventTime
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <SfTooltip Target="#txt" @key="@item.EventId">
+                                                                <TooltipTemplates>
+                                                                    <Content>
+                                                                        <span id="txt"><b>EventId:</b> @item.EventId - <b>Station:</b> @item.Station</span>
+                                                                        <div class="image">
+                                                                            <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
+                                                                        </div>
+                                                                    </Content>
+                                                                </TooltipTemplates>
+                                                                <span id="txt">@item.EventType</span>
+                                                            </SfTooltip>
+                                                        </td>
+                                                        <td>@item.EventTime</td>
+                                                        <td>
+                                                            <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
+                                                            <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId + " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
+                                                            <SfButton OnClick="@(e => LoadProfile(item.EventId))" CssClass="btn btn-link" Content="Wrong Person?"></SfButton>
+                                                        </td>
+                                                    </tr>
+                                                }
                                             }
-                                            else
-                                            {
-                                                <tr>
-                                                    <td>
-                                                        <SfTooltip Target="#txt" @key="@item.EventId">
-                                                            <TooltipTemplates>
-                                                                <Content>
-                                                                    <span id="txt"><b>EventId:</b> @item.EventId - <b>Station:</b> @item.Station</span>
-                                                                    <div class="image">
-                                                                        <img class="rounded img-thumbnail" src="@(imagePrefix + item.ImageUrl)" alt="@item.EventId" />
-                                                                    </div>
-                                                                </Content>
-                                                            </TooltipTemplates>
-                                                            <span id="txt">@item.EventType</span>
-                                                        </SfTooltip>
-                                                    </td>
-                                                    <td>@item.EventTime</td>
-                                                    <td>
-                                                        <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
-                                                        <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId + " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
-                                                        <SfButton OnClick="@(e => LoadProfile(item.EventId))" CssClass="btn btn-link" Content="Wrong Person?"></SfButton>
-                                                    </td>
-                                                </tr>
-                                            }
+                                            <tr>
+                                                <td colspan="3">
+                                                    <ActionLink Action="Add" Text="add more..." Class="btn btn-link" Parameters="@($"id=" + timesheetData.EventTimeLine.FirstOrDefault().EventId)" />
+                                                </td>
+                                            </tr>
                                         }
-                                        <tr>
-                                            <td colspan="3">
-                                                <ActionLink Action="Add" Text="add more..." Class="btn btn-link" Parameters="@($"id=" + timesheetData.EventTimeLine.FirstOrDefault().EventId)" />
-                                            </td>
-                                        </tr>
+
                                     </tbody>
                                 </table>
                             </div>
@@ -198,139 +202,156 @@
         </SfDialog>
     </div>
 </div>
-    
 
-    @*<SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
-            <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
-            <GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
-            <GridColumns>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.Department) HeaderText="Department" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" Type="ColumnType.Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetData.TotalBreakHour) HeaderText="Extra Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-                        @{ var timesheetData = (context as TimesheetDataExcelExport);
-                            <td><ActionLink Action="Edit" Parameters="@($"id=" + timesheetData.TimesheetDataId.ToString())" /></td>
-                            <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + timesheetData.Name+" record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(timesheetData.TimesheetDataId))" /></td>
-                        }
-                    </Template>
-                </GridColumn>
-            </GridColumns>
-        </SfGrid>*@
-    <br />
-    <br />
-    <!-- The content above is for informational purposes only and can be safely removed -->
 
-    @code { public override List<Resource> Resources => new List<Resource>()
+@*<SfGrid DataSource="@exportData" @ref="Grid" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true" AllowSorting="true" Toolbar="Toolbaritems">
+        <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+        <GridEvents TValue="TimesheetDataExcelExport" RowDataBound="RowBound"></GridEvents>
+        <GridColumns>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.PayrollID) HeaderText="Payroll ID" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Department) HeaderText="Department" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.DayOfWeek) HeaderText="Date Of Week" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.Date) HeaderText="Date" Type="ColumnType.Date" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyStartTime) HeaderText="Start Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.DailyEndTime) HeaderText="End Time" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakStartTime) HeaderText="Break Start" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetDataExcelExport.BreakEndTime) HeaderText="Break End" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetData.TotalRestHour) HeaderText="Lunch Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetData.TotalBreakHour) HeaderText="Extra Break" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(TimesheetData.TotalWorkingHour) HeaderText="Working Hours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+            <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                <Template>
+                    @{ var timesheetData = (context as TimesheetDataExcelExport);
+                        <td><ActionLink Action="Edit" Parameters="@($"id=" + timesheetData.TimesheetDataId.ToString())" /></td>
+                        <td><ActionDialog Header="Delete Employee" Message="@("Are You Sure You Wish To Delete The " + timesheetData.Name+" record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(timesheetData.TimesheetDataId))" /></td>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>*@
+<br />
+<br />
+<!-- The content above is for informational purposes only and can be safely removed -->
+
+@code { public override List<Resource> Resources => new List<Resource>()
 {
         new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
         new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
     };
 
-        private SfGrid<TimesheetDataExcelExport> Grid;
-        private SfGrid<TimesheetDataExcelExport> _attendanceGrid;
-        private string imagePrefix = "https://attendance.geatech.net/log-images/";
-        List<TimesheetData> _Timesheets;
-        List<TimesheetDataExcelExport> _attendance;
-        List<Employee_FaceRegEventDetail> _wrongList = new List<Employee_FaceRegEventDetail>();
-        private int _folderId = 2;
-        private List<Object> Toolbaritems = new List<Object>() { "Search" };
-        private bool _isWarningChecked = false;
-        List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
-        private bool IsVisible { get; set; } = false;
+    private SfGrid<TimesheetDataExcelExport> Grid;
+    private SfGrid<TimesheetDataExcelExport> _attendanceGrid;
+    private string imagePrefix = "https://attendance.geatech.net/log-images/";
+    List<TimesheetData> _Timesheets;
+    List<TimesheetDataExcelExport> _attendance;
+    List<Employee_FaceRegEventDetail> _wrongList = new List<Employee_FaceRegEventDetail>();
+    private int _folderId = 2;
+    private List<Object> Toolbaritems = new List<Object>() { "Search" };
+    private bool _isWarningChecked = false;
+    List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
+    private bool IsVisible { get; set; } = false;
 
-        private string AttendanceStatus = "All";
-        private bool ImportExcelDialogEnable { get; set; } = false;
-        List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
+    private string AttendanceStatus = "All";
+    private bool ImportExcelDialogEnable { get; set; } = false;
+    List<TimesheetDataExcelExport> exportData = new List<TimesheetDataExcelExport>();
 
-        DateTime _fromDate = DateTime.Now.AddDays(-1);
-        DateTime _toDate = DateTime.Now;
+    DateTime _fromDate = DateTime.Now.AddDays(-1);
+    DateTime _toDate = DateTime.Now;
 
-        string _department = "All";
+    string _department = "All";
 
-        private List<Object> ToolbarItems = new List<Object>() { "Search", new ItemModel() { Text = "Payroll Report", TooltipText = "Payroll Report", PrefixIcon = "Excel_Export" }, new ItemModel() { Text = "Late Report", TooltipText = "Late Report", PrefixIcon = "e-chart" } };
+    private List<Object> ToolbarItems = new List<Object>() { "Search", new ItemModel() { Text = "Payroll Report", TooltipText = "Payroll Report", PrefixIcon = "Excel_Export" }, new ItemModel() { Text = "Late Report", TooltipText = "Late Report", PrefixIcon = "e-chart" } };
 
-        public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Admin;
 
-        public Query GetEmployeesQuery(Employee_FaceRegEventDetail value)
+    public Query GetEmployeesQuery(Employee_FaceRegEventDetail value)
+    {
+        return new Query().Where("EmployeeId", "equal", value.EmployeeId);
+    }
+
+    public Query GetDateQuery(Employee_FaceRegEventSummary value)
+    {
+        return new Query()
+        .Where("EmployeeId", "equal", value.EmployeeId);
+    }
+
+    private async Task FilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, DepartmentViewModel>
+    args)
+    {
+        _department = args.Value;
+    }
+
+    private void CloseDialog()
+    {
+        this.IsVisible = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ShowProgressIndicator();
+
+        if (PageState.QueryString.ContainsKey("id"))
         {
-            return new Query().Where("EmployeeId", "equal", value.EmployeeId);
+            _folderId = int.Parse(PageState.QueryString["id"]);
         }
 
-        public Query GetDateQuery(Employee_FaceRegEventSummary value)
+        try
         {
-            return new Query()
-            .Where("EmployeeId", "equal", value.EmployeeId);
+            var listDepartment = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+            departmentListFilter.AddRange(listDepartment);
+
+            TimesheetDailyQuery query = new TimesheetDailyQuery();
+            query.FromDate = _fromDate;
+            query.ToDate = _toDate;
+            query.Department = "All";
+            query.AttendanceStatus = AttendanceStatus;
+
+            //_Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+            _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+
+            //UpdateExportData();
+            HideProgressIndicator();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Timesheet {Error}", ex.Message);
+            AddModuleMessage("Error Loading Timesheet", MessageType.Error);
+        }
+    }
+
+    private async Task LoadProfile(int eventId)
+    {
+        _wrongList = await TimesheetService.GetEmployeeByEvenIdAsync(ModuleState.ModuleId, eventId);
+
+        if (_wrongList.Any())
+        {
+            this.IsVisible = true;
         }
 
-        private async Task FilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, DepartmentViewModel>
+    }
+
+    private async Task IsWarningChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool>
         args)
+    {
+        ShowProgressIndicator();
+        TimesheetDailyQuery query = new TimesheetDailyQuery();
+        query.FromDate = _fromDate;
+        query.ToDate = _toDate;
+        query.Department = _department;
+        query.IsWarning = _isWarningChecked;
+        query.AttendanceStatus = AttendanceStatus;
+
+        _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+        HideProgressIndicator();
+    }
+
+    private async Task Search()
+    {
+        ShowProgressIndicator();
+
+        try
         {
-            _department = args.Value;
-        }
-
-        private void CloseDialog()
-        {
-            this.IsVisible = false;
-        }
-
-        protected override async Task OnInitializedAsync()
-        {
-            ShowProgressIndicator();
-
-            if (PageState.QueryString.ContainsKey("id"))
-            {
-                _folderId = int.Parse(PageState.QueryString["id"]);
-            }
-
-            try
-            {
-                var listDepartment = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
-                departmentListFilter.AddRange(listDepartment);
-
-                TimesheetDailyQuery query = new TimesheetDailyQuery();
-                query.FromDate = _fromDate;
-                query.ToDate = _toDate;
-                query.Department = "All";
-                query.AttendanceStatus = AttendanceStatus;
-
-                //_Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
-                _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
-
-                //UpdateExportData();
-                HideProgressIndicator();
-            }
-            catch (Exception ex)
-            {
-                await logger.LogError(ex, "Error Loading Timesheet {Error}", ex.Message);
-                AddModuleMessage("Error Loading Timesheet", MessageType.Error);
-            }
-        }
-
-        private async Task LoadProfile(int eventId)
-        {
-            _wrongList = await TimesheetService.GetEmployeeByEvenIdAsync(ModuleState.ModuleId, eventId);
-
-            if (_wrongList.Any())
-            {
-                this.IsVisible = true;
-            }
-
-        }
-
-        private async Task IsWarningChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool>
-            args)
-        {
-            ShowProgressIndicator();
             TimesheetDailyQuery query = new TimesheetDailyQuery();
             query.FromDate = _fromDate;
             query.ToDate = _toDate;
@@ -338,230 +359,213 @@
             query.IsWarning = _isWarningChecked;
             query.AttendanceStatus = AttendanceStatus;
 
+            _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, query);
             _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
-            HideProgressIndicator();
+
+            if (!_Timesheets.Any())
+            {
+                HideProgressIndicator();
+                return;
+            }
+
+            UpdateExportData();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Timesheet {Error}", ex.Message);
+            AddModuleMessage("Error Loading Timesheet", MessageType.Error);
         }
 
-        private async Task Search()
+        HideProgressIndicator();
+    }
+
+    private async Task Delete(int TimesheetDataId)
+    {
+        try
+        {
+            await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
+            await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
+            _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+
+            UpdateExportData();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
+            AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+        }
+    }
+
+    private async Task DeleteEvent(int EventId)
+    {
+        try
         {
             ShowProgressIndicator();
 
-            try
-            {
-                TimesheetDailyQuery query = new TimesheetDailyQuery();
-                query.FromDate = _fromDate;
-                query.ToDate = _toDate;
-                query.Department = _department;
-                query.IsWarning = _isWarningChecked;
-                query.AttendanceStatus = AttendanceStatus;
+            TimesheetDailyQuery query = new TimesheetDailyQuery();
+            query.FromDate = _fromDate;
+            query.ToDate = _toDate;
+            query.Department = _department;
+            query.IsWarning = _isWarningChecked;
+            query.AttendanceStatus = AttendanceStatus;
 
-                _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, query);
-                _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
-
-                if (!_Timesheets.Any())
-                {
-                    HideProgressIndicator();
-                    return;
-                }
-
-                UpdateExportData();
-            }
-            catch (Exception ex)
-            {
-                await logger.LogError(ex, "Error Loading Timesheet {Error}", ex.Message);
-                AddModuleMessage("Error Loading Timesheet", MessageType.Error);
-            }
+            await TimesheetService.DeleteAttendanceDataAsync(EventId, ModuleState.ModuleId);
+            await logger.LogInformation("Event Deleted {Timesheet}", EventId);
+            _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+            _attendanceGrid.Refresh();
 
             HideProgressIndicator();
         }
-
-        private async Task Delete(int TimesheetDataId)
+        catch (Exception ex)
         {
-            try
-            {
-                await TimesheetService.DeleteTimesheetAsync(TimesheetDataId, ModuleState.ModuleId);
-                await logger.LogInformation("Timesheet Deleted {Timesheet}", TimesheetDataId);
-                _Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
+            await logger.LogError(ex, "Error Deleting Attendance Event {Timesheet} {Error}", EventId, ex.Message);
+            AddModuleMessage("Error Deleting Attendance Event", MessageType.Error);
+        }
+    }
 
-                UpdateExportData();
-            }
-            catch (Exception ex)
+    public void ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Text == "Payroll Report")
+        {
+            var roleList = PageState.User.Roles.Split(';');
+            if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x == "Accountant") && _attendance != null))
             {
-                await logger.LogError(ex, "Error Deleting Timesheet {Timesheet} {Error}", TimesheetDataId, ex.Message);
-                AddModuleMessage("Error Deleting Timesheet", MessageType.Error);
+                ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+                ExcelProperties.DataSource = _attendance;
+
+                var columns = new List<GridColumn>
+                    ();
+
+                columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+
+
+                ExcelProperties.Columns = columns;
+                ExcelProperties.FileName = "DetailReport.xlsx";
+                this._attendanceGrid.ExcelExport(ExcelProperties);
             }
         }
-
-        private async Task DeleteEvent(int EventId)
+        else if (args.Item.Text == "Late Report")
         {
-            try
+            var roleList = PageState.User.Roles.Split(';');
+            if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x == "Accountant") && _attendance != null))
             {
-                ShowProgressIndicator();
+                ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+                ExcelProperties.DataSource = _attendance;
 
-                TimesheetDailyQuery query = new TimesheetDailyQuery();
-                query.FromDate = _fromDate;
-                query.ToDate = _toDate;
-                query.Department = _department;
-                query.IsWarning = _isWarningChecked;
-                query.AttendanceStatus = AttendanceStatus;
+                var columns = new List<GridColumn>
+                    ();
 
-                await TimesheetService.DeleteAttendanceDataAsync(EventId, ModuleState.ModuleId);
-                await logger.LogInformation("Event Deleted {Timesheet}", EventId);
-                _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
-                _attendanceGrid.Refresh();
-
-                HideProgressIndicator();
-            }
-            catch (Exception ex)
-            {
-                await logger.LogError(ex, "Error Deleting Attendance Event {Timesheet} {Error}", EventId, ex.Message);
-                AddModuleMessage("Error Deleting Attendance Event", MessageType.Error);
-            }
-        }
-
-        public void ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
-        {
-            if (args.Item.Text == "Payroll Report")
-            {
-                var roleList = PageState.User.Roles.Split(';');
-                if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x == "Accountant") && _attendance != null))
-                {
-                    ExcelExportProperties ExcelProperties = new ExcelExportProperties();
-                    ExcelProperties.DataSource = _attendance;
-
-                    var columns = new List<GridColumn>
-                        ();
-
-                    columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+                columns.Add(new GridColumn() { Field = "Status", Width = "120px" });
 
 
-                    ExcelProperties.Columns = columns;
-                    ExcelProperties.FileName = "DetailReport.xlsx";
-                    this._attendanceGrid.ExcelExport(ExcelProperties);
-                }
-            }
-            else if (args.Item.Text == "Late Report")
-            {
-                var roleList = PageState.User.Roles.Split(';');
-                if (roleList.Any(x => (x == "Manager" || x == "Administrators" || x == "Accountant") && _attendance != null))
-                {
-                    ExcelExportProperties ExcelProperties = new ExcelExportProperties();
-                    ExcelProperties.DataSource = _attendance;
-
-                    var columns = new List<GridColumn>
-                        ();
-
-                    columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
-                    columns.Add(new GridColumn() { Field = "Status", Width = "120px" });
-
-
-                    ExcelProperties.Columns = columns;
-                    ExcelProperties.FileName = "LateReport.xlsx";
-                    this._attendanceGrid.ExcelExport(ExcelProperties);
-                }
-            }
-        }
-
-        public async Task ExcelExport()
-        {
-            UpdateExportData();
-
-            ExcelExportProperties ExcelProperties = new ExcelExportProperties();
-            ExcelProperties.DataSource = exportData;
-
-            var columns = new List<GridColumn>
-                ();
-
-            columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
-            columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
-
-
-            ExcelProperties.Columns = columns;
-            ExcelProperties.FileName = "DetailReport.xlsx";
-
-            await this.Grid.ExcelExport(ExcelProperties);
-        }
-
-        public void RowBound(RowDataBoundEventArgs<TimesheetDataExcelExport>
-            args)
-        {
-            if (args.Data.TotalWorkingHour > 8 || args.Data.Status == "Late" || args.Data.Status == "Early")
-            {
-                args.Row.AddClass(new string[] { "table-warning" });
-            }
-
-            if (args.Data.TotalWorkingHour < 0 || args.Data.TotalRestHour < 0)
-            {
-                args.Row.AddClass(new string[] { "table-danger" });
-            }
-        }
-
-        private void UpdateExportData()
-        {
-            exportData.Clear();
-
-            foreach (var item in _Timesheets)
-            {
-                TimesheetDataExcelExport row = new TimesheetDataExcelExport();
-                row.Name = item.FirstName + " " + item.LastName;
-                row.TimesheetDataId = item.TimesheetDataId;
-                row.PayrollID = item.PayrollID;
-                row.Department = item.Department;
-                row.DayOfWeek = item.DayOfWeek;
-                row.Date = item.Date;
-                row.Rate = item.Rate;
-                row.DailyStartTime = item.DailyStartTime.ToString("hh:mm tt");
-                row.DailyEndTime = item.DailyEndTime.ToString("hh:mm tt");
-                row.BreakStartTime = item.BreakStartTime.ToString("hh:mm tt");
-                row.BreakEndTime = item.BreakEndTime.ToString("hh:mm tt");
-                row.TotalRestHour = item.TotalRestHour;
-                row.TotalWorkingHour = item.TotalWorkingHour;
-                row.TotalPay = item.Rate * item.TotalWorkingHour;
-                row.TotalBreakHour = item.TotalBreakHour;
-                row.Notes = item.Notes;
-
-                exportData.Add(row);
-            }
-
-            if (Grid != null)
-            {
-                Grid.Refresh();
+                ExcelProperties.Columns = columns;
+                ExcelProperties.FileName = "LateReport.xlsx";
+                this._attendanceGrid.ExcelExport(ExcelProperties);
             }
         }
     }
+
+    public async Task ExcelExport()
+    {
+        UpdateExportData();
+
+        ExcelExportProperties ExcelProperties = new ExcelExportProperties();
+        ExcelProperties.DataSource = exportData;
+
+        var columns = new List<GridColumn>
+            ();
+
+        columns.Add(new GridColumn() { Field = "Name", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "PayrollID", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "Department", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "DayOfWeek", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "Date", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "DailyStartTime", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "DailyEndTime", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "BreakStartTime", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "BreakEndTime", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "TotalRestHour", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "TotalWorkingHour", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "TotalBreakHour", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "Rate", Width = "120px" });
+        columns.Add(new GridColumn() { Field = "TotalPay", Width = "120px" });
+
+
+        ExcelProperties.Columns = columns;
+        ExcelProperties.FileName = "DetailReport.xlsx";
+
+        await this.Grid.ExcelExport(ExcelProperties);
+    }
+
+    public void RowBound(RowDataBoundEventArgs<TimesheetDataExcelExport>
+        args)
+    {
+        if (args.Data.TotalWorkingHour > 8 || args.Data.Status == "Late" || args.Data.Status == "Early")
+        {
+            args.Row.AddClass(new string[] { "table-warning" });
+        }
+
+        if (args.Data.TotalWorkingHour < 0 || args.Data.TotalRestHour < 0)
+        {
+            args.Row.AddClass(new string[] { "table-danger" });
+        }
+    }
+
+    private void UpdateExportData()
+    {
+        exportData.Clear();
+
+        foreach (var item in _Timesheets)
+        {
+            TimesheetDataExcelExport row = new TimesheetDataExcelExport();
+            row.Name = item.FirstName + " " + item.LastName;
+            row.TimesheetDataId = item.TimesheetDataId;
+            row.PayrollID = item.PayrollID;
+            row.Department = item.Department;
+            row.DayOfWeek = item.DayOfWeek;
+            row.Date = item.Date;
+            row.Rate = item.Rate;
+            row.DailyStartTime = item.DailyStartTime.ToString("hh:mm tt");
+            row.DailyEndTime = item.DailyEndTime.ToString("hh:mm tt");
+            row.BreakStartTime = item.BreakStartTime.ToString("hh:mm tt");
+            row.BreakEndTime = item.BreakEndTime.ToString("hh:mm tt");
+            row.TotalRestHour = item.TotalRestHour;
+            row.TotalWorkingHour = item.TotalWorkingHour;
+            row.TotalPay = item.Rate * item.TotalWorkingHour;
+            row.TotalBreakHour = item.TotalBreakHour;
+            row.Notes = item.Notes;
+
+            exportData.Add(row);
+        }
+
+        if (Grid != null)
+        {
+            Grid.Refresh();
+        }
+    }
+}

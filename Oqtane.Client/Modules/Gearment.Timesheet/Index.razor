@@ -126,7 +126,11 @@
                                                         <td>
                                                             @item.EventTime
                                                         </td>
-                                                        <td></td>
+                                                        <td>
+                                                            <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
+                                                            <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId + " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
+                                                            <SfButton OnClick="@(e => LoadProfile(item.EventId))" CssClass="btn btn-link" Content="Wrong Person?"></SfButton>
+                                                        </td>
                                                     </tr>
                                                 }
                                                 else

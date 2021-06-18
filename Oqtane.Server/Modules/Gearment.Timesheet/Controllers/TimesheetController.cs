@@ -439,22 +439,15 @@ namespace Gearment.Timesheet.Controllers
 
                         if (item.EventTimeLine.Any())
                         {
-                            foreach (var checkpoint in item.EventTimeLine)
+                            if (item.EventTimeLine.FirstOrDefault().EventType != "In")
                             {
-                                if (checkpoint.EventType != "In")
-                                {
-                                    checkpointList.Add(checkpoint);
-                                }
+                                checkpointList.Add(item.EventTimeLine.FirstOrDefault());
+                                item.EventTimeLine.Remove(item.EventTimeLine.FirstOrDefault());
                             }
                         }
 
                         if (checkpointList.Any())
                         {
-                            foreach (var checkpoint in checkpointList)
-                            {
-                                item.EventTimeLine.Remove(checkpoint);
-                            }
-
                             var foundRecord = summary.Where(x => x.EmployeeId == item.EmployeeId && DateTime.Parse(x.Date) == checkpointList.First().EventTime.Date.AddDays(-1)).OrderBy(x => DateTime.Parse(x.Date)).FirstOrDefault();
                             if (foundRecord != null)
                             {

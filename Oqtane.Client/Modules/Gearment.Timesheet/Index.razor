@@ -1,6 +1,8 @@
 @using Gearment.Timesheet.Services
 @using Gearment.Employee.Services
 @using Gearment.Timesheet.Models
+@using Gearment.GearmentSetting.Models
+@using Gearment.GearmentSetting.Services 
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Calendars
 @using System.IO
@@ -18,6 +20,7 @@
 @inject IFolderService FolderService
 @inject IEmployeeService EmployeeService
 @inject IUserRoleService UserRoleService
+@inject IGearmentSettingService GearmentSettingService
 @*<ActionLink Action="Upload" Security="SecurityAccessLevel.Edit" class="btn btn-info" Text="Import" Parameters="@($"id=" + _folderId.ToString())" ResourceKey="UploadFiles" />
     <SfButton OnClick="ExcelExport" class="btn btn-primary" Content="Export"></SfButton>
     <ActionLink Action="Payroll" Security="SecurityAccessLevel.Edit" class="btn btn-secondary" Text="Daily Summary" />
@@ -313,6 +316,13 @@
 
             //_Timesheets = await TimesheetService.GetTimesheetDataAsync(ModuleState.ModuleId);
             _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+
+            var imageUrlList = await GearmentSettingService.GetGearmentSettingsAsync(ModuleState.ModuleId);
+            var imageLogUrl = imageUrlList.FirstOrDefault(x => x.Name == "logs-image-url");
+            if (imageLogUrl != null)
+            {
+                imagePrefix = imageLogUrl.Value;
+            }
 
             //UpdateExportData();
             HideProgressIndicator();

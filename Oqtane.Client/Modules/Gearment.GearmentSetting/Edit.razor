@@ -1,0 +1,104 @@
+@using Oqtane.Modules.Controls
+@using Gearment.GearmentSetting.Services
+@using Gearment.GearmentSetting.Models
+
+@namespace Gearment.GearmentSetting
+@inherits ModuleBase
+@inject IGearmentSettingService GearmentSettingService
+@inject NavigationManager NavigationManager
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <input id="name" class="form-control" placeholder="Setting Name" @bind="@_name" />
+        </td>
+        <td>
+            <input id="name" class="form-control" placeholder="Setting Value" @bind="@_value" />
+        </td>
+    </tr>
+</table>
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+<br />
+<br />
+@if (PageState.Action == "Edit")
+{
+    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
+}
+
+@code {
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Actions => "Add,Edit";
+
+    public override string Title => "Manage GearmentSetting";
+
+    public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
+    };
+
+    int _id;
+    string _name;
+    string _value;
+    string _createdby;
+    DateTime _createdon;
+    string _modifiedby;
+    DateTime _modifiedon;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (PageState.Action == "Edit")
+            {
+                _id = Int32.Parse(PageState.QueryString["id"]);
+                GearmentSetting GearmentSetting = await GearmentSettingService.GetGearmentSettingAsync(_id, ModuleState.ModuleId);
+                if (GearmentSetting != null)
+                {
+                    _name = GearmentSetting.Name;
+                    _value = GearmentSetting.Value;
+                    _createdby = GearmentSetting.CreatedBy;
+                    _createdon = GearmentSetting.CreatedOn;
+                    _modifiedby = GearmentSetting.ModifiedBy;
+                    _modifiedon = GearmentSetting.ModifiedOn;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading GearmentSetting {GearmentSettingId} {Error}", _id, ex.Message);
+            AddModuleMessage("Error Loading GearmentSetting", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (PageState.Action == "Add")
+            {
+                GearmentSetting GearmentSetting = new GearmentSetting();
+                GearmentSetting.ModuleId = ModuleState.ModuleId;
+                GearmentSetting.Name = _name;
+                GearmentSetting.Value = _value;
+                GearmentSetting = await GearmentSettingService.AddGearmentSettingAsync(GearmentSetting);
+                await logger.LogInformation("GearmentSetting Added {GearmentSetting}", GearmentSetting);
+            }
+            else
+            {
+                GearmentSetting GearmentSetting = await GearmentSettingService.GetGearmentSettingAsync(_id, ModuleState.ModuleId);
+                GearmentSetting.Name = _name;
+                GearmentSetting.Value = _value;
+                await GearmentSettingService.UpdateGearmentSettingAsync(GearmentSetting);
+                await logger.LogInformation("GearmentSetting Updated {GearmentSetting}", GearmentSetting);
+            }
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving GearmentSetting {Error}", ex.Message);
+            AddModuleMessage("Error Saving GearmentSetting", MessageType.Error);
+        }
+    }
+}

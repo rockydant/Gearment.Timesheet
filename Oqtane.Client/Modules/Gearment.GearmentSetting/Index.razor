@@ -1,0 +1,76 @@
+@using Gearment.GearmentSetting.Services
+@using Gearment.GearmentSetting.Models
+
+@namespace Gearment.GearmentSetting
+@inherits ModuleBase
+@inject IGearmentSettingService GearmentSettingService
+@inject NavigationManager NavigationManager
+
+@if (_GearmentSettings == null)
+{
+<p><em>Loading...</em></p> }
+else
+{
+<ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add GearmentSetting" />
+                <br />
+                                <br />
+
+                                                <SfGrid DataSource="@_GearmentSettings" AllowPaging="true" AllowExcelExport="true" AllowSorting="true">
+                                                    <GridPageSettings PageSizes="new int[] { 5, 10, 50, 100 }"></GridPageSettings>
+                                                    <GridColumns>
+                                                        <GridColumn Field=@nameof(GearmentSetting.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                                        <GridColumn Field=@nameof(GearmentSetting.Value) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                                                        <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
+                                                            <Template>
+                                                                @{ var GearmentSetting = (context as GearmentSetting);
+                                            <td><ActionLink Action="Edit" Parameters="@($"id=" + GearmentSetting.GearmentSettingId.ToString())" /></td>
+                                                                    <td><ActionDialog Header="Delete GearmentSetting" Message="@("Are You Sure You Wish To Delete The " + GearmentSetting.Name + " GearmentSetting?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(GearmentSetting))" /></td>
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>}
+
+<!-- The content below is for informational purposes only and can be safely removed -->
+
+<br />
+<br />
+
+<!-- The content above is for informational purposes only and can be safely removed -->
+
+@code { public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    List<GearmentSetting> _GearmentSettings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _GearmentSettings = await GearmentSettingService.GetGearmentSettingsAsync(ModuleState.ModuleId);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading GearmentSetting {Error}", ex.Message);
+            AddModuleMessage("Error Loading GearmentSetting", MessageType.Error);
+        }
+    }
+
+    private async Task Delete(GearmentSetting GearmentSetting)
+    {
+        try
+        {
+            await GearmentSettingService.DeleteGearmentSettingAsync(GearmentSetting.GearmentSettingId, ModuleState.ModuleId);
+            await logger.LogInformation("GearmentSetting Deleted {GearmentSetting}", GearmentSetting);
+            _GearmentSettings = await GearmentSettingService.GetGearmentSettingsAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting GearmentSetting {GearmentSetting} {Error}", GearmentSetting, ex.Message);
+            AddModuleMessage("Error Deleting GearmentSetting", MessageType.Error);
+        }
+    } }

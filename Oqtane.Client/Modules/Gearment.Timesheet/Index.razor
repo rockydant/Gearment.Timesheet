@@ -69,6 +69,8 @@
 <br />
 <label for="checked" style="padding: 10px 10px 10px 0">Manual Check</label>
 <SfSwitch @bind-Checked="_isWarningChecked" ValueChange="IsWarningChange" TChecked="bool"></SfSwitch>
+<label for="checked" style="padding: 10px 10px 10px 0">Multiple Checkin/out</label>
+<SfSwitch @bind-Checked="_isMultiChecked" ValueChange="IsMultiCheckedChange" TChecked="bool"></SfSwitch>
 <ActionLink Action="Event" Security="SecurityAccessLevel.Edit" class="btn btn-primary" Text="Add" />
 <br />
 
@@ -256,6 +258,7 @@
     private int _folderId = 2;
     private List<Object> Toolbaritems = new List<Object>() { "Search" };
     private bool _isWarningChecked = false;
+    private bool _isMultiChecked = false;
     List<DepartmentViewModel> departmentListFilter = new List<DepartmentViewModel>() { new DepartmentViewModel() { DepartmentId = 0, Name = "All" } };
     private bool IsVisible { get; set; } = false;
 
@@ -349,15 +352,33 @@
         args)
     {
         ShowProgressIndicator();
+        TimesheetDailyQuery query = GetNewQuery();
+
+        _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+        HideProgressIndicator();
+    }
+
+    private async Task IsMultiCheckedChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool>
+        args)
+    {
+        ShowProgressIndicator();
+        TimesheetDailyQuery query = GetNewQuery();        
+
+        _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
+        HideProgressIndicator();
+    }
+
+    private TimesheetDailyQuery GetNewQuery()
+    {
         TimesheetDailyQuery query = new TimesheetDailyQuery();
         query.FromDate = _fromDate;
         query.ToDate = _toDate;
         query.Department = _department;
         query.IsWarning = _isWarningChecked;
+        query.IsMultiCheckin = _isMultiChecked;
         query.AttendanceStatus = AttendanceStatus;
 
-        _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
-        HideProgressIndicator();
+        return query;
     }
 
     private async Task Search()
@@ -366,12 +387,7 @@
 
         try
         {
-            TimesheetDailyQuery query = new TimesheetDailyQuery();
-            query.FromDate = _fromDate;
-            query.ToDate = _toDate;
-            query.Department = _department;
-            query.IsWarning = _isWarningChecked;
-            query.AttendanceStatus = AttendanceStatus;
+            TimesheetDailyQuery query = GetNewQuery();
 
             _Timesheets = await TimesheetService.GetTimesheetDataByDateAsync(ModuleState.ModuleId, query);
             _attendance = await TimesheetService.GetAttendanceDataAsync(ModuleState.ModuleId, query);
@@ -416,12 +432,7 @@
         {
             ShowProgressIndicator();
 
-            TimesheetDailyQuery query = new TimesheetDailyQuery();
-            query.FromDate = _fromDate;
-            query.ToDate = _toDate;
-            query.Department = _department;
-            query.IsWarning = _isWarningChecked;
-            query.AttendanceStatus = AttendanceStatus;
+            TimesheetDailyQuery query = GetNewQuery();
 
             await TimesheetService.DeleteAttendanceDataAsync(EventId, ModuleState.ModuleId);
             await logger.LogInformation("Event Deleted {Timesheet}", EventId);

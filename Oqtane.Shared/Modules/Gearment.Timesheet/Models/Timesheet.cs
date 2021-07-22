@@ -159,6 +159,7 @@ namespace Gearment.Timesheet.Models
         public string EmployeeName { get; set; }
         public string AttendanceStatus { get; set; }
 
+        public bool IsMultiCheckin { get; set; }
         public bool IsWarning { get; set; }
     }
 

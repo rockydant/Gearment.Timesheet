@@ -427,6 +427,11 @@ namespace Gearment.Timesheet.Controllers
                 }
             }
 
+            if (Query.IsMultiCheckin)
+            {
+                summary = summary.Where(x => x.EventTimeLine.Count(y => y.EventType == "In") > 1 && x.EventTimeLine.Count(y => y.EventType == "Out") > 1).ToList();
+            }
+
             foreach (var item in summary)
             {
                 if (item.EventTimeLine != null)

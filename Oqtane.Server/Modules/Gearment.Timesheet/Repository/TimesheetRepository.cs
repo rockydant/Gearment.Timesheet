@@ -66,7 +66,7 @@ namespace Gearment.Timesheet.Repository
         {
             if (!_db.Employee_FaceReg.Any(x => x.EmployeeId == Employee_FaceReg.EmployeeId))
             {
-                _db.Employee_FaceReg.Add(Employee_FaceReg);               
+                _db.Employee_FaceReg.Add(Employee_FaceReg);
             }
             else
             {
@@ -76,6 +76,12 @@ namespace Gearment.Timesheet.Repository
             _db.SaveChanges();
 
             return Employee_FaceReg;
+        }
+
+        public Models.Employee_FaceReg GetFaces(string EmployeeId)
+        {
+            var foundEmployee = _db.Employee.FirstOrDefault(x => x.Name == EmployeeId);
+            return _db.Employee_FaceReg.FirstOrDefault(x => x.EmployeeId == foundEmployee.EmployeeId);
         }
 
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)

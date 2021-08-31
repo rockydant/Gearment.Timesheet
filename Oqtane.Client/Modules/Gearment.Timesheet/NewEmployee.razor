@@ -1,11 +1,14 @@
 @using Oqtane.Modules.Controls
 @using Gearment.Employee.Services
 @using Gearment.Timesheet.Services
+@using Gearment.Timesheet.Models;
 @using Gearment.Employee.Models
 @using Gearment.Department.Models
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Navigations
 @using System.IO
 
 @namespace Gearment.Timesheet
@@ -14,126 +17,160 @@
 @inject ITimesheetService TimesheetService
 @inject NavigationManager NavigationManager
 
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Employee Name</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfTextBox @bind-Value="@_name"></SfTextBox>
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Payroll ID</label>
-    <div class="col-10">
-        <div class="input-group">
-            <input id="name" class="form-control" @bind="@_payrollID" />
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Department</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
-                <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
-            </SfDropDownList>
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Start Date</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfDatePicker TValue="DateTime" @bind-Value="@_startDate" Placeholder='Choose a Date'></SfDatePicker>
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Status</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfDropDownList TValue="string" TItem="string" Placeholder="Select status" @bind-Value="@_status" DataSource="@statusList"></SfDropDownList>
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Note</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfTextBox Multiline=true Placeholder="Enter note" @bind-Value="@_note"></SfTextBox>
-        </div>
-    </div>
-</div>
+<SfTab CssClass="default-tab">
+    <TabItems>
+        <TabItem>
+            <HeaderTemplate>Add Employee</HeaderTemplate>
+            <ContentTemplate>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Employee Name</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfTextBox @bind-Value="@_name"></SfTextBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Payroll ID</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <input id="name" class="form-control" @bind="@_payrollID" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Department</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
+                                <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Start Date</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfDatePicker TValue="DateTime" @bind-Value="@_startDate" Placeholder='Choose a Date'></SfDatePicker>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Status</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfDropDownList TValue="string" TItem="string" Placeholder="Select status" @bind-Value="@_status" DataSource="@statusList"></SfDropDownList>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Note</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfTextBox Multiline=true Placeholder="Enter note" @bind-Value="@_note"></SfTextBox>
+                        </div>
+                    </div>
+                </div>
 
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Photo1</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfUploader ID="UploadFiles1" DropArea=".control-fluid" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
-                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
-                <UploaderTemplates>
-                    <Template Context="HttpContext">
-                        <table>
-                            <tr>
-                                <img class="rounded img-thumbnail" alt="Preview Image @(HttpContext.Name)"
-                                     src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)">
-                            </tr>
-                        </table>
-                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
-                    </Template>
-                </UploaderTemplates>
-            </SfUploader>
-        </div>
-    </div>
-</div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Photo1</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfUploader ID="UploadFiles1" DropArea=".control-fluid" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
+                                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
+                                <UploaderTemplates>
+                                    <Template Context="HttpContext">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <img class="rounded img-thumbnail" style="width:200px" alt="Preview Image @(HttpContext.Name)"
+                                                         src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)" />
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
+                                    </Template>
+                                </UploaderTemplates>
+                            </SfUploader>
+                        </div>
+                    </div>
+                </div>
 
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Photo2</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfUploader ID="UploadFiles2" DropArea=".control-fluid" AutoUpload="true" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
-                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
-                <UploaderTemplates>
-                    <Template Context="HttpContext">
-                        <table>
-                            <tr>
-                                <img class="rounded img-thumbnail" alt="Preview Image @(HttpContext.Name)"
-                                     src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)">
-                            </tr>
-                        </table>
-                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
-                    </Template>
-                </UploaderTemplates>
-            </SfUploader>
-        </div>
-    </div>
-</div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Photo2</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfUploader ID="UploadFiles2" DropArea=".control-fluid" AutoUpload="true" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
+                                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
+                                <UploaderTemplates>
+                                    <Template Context="HttpContext">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <img class="rounded img-thumbnail" style="width:200px" alt="Preview Image @(HttpContext.Name)"
+                                                         src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)" />
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
+                                    </Template>
+                                </UploaderTemplates>
+                            </SfUploader>
+                        </div>
+                    </div>
+                </div>
 
-<div class="form-group row">
-    <label for="text" class="col-2 col-form-label">Photo3</label>
-    <div class="col-10">
-        <div class="input-group">
-            <SfUploader ID="UploadFiles3" DropArea=".control-fluid" AutoUpload="true" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
-                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
-                <UploaderTemplates>
-                    <Template Context="HttpContext">
-                        <table>
-                            <tr>
-                                <img class="rounded img-thumbnail" alt="Preview Image @(HttpContext.Name)"
-                                     src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)">
-                            </tr>
-                        </table>
-                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
-                    </Template>
-                </UploaderTemplates>
-            </SfUploader>
-        </div>
-    </div>
-</div>
+                <div class="form-group row">
+                    <label for="text" class="col-2 col-form-label">Photo3</label>
+                    <div class="col-10">
+                        <div class="input-group">
+                            <SfUploader ID="UploadFiles3" DropArea=".control-fluid" AutoUpload="true" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
+                                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
+                                <UploaderTemplates>
+                                    <Template Context="HttpContext">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <img class="rounded img-thumbnail" style="width:200px" alt="Preview Image @(HttpContext.Name)"
+                                                         src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)" />
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
+                                    </Template>
+                                </UploaderTemplates>
+                            </SfUploader>
+                        </div>
+                    </div>
+                </div>
 
-<button type="button" class="btn btn-success" @onclick="Save">Save</button>
-<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
-
+                <button type="button" class="btn btn-success" @onclick="Save">Save</button>
+                <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+            </ContentTemplate>
+        </TabItem>
+        <TabItem>
+            <HeaderTemplate>Search Employee</HeaderTemplate>
+            <ContentTemplate>
+                <br /><br />
+                <div class="form-group row">
+                    <div class="col-9">
+                        <div class="input-group">
+                            <input id="name" class="form-control" @bind="@_searchUser" />
+                        </div>
+                    </div>
+                    <SfButton OnClick="@LoadProfile" CssClass="btn btn-secondary col-3" Content="Search"></SfButton>
+                </div>
+                <div class="form-group row justify-content-center">
+                    <img class="rounded img-thumbnail col-3" src="data:image/jpg;base64,@(review1==null?string.Empty: Convert.ToBase64String(review1))" alt="review" />
+                    <img class="rounded img-thumbnail col-3" src="data:image/jpg;base64,@(review2==null?string.Empty: Convert.ToBase64String(review2))" alt="review" />
+                    <img class="rounded img-thumbnail col-3" src="data:image/jpg;base64,@(review3==null?string.Empty: Convert.ToBase64String(review3))" alt="review" />
+                </div>
+                <NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+            </ContentTemplate>
+        </TabItem>
+    </TabItems>
+</SfTab>
 <br />
 <br />
 @if (PageState.Action == "Edit")
@@ -163,10 +200,14 @@
     string _department = "tshirt";
     string _status = "active";
     string _note = string.Empty;
+    string _searchUser = string.Empty;
     DateTime _startDate = DateTime.Now.Date;
-    Timesheet.Models.Employee_FaceReg faceReg = new Timesheet.Models.Employee_FaceReg();
-    Byte[] photo1 = new Byte[64];
+    Employee_FaceReg faceReg = new Employee_FaceReg();
+    Byte[] review1 = new Byte[64];
+    Byte[] review2 = new Byte[64];
+    Byte[] review3 = new Byte[64];
     List<fileInfo> files = new List<fileInfo>();
+    List<Employee_FaceRegEventDetail> _wrongList = new List<Employee_FaceRegEventDetail>();
 
     public class fileInfo
     {
@@ -243,6 +284,14 @@
         }
 
         HideProgressIndicator();
+    }
+
+    private async Task LoadProfile()
+    {
+        var foundUser = await TimesheetService.GetEmployeeFaceByIdAsync(_searchUser, ModuleState.ModuleId);
+        review1 = foundUser.FacePhoto1;
+        review2 = foundUser.FacePhoto2;
+        review3 = foundUser.FacePhoto3;
     }
 
     public void onRemove(RemovingEventArgs args)

@@ -113,6 +113,11 @@ namespace Gearment.Timesheet.Services
         {
             return await PostJsonAsync<Models.Employee_FaceReg>(CreateAuthorizationPolicyUrl($"{Apiurl}/face", ModuleId), Employee_FaceReg);            
         }
+
+        public async Task<Models.Employee_FaceReg> GetEmployeeFaceByIdAsync(string employeeID, int ModuleId)
+        {
+            return await GetJsonAsync<Models.Employee_FaceReg>(CreateAuthorizationPolicyUrl($"{Apiurl}/attendance/employee/{employeeID}", ModuleId));
+        }
     }
 }
 

@@ -22,6 +22,7 @@ using System.Net.Http.Headers;
 using RestWrapper;
 using System.Threading.Tasks;
 using RestSharp;
+using Gearment.GearmentSetting.Repository;
 
 namespace Gearment.Timesheet.Controllers
 {
@@ -38,8 +39,9 @@ namespace Gearment.Timesheet.Controllers
         private readonly ITenantResolver _tenants;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly IGearmentSettingRepository _settingRepository;
 
-        public TimesheetController(ITimesheetRepository TimesheetRepository, IEmployeeRepository EmployeeRepository, IFolderRepository Folders, IDepartmentRepository DepartmentRepository, IWebHostEnvironment environment, ITenantResolver tenants, IUserPermissions userPermissions, IFileRepository files, ILogManager logger, IHttpContextAccessor accessor)
+        public TimesheetController(ITimesheetRepository TimesheetRepository, IEmployeeRepository EmployeeRepository, IFolderRepository Folders, IDepartmentRepository DepartmentRepository, IWebHostEnvironment environment, ITenantResolver tenants, IUserPermissions userPermissions, IGearmentSettingRepository settingRepository, IFileRepository files, ILogManager logger, IHttpContextAccessor accessor)
         {
             _TimesheetRepository = TimesheetRepository;
             _logger = logger;
@@ -49,6 +51,7 @@ namespace Gearment.Timesheet.Controllers
             _tenants = tenants;
             _employeeRepository = EmployeeRepository;
             _departmentRepository = DepartmentRepository;
+            _settingRepository = settingRepository;
             _folders = Folders;
 
             if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
@@ -390,6 +393,13 @@ namespace Gearment.Timesheet.Controllers
             }
 
             return result;
+        }
+
+        [HttpGet("attendance/employee/{empId}")]
+        public Models.Employee_FaceReg GetEmployeeFaceById(string empId)
+        {
+            return _TimesheetRepository.GetFaces(empId);
+
         }
 
         [HttpPost("attendance")]
@@ -741,12 +751,17 @@ namespace Gearment.Timesheet.Controllers
                 _logger.Log(LogLevel.Information, this, LogFunction.Create, "Employee_FaceReg Added {Employee_FaceReg}", Employee_FaceReg);
             }
 
-            var client = new RestClient("https://attendance.geatech.net/api/face/update/1587");
-            client.Timeout = -1;
-            var request = new RestSharp.RestRequest(Method.POST);
-            var body = @"";
-            request.AddParameter("text/plain", body, ParameterType.RequestBody);
-            IRestResponse response = client.Execute(request);
+            var gearmentSetting = _settingRepository.GetGearmentSettings(_entityId);
+            var amazonUrl = gearmentSetting.FirstOrDefault(x => x.Name == "attendance-post-url");
+            if (amazonUrl != null)
+            {
+                var client = new RestClient(string.Format("{0}/{1}", amazonUrl.Value, Employee_FaceReg.EmployeeId));
+                client.Timeout = -1;
+                var request = new RestSharp.RestRequest(Method.POST);
+                var body = @"";
+                request.AddParameter("text/plain", body, ParameterType.RequestBody);
+                IRestResponse response = client.Execute(request);
+            }
 
             return Employee_FaceReg;
         }

@@ -12,6 +12,8 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData GetTimesheet(int TimesheetId);
         Models.Timesheet AddTimesheet(Models.Timesheet Timesheet);
         Models.Employee_FaceReg AddFaces(Models.Employee_FaceReg Employee_FaceReg);
+
+        Models.Employee_FaceReg GetFaces(string EmployeeId);
         Models.TimesheetData UpdateTimesheet(Models.TimesheetData Timesheet);
         void DeleteTimesheet(int TimesheetId);
         void DeleteTimesheetByDateAsync(TimesheetDailyQuery Query);

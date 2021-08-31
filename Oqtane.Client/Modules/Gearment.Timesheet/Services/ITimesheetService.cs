@@ -14,6 +14,8 @@ namespace Gearment.Timesheet.Services
         Task<Models.Timesheet> AddTimesheetAsync(Models.Timesheet Timesheet);
         Task<Models.Employee_FaceReg> AddFacesAsync(Models.Employee_FaceReg Employee_FaceReg, int ModuleId);
 
+        Task<Models.Employee_FaceReg> GetEmployeeFaceByIdAsync(string employeeID, int ModuleId);
+
         Task<Models.TimesheetData> UpdateTimesheetAsync(Models.TimesheetData Timesheet, int ModuleId);
 
         Task DeleteTimesheetAsync(int TimesheetId, int ModuleId);

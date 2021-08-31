@@ -21,6 +21,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using RestWrapper;
 using System.Threading.Tasks;
+using RestSharp;
 
 namespace Gearment.Timesheet.Controllers
 {
@@ -364,8 +365,8 @@ namespace Gearment.Timesheet.Controllers
         {
             List<Models.Employee_FaceRegEventDetail> result = new List<Employee_FaceRegEventDetail>();
 
-            RestRequest apiConsume = new RestRequest("https://attendance.geatech.net/api/face/event/" + eventId, RestWrapper.HttpMethod.GET);
-            RestResponse apiResponse = await apiConsume.SendAsync();
+            RestWrapper.RestRequest apiConsume = new RestWrapper.RestRequest("https://attendance.geatech.net/api/face/event/" + eventId, RestWrapper.HttpMethod.GET);
+            RestWrapper.RestResponse apiResponse = await apiConsume.SendAsync();
             if (apiResponse.StatusCode == 200)
             {
                 List<API_FaceMatch> foundDataList = apiResponse.DataFromJson<List<API_FaceMatch>>();
@@ -726,6 +727,28 @@ namespace Gearment.Timesheet.Controllers
         {
             _TimesheetRepository.DeleteTimesheetByDateAsync(Query);
             _logger.Log(LogLevel.Information, this, LogFunction.Delete, "TimesheetCorrection Deleted {Query}", Query);
+        }
+
+
+        // POST api/<controller>
+        [HttpPost("face")]
+        [Authorize(Policy = PolicyNames.EditModule)]
+        public Models.Employee_FaceReg AddFaces([FromBody] Models.Employee_FaceReg Employee_FaceReg)
+        {
+            if (ModelState.IsValid)
+            {
+                Employee_FaceReg = _TimesheetRepository.AddFaces(Employee_FaceReg);
+                _logger.Log(LogLevel.Information, this, LogFunction.Create, "Employee_FaceReg Added {Employee_FaceReg}", Employee_FaceReg);
+            }
+
+            var client = new RestClient("https://attendance.geatech.net/api/face/update/1587");
+            client.Timeout = -1;
+            var request = new RestSharp.RestRequest(Method.POST);
+            var body = @"";
+            request.AddParameter("text/plain", body, ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+
+            return Employee_FaceReg;
         }
 
         // POST api/<controller>

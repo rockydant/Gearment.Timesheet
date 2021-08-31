@@ -191,7 +191,7 @@ namespace Gearment.Timesheet.Models
     }
 
     [Table("GearmentEmployee_FaceReg")]
-    public class GearmentEmployee_FaceReg
+    public class Employee_FaceReg
     {
         [Key]
         public int EmployeeId { get; set; }

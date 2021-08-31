@@ -51,11 +51,33 @@ namespace Gearment.Timesheet.Repository
             if (!_db.Employee_FaceRegEvent.Any(x => x.EventTime == Employee_FaceRegEvent.EventTime && x.EventType == Employee_FaceRegEvent.EventType && x.EmployeeId == Employee_FaceRegEvent.EmployeeId))
             {
                 _db.Employee_FaceRegEvent.Add(Employee_FaceRegEvent);
-                _db.SaveChanges();
+
+            }
+            else
+            {
+                _db.Employee_FaceRegEvent.Update(Employee_FaceRegEvent);
             }
 
+            _db.SaveChanges();
             return Employee_FaceRegEvent;
         }
+
+        public Models.Employee_FaceReg AddFaces(Models.Employee_FaceReg Employee_FaceReg)
+        {
+            if (!_db.Employee_FaceReg.Any(x => x.EmployeeId == Employee_FaceReg.EmployeeId))
+            {
+                _db.Employee_FaceReg.Add(Employee_FaceReg);               
+            }
+            else
+            {
+                _db.Employee_FaceReg.Add(Employee_FaceReg);
+            }
+
+            _db.SaveChanges();
+
+            return Employee_FaceReg;
+        }
+
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)
         {
             if (!_db.Timesheet.Any(x =>
@@ -243,7 +265,7 @@ namespace Gearment.Timesheet.Repository
             return result;
         }
 
-        public Models.GearmentEmployee_FaceReg GetEmployee_FaceReg(int employeeId)
+        public Models.Employee_FaceReg GetEmployee_FaceReg(int employeeId)
         {
             return _db.Employee_FaceReg.Find(employeeId);
         }

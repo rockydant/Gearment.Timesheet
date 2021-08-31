@@ -11,6 +11,7 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData UpdateRateAnDepartment(Gearment.Employee.Models.Employee timesheet);
         Models.TimesheetData GetTimesheet(int TimesheetId);
         Models.Timesheet AddTimesheet(Models.Timesheet Timesheet);
+        Models.Employee_FaceReg AddFaces(Models.Employee_FaceReg Employee_FaceReg);
         Models.TimesheetData UpdateTimesheet(Models.TimesheetData Timesheet);
         void DeleteTimesheet(int TimesheetId);
         void DeleteTimesheetByDateAsync(TimesheetDailyQuery Query);
@@ -21,7 +22,7 @@ namespace Gearment.Timesheet.Repository
         Models.TimesheetData UpdateTimesheetData(Models.TimesheetData Timesheet);
 
         Models.Employee_FaceRegEventDetail GetEmployee_FaceRegEvent(int EventId);
-        Models.GearmentEmployee_FaceReg GetEmployee_FaceReg(int employeeId);
+        Models.Employee_FaceReg GetEmployee_FaceReg(int employeeId);
         List<Employee_FaceRegEventDetail> GetAllEmployee_FaceRegEvent(TimesheetDailyQuery Query);
 
         Models.Employee_FaceRegEventDetail UpdateEvent(Models.Employee_FaceRegEventDetail Timesheet);

@@ -1,0 +1,327 @@
+@using Oqtane.Modules.Controls
+@using Gearment.Employee.Services
+@using Gearment.Timesheet.Services
+@using Gearment.Employee.Models
+@using Gearment.Department.Models
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Inputs
+@using System.IO
+
+@namespace Gearment.Timesheet
+@inherits ModuleBase
+@inject IEmployeeService EmployeeService
+@inject ITimesheetService TimesheetService
+@inject NavigationManager NavigationManager
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Employee Name</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTextBox @bind-Value="@_name"></SfTextBox>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Payroll ID</label>
+    <div class="col-10">
+        <div class="input-group">
+            <input id="name" class="form-control" @bind="@_payrollID" />
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Department</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfDropDownList TValue="string" TItem="DepartmentViewModel" @bind-Value="@_department" Placeholder="Select department" DataSource="@departmentList">
+                <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Start Date</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfDatePicker TValue="DateTime" @bind-Value="@_startDate" Placeholder='Choose a Date'></SfDatePicker>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Status</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfDropDownList TValue="string" TItem="string" Placeholder="Select status" @bind-Value="@_status" DataSource="@statusList"></SfDropDownList>
+        </div>
+    </div>
+</div>
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Note</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfTextBox Multiline=true Placeholder="Enter note" @bind-Value="@_note"></SfTextBox>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Photo1</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfUploader ID="UploadFiles1" DropArea=".control-fluid" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
+                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
+                <UploaderTemplates>
+                    <Template Context="HttpContext">
+                        <table>
+                            <tr>
+                                <img class="rounded img-thumbnail" alt="Preview Image @(HttpContext.Name)"
+                                     src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)">
+                            </tr>
+                        </table>
+                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
+                    </Template>
+                </UploaderTemplates>
+            </SfUploader>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Photo2</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfUploader ID="UploadFiles2" DropArea=".control-fluid" AutoUpload="true" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
+                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
+                <UploaderTemplates>
+                    <Template Context="HttpContext">
+                        <table>
+                            <tr>
+                                <img class="rounded img-thumbnail" alt="Preview Image @(HttpContext.Name)"
+                                     src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)">
+                            </tr>
+                        </table>
+                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
+                    </Template>
+                </UploaderTemplates>
+            </SfUploader>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="text" class="col-2 col-form-label">Photo3</label>
+    <div class="col-10">
+        <div class="input-group">
+            <SfUploader ID="UploadFiles3" DropArea=".control-fluid" AutoUpload="true" AllowedExtensions=".jpeg,.jpg,.png" AllowMultiple="false">
+                <UploaderEvents ValueChange="OnChange" OnRemove="onRemove"></UploaderEvents>
+                <UploaderTemplates>
+                    <Template Context="HttpContext">
+                        <table>
+                            <tr>
+                                <img class="rounded img-thumbnail" alt="Preview Image @(HttpContext.Name)"
+                                     src="@(files.Count >0 ? files.Where(item=>item.Name == HttpContext.Name)?.FirstOrDefault()?.Path : string.Empty)">
+                            </tr>
+                        </table>
+                        <span class="e-icons e-file-remove-btn remove" id="removeIcon" title="Remove"></span>
+                    </Template>
+                </UploaderTemplates>
+            </SfUploader>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+
+<br />
+<br />
+@if (PageState.Action == "Edit")
+{
+    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>}
+
+@code { public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Actions => "Add,Edit";
+
+    public override string Title => "Manage Employee";
+
+    public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
+    };
+
+    int _id;
+    string _name;
+    string _createdby;
+    DateTime _createdon;
+    string _modifiedby;
+    DateTime _modifiedon;
+
+    int _payrollID = 0;
+    double _rate = 14;
+    string _department = "tshirt";
+    string _status = "active";
+    string _note = string.Empty;
+    DateTime _startDate = DateTime.Now.Date;
+    Timesheet.Models.Employee_FaceReg faceReg = new Timesheet.Models.Employee_FaceReg();
+    Byte[] photo1 = new Byte[64];
+    List<fileInfo> files = new List<fileInfo>();
+
+    public class fileInfo
+    {
+        public string Path { get; set; }
+        public string Name { get; set; }
+        public double Size { get; set; }
+        public byte[] base64string { get; set; }
+    }
+
+    List<string> statusList = new List<string> { "Active", "InActive" };
+    List<DepartmentViewModel> departmentList = new List<DepartmentViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ShowProgressIndicator();
+            await InitData();
+
+            if (PageState.Action == "Edit")
+            {
+                _id = Int32.Parse(PageState.QueryString["id"]);
+                Employee Employee = await EmployeeService.GetEmployeeAsync(_id, ModuleState.ModuleId);
+                if (Employee != null)
+                {
+                    _name = Employee.Name;
+                    _payrollID = Employee.PayrollID;
+                    _rate = decimal.ToDouble(Employee.Rate);
+                    _department = Employee.Department;
+                    _status = Employee.Status;
+                    _note = Employee.Note;
+                    _startDate = Employee.StartDate;
+
+                    _createdby = Employee.CreatedBy;
+                    _createdon = Employee.CreatedOn;
+                    _modifiedby = Employee.ModifiedBy;
+                    _modifiedon = Employee.ModifiedOn;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Employee {EmployeeId} {Error}", _id, ex.Message);
+            AddModuleMessage("Error Loading Employee", MessageType.Error);
+        }
+    }
+    private async Task InitData()
+    {
+        departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
+        StateHasChanged();
+        HideProgressIndicator();
+    }
+
+    private async void OnChange(UploadChangeEventArgs args)
+    {
+        ShowProgressIndicator();
+        try
+        {
+            foreach (var file in args.Files)
+            {
+                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), "Images");
+                var fullPath = Path.Combine(pathToSave, file.FileInfo.Name);
+                byte[] bytes = file.Stream.ToArray();
+                string base64 = Convert.ToBase64String(bytes);
+                files.Add(new fileInfo() { Path = @"data:image/" + file.FileInfo.Type + ";base64," + base64, Name = file.FileInfo.Name, Size = file.FileInfo.Size, base64string = bytes });
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+
+            await logger.LogError(ex, "Error Uploading", _id, ex.Message);
+            AddModuleMessage("Error Uploading", MessageType.Error);
+        }
+
+        HideProgressIndicator();
+    }
+
+    public void onRemove(RemovingEventArgs args)
+    {
+        foreach (var removeFile in args.FilesData)
+        {
+            if (System.IO.File.Exists(Path.Combine(@"\Images", removeFile.Name)))
+            {
+                System.IO.File.Delete(Path.Combine(@"\Images\", removeFile.Name));
+            }
+
+            if (files.Any(x => x.Name == removeFile.Name && x.Size == removeFile.Size))
+            {
+                files.RemoveAll(x => x.Name == removeFile.Name);
+            }
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (PageState.Action == "NewEmployee")
+            {
+                Employee Employee = new Employee();
+                Employee.ModuleId = ModuleState.ModuleId;
+                Employee.Name = _name;
+                Employee.PayrollID = _payrollID;
+                Employee.Rate = (decimal)_rate;
+                Employee.Department = _department;
+                Employee.Status = _status;
+                Employee.Note = _note;
+                Employee.StartDate = _startDate;
+
+                Employee = await EmployeeService.AddEmployeeAsync(Employee);
+                await logger.LogInformation("Employee Added {Employee}", Employee);
+
+                faceReg.EmployeeId = Employee.EmployeeId;
+                faceReg.FaceRegId = Employee.EmployeeId.ToString();
+
+                faceReg.FacePhoto1 = files[0].base64string;
+                faceReg.FacePhoto2 = files[1].base64string;
+                faceReg.FacePhoto3 = files[2].base64string;
+
+                faceReg = await TimesheetService.AddFacesAsync(faceReg, ModuleState.ModuleId);
+
+                AddModuleMessage("Employee Added", MessageType.Success);
+            }
+            else
+            {
+                Employee Employee = await EmployeeService.GetEmployeeAsync(_id, ModuleState.ModuleId);
+                Employee.Name = _name;
+                Employee.PayrollID = _payrollID;
+                Employee.Rate = (decimal)_rate;
+                Employee.Department = _department;
+                Employee.Status = _status;
+                Employee.Note = _note;
+                Employee.StartDate = _startDate;
+
+                await EmployeeService.UpdateEmployeeAsync(Employee);
+                await logger.LogInformation("Employee Updated {Employee}", Employee);
+            }
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving Employee {Error}", ex.Message);
+            AddModuleMessage("Error Saving Employee", MessageType.Error);
+        }
+    }
+
+    private byte[] ImageToByteArray(System.Drawing.Image imageIn)
+    {
+        using (var ms = new MemoryStream())
+        {
+            imageIn.Save(ms, imageIn.RawFormat);
+            return ms.ToArray();
+        }
+    }
+}
+
+

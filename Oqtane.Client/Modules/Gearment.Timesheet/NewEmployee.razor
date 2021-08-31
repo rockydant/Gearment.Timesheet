@@ -288,10 +288,21 @@
 
     private async Task LoadProfile()
     {
+        ShowProgressIndicator();
         var foundUser = await TimesheetService.GetEmployeeFaceByIdAsync(_searchUser, ModuleState.ModuleId);
-        review1 = foundUser.FacePhoto1;
-        review2 = foundUser.FacePhoto2;
-        review3 = foundUser.FacePhoto3;
+        if (foundUser != null)
+        {
+            review1 = foundUser.FacePhoto1;
+            review2 = foundUser.FacePhoto2;
+            review3 = foundUser.FacePhoto3;
+            StateHasChanged();
+        }
+        else
+        {
+            AddModuleMessage("Employee Not Found", MessageType.Warning);
+        }
+
+        HideProgressIndicator();
     }
 
     public void onRemove(RemovingEventArgs args)
@@ -312,6 +323,7 @@
 
     private async Task Save()
     {
+        ShowProgressIndicator();
         try
         {
             if (PageState.Action == "NewEmployee")
@@ -354,6 +366,8 @@
                 await EmployeeService.UpdateEmployeeAsync(Employee);
                 await logger.LogInformation("Employee Updated {Employee}", Employee);
             }
+
+            HideProgressIndicator();
             NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)

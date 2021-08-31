@@ -80,8 +80,14 @@ namespace Gearment.Timesheet.Repository
 
         public Models.Employee_FaceReg GetFaces(string EmployeeId)
         {
+            Employee_FaceReg employee_FaceReg = new Employee_FaceReg();
             var foundEmployee = _db.Employee.FirstOrDefault(x => x.Name == EmployeeId);
-            return _db.Employee_FaceReg.FirstOrDefault(x => x.EmployeeId == foundEmployee.EmployeeId);
+            if (foundEmployee != null)
+            {
+                employee_FaceReg = _db.Employee_FaceReg.FirstOrDefault(x => x.EmployeeId == foundEmployee.EmployeeId);
+            }
+
+            return employee_FaceReg;
         }
 
         public Models.Timesheet AddTimesheet(Models.Timesheet Timesheet)

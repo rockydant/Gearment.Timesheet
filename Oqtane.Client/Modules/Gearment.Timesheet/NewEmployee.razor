@@ -269,10 +269,16 @@
             foreach (var file in args.Files)
             {
                 var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), "Images");
-                var fullPath = Path.Combine(pathToSave, file.FileInfo.Name);
-                byte[] bytes = file.Stream.ToArray();
-                string base64 = Convert.ToBase64String(bytes);
-                files.Add(new fileInfo() { Path = @"data:image/" + file.FileInfo.Type + ";base64," + base64, Name = file.FileInfo.Name, Size = file.FileInfo.Size, base64string = bytes });
+                using var fullsizeImage = System.Drawing.Image.FromStream(file.Stream);
+                using var newImage = Oqtane.Modules.ImageUtils.ResizeImage(fullsizeImage, 800, 800);
+                using var resultStream = new MemoryStream();
+
+                newImage.Save(resultStream, System.Drawing.Imaging.ImageFormat.Png);
+
+                var resultBytes = resultStream.ToArray();
+
+                string base64 = Convert.ToBase64String(resultBytes);
+                files.Add(new fileInfo() { Path = @"data:image/" + file.FileInfo.Type + ";base64," + base64, Name = file.FileInfo.Name, Size = file.FileInfo.Size, base64string = resultBytes });
                 StateHasChanged();
             }
         }

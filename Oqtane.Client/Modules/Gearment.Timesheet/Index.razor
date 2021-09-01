@@ -133,7 +133,7 @@
                                                             @item.EventTime
                                                         </td>
                                                         <td>
-                                                            <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
+                                                            <ActionLink Action="EditTime" Parameters="@($"id=" + item.EventId)" Security="SecurityAccessLevel.Edit" Text="Edit"/>                                                            
                                                             <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId + " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
                                                             <SfButton OnClick="@(e => LoadProfile(item.EventId))" CssClass="btn btn-link" Content="Wrong Person?"></SfButton>
                                                         </td>
@@ -157,7 +157,7 @@
                                                         </td>
                                                         <td>@item.EventTime</td>
                                                         <td>
-                                                            <ActionLink Action="Edit" Parameters="@($"id=" + item.EventId)" />
+                                                            <ActionLink Action="EditTime" Parameters="@($"id=" + item.EventId)" Text="Edit"/>
                                                             <ActionDialog Header="Delete Event" Message="@("Are You Sure You Wish To Delete The " + item.EventId + " record?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await DeleteEvent(item.EventId))" />
                                                             <SfButton OnClick="@(e => LoadProfile(item.EventId))" CssClass="btn btn-link" Content="Wrong Person?"></SfButton>
                                                         </td>

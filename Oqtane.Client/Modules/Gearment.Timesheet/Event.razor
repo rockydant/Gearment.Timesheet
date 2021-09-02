@@ -76,11 +76,13 @@
 </div>
 
 
-@code { public override List<Resource> Resources => new List<Resource>()
+@code {    
+    public override List<Resource> Resources => new List<Resource>()
+
 {
-        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
-        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
-    };
+    new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+    new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+};
 
 
     private SfGrid<Employee_FaceRegEvent> Grid;

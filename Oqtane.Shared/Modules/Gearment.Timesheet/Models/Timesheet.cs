@@ -161,16 +161,64 @@ namespace Gearment.Timesheet.Models
 
         public bool IsMultiCheckin { get; set; }
         public bool IsWarning { get; set; }
+
+        public List<Holiday> Holidays { get; set; }
+        public List<SickLeave> SickLeaves { get; set; }
+
     }
 
     public class PayrollViewModel
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public decimal Rate { get; set; }
         public List<string[]> WorkingDates { get; set; }
         public decimal TotalWorkingHours { get; set; }
+        public decimal TotalBreakHours { get; set; }
+        public decimal TotalOvertimeHours { get; set; }
         public decimal TotalPay { get; set; }
+        public decimal TotalOvertimePay { get; set; }
+        public decimal TotalBonusPay { get; set; }
+        public decimal TotalSickPay { get; set; }
+        public string Department { get; set; }
+        public decimal BonusRate { get; set; }
+
+        public List<PayrollDetailViewModel> PayrollDetailList { get; set; }
+    }
+
+    public class PayrollDetailViewModel
+    {
+        public string DayOfWeek { get; set; }
+        public string Date { get; set; }
+        public string DailyStartTime { get; set; }
+        public string DailyEndTime { get; set; }
+        public string BreakStartTime { get; set; }
+        public string BreakEndTime { get; set; }        
+        public decimal TotalWorkingHourCurrentDay { get; set; }        
+        public string Status { get; set; }
+        public decimal TotalBreakHourCurrentDay { get; set; }
+        public decimal TotalOvertimeHourCurrentDay { get; set; }
+
+        public decimal TotalPayCurrentDay { get; set; }
+        public decimal TotalOvertimePayCurrentDay { get; set; }
+        public decimal TotalBonusPayCurrentDay { get; set; }
+        public decimal TotalSickPayCurrentDay { get; set; }
+    }
+
+    public class Holiday
+    {        
+        public DateTime Date { get; set; }
+
+        public int? BonusHour { get; set; }
+    }
+
+    public class SickLeave
+    {
+        public string Name { get; set; }
+        public string Department { get; set; }
+        public DateTime Date { get; set; }
+
+        public int? Hours { get; set; }
     }
 
     public class AttendanceReport

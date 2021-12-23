@@ -1,0 +1,122 @@
+@using Gearment.Timesheet.Models
+@using Gearment.Employee.Services
+@using Gearment.Employee.Models
+@using Gearment.Department.Models
+
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+
+<div class="form-group row">
+    <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
+        <label>Employee</label>
+        <SfDropDownList TValue="string" TItem="Employee" AllowFiltering="true" DataSource="@Employees" @bind-Value="@_employeeId">
+            <DropDownListFieldSettings Text="Name" Value="Name" GroupBy="Department"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+        <label>Department</label>
+        <SfDropDownList TValue="string" TItem="DepartmentViewModel" Placeholder="All" DataSource="@DepartmentListFilter" @bind-Value="@_department">
+            <DropDownListFieldSettings Value="Name" Text="Name"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+    <div class="col-xs-3 col-sm-3 col-lg-3 col-md-3">
+        <label>Date</label>
+        <SfDatePicker TValue="DateTime" Width="100%" @bind-Value="@_selectedDate"></SfDatePicker>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+        <label>Hours</label>
+        <SfNumericTextBox TValue="int?" Min="1" Max="8" @bind-Value="@_hourAmount"></SfNumericTextBox>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+        <label> </label>
+        <SfButton OnClick="AddHoliday" class="btn btn-info" Content="+"></SfButton>
+    </div>
+</div>
+<br />
+<div class="form-group row">
+    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <td scope="col">Name</td>
+                    <td scope="col">Department</td>
+                    <td scope="col">Date</td>
+                    <td scope="col">Hours</td>
+                    <td scope="col"></td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (SelectedDates != null)
+                {
+                    @foreach (var item in SelectedDates)
+                    {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Department</td>
+                    <td>@item.Date</td>
+                    <td>@item.Hours</td>
+                    <td><SfButton OnClick="@(()=>RemoveHoliday(item))" class="btn btn-info" Content="-"></SfButton></td>
+                </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<br />
+@code {
+    [Parameter]
+    public DateTime FromDate { get; set; }
+    [Parameter]
+    public DateTime ToDate { get; set; }
+    [Parameter]
+    public List<SickLeave> SelectedDates { get; set; }
+    [Parameter]
+    public List<Employee> Employees { get; set; }
+    [Parameter]
+    public List<Employee> SelectedEmployees { get; set; }
+    [Parameter]
+    public List<DepartmentViewModel> DepartmentListFilter { get; set; }
+
+    DateTime _selectedDate = DateTime.Today;
+    int? _hourAmount = 8;
+
+    string _employeeId = string.Empty;
+
+    string _department = string.Empty;
+
+    private DateTime _selectedDay = DateTime.Now;
+
+    private void AddHoliday()
+    {
+        if (!_hourAmount.HasValue || string.IsNullOrEmpty(_employeeId) || string.IsNullOrEmpty(_department))
+        {
+            return;
+        }
+
+        if (SelectedDates == null)
+        {
+            SelectedDates = new List<SickLeave>();
+        }
+
+        if (SelectedDates.Any(x => x.Date == _selectedDate) && SelectedDates.Any(x => x.Name == _employeeId))
+        {
+            return;
+        }
+
+        SickLeave leave = new SickLeave();
+        leave.Date = _selectedDate;
+        leave.Hours = _hourAmount;
+        leave.Name = _employeeId;
+        leave.Department = _department;
+
+        SelectedDates.Add(leave);
+    }
+
+    private void RemoveHoliday(SickLeave selectedRecord)
+    {
+        SelectedDates.RemoveAll(x => x == selectedRecord);
+    }
+}

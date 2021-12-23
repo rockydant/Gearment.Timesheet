@@ -1,0 +1,92 @@
+@using Gearment.Timesheet.Models
+
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+
+<br />
+<div class="form-group row">
+    <div class="col-xs-1 col-sm-1 col-lg-1 col-md-1">
+        <label>Holiday</label>
+    </div>
+    <div class="col-xs-4 col-sm-4 col-lg-4 col-md-4">
+        <SfDatePicker TValue="DateTime" Width="100%" Placeholder="From Date" @bind-Value="@_selectedDate"></SfDatePicker>
+    </div>
+    <div class="col-xs-1 col-sm-1 col-lg-1 col-md-1">
+        <label>Bonus Hours</label>
+    </div>
+    <div class="col-xs-4 col-sm-4 col-lg-4 col-md-4">
+        <SfNumericTextBox TValue="int?" Min="1" Max="8" @bind-Value="@_hourAmount"></SfNumericTextBox>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-lg-2 col-md-2">
+        <SfButton OnClick="AddHoliday" class="btn btn-info" Content="+"></SfButton>
+    </div>    
+</div>
+<br />
+<div class="form-group row">
+    <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <td scope="col">Date</td>
+                    <td scope="col">Hours</td>
+                    <td scope="col"></td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (SelectedDates != null)
+                {
+                    @foreach (var item in SelectedDates)
+                    {
+                        <tr>
+                            <td>@item.Date</td>
+                            <td>@item.BonusHour</td>
+                            <td><SfButton OnClick="@(()=>RemoveHoliday(item.Date))" class="btn btn-info" Content="-"></SfButton></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<br />
+@code {
+    [Parameter]
+    public DateTime FromDate { get; set; }
+    [Parameter]
+    public DateTime ToDate { get; set; }
+    [Parameter]
+    public List<Holiday> SelectedDates { get; set; }
+
+    DateTime _selectedDate = DateTime.Today;
+    int? _hourAmount = 8;
+
+    private void AddHoliday()
+    {
+        if (!_hourAmount.HasValue)
+        {
+            return;
+        }
+
+        if (SelectedDates == null)
+        {
+            SelectedDates = new List<Holiday>();
+        }
+
+        if (SelectedDates.Any(x => x.Date == _selectedDate))
+        {
+            return;
+        }
+
+        Holiday holiday = new Holiday();
+        holiday.Date = _selectedDate;
+        holiday.BonusHour = _hourAmount;
+
+        SelectedDates.Add(holiday);
+    }
+
+    private void RemoveHoliday(DateTime selectedDate)
+    {
+        SelectedDates.RemoveAll(x => x.Date == selectedDate);
+    }
+}

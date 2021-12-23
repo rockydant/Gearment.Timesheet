@@ -405,6 +405,145 @@ namespace Gearment.Timesheet.Controllers
         [HttpPost("attendance")]
         public List<Models.TimesheetDataExcelExport> GetAttendanceData([FromBody] TimesheetDailyQuery Query)
         {
+            return QueryPayrollData(Query);
+        }
+
+        [HttpPost("payroll")]
+        public List<Models.PayrollViewModel> GetPayrollData([FromBody] TimesheetDailyQuery Query)
+        {
+            List<PayrollViewModel> result = new List<PayrollViewModel>();
+            List<TimesheetDataExcelExport> summary = new List<TimesheetDataExcelExport>();
+            summary = QueryPayrollData(Query);
+
+            if (summary.Any())
+            {
+                foreach (var item in summary)
+                {
+                    var IsExisted = result.FirstOrDefault(x => x.Name == item.Name && x.Department == item.Department);
+
+                    PayrollDetailViewModel newRecord = new PayrollDetailViewModel();
+                    newRecord.DayOfWeek = item.DayOfWeek;
+                    newRecord.Date = item.Date;
+                    newRecord.DailyStartTime = item.DailyStartTime;
+                    newRecord.DailyEndTime = item.DailyEndTime;
+                    newRecord.BreakStartTime = item.BreakStartTime;
+                    newRecord.BreakEndTime = item.BreakEndTime;
+                    newRecord.TotalBreakHourCurrentDay = item.TotalBreakHour;
+                    newRecord.TotalWorkingHourCurrentDay = item.TotalWorkingHour;
+                    newRecord.TotalOvertimeHourCurrentDay = 0;
+
+                    if (Query.Holidays.Any(x => x.Date == DateTime.Parse(newRecord.Date)))
+                    {
+                        newRecord.TotalWorkingHourCurrentDay = 0;
+                    }
+
+                    if (IsBusinessDay(DateTime.Parse(newRecord.Date)))
+                    {
+                        if (newRecord.TotalWorkingHourCurrentDay >= 8)
+                        {
+                            newRecord.TotalOvertimeHourCurrentDay = newRecord.TotalWorkingHourCurrentDay - 8;
+                            newRecord.TotalWorkingHourCurrentDay = 8;
+                        }
+                    }
+                    else
+                    {
+                        newRecord.TotalOvertimeHourCurrentDay = newRecord.TotalWorkingHourCurrentDay;
+                        newRecord.TotalWorkingHourCurrentDay = 0;
+                    }
+
+                    if (Query.SickLeaves.Any(x => x.Name == item.Name && x.Department == item.Department && x.Date == DateTime.Parse(newRecord.Date)))
+                    {
+                        newRecord.TotalWorkingHourCurrentDay = 0;
+                    }
+
+                    newRecord.TotalOvertimePayCurrentDay = item.Rate * (decimal)1.5 * newRecord.TotalOvertimeHourCurrentDay;
+                    newRecord.TotalPayCurrentDay = item.Rate * newRecord.TotalWorkingHourCurrentDay;
+
+                    if (IsExisted != null)
+                    {
+                        newRecord.TotalSickPayCurrentDay = 0;
+                        IsExisted.PayrollDetailList.Add(newRecord);
+                        IsExisted.TotalPay += newRecord.TotalPayCurrentDay;
+                        IsExisted.TotalOvertimePay += newRecord.TotalOvertimePayCurrentDay;
+                        IsExisted.TotalSickPay += newRecord.TotalSickPayCurrentDay;
+
+                        IsExisted.TotalWorkingHours += newRecord.TotalWorkingHourCurrentDay;
+                        IsExisted.TotalBreakHours += newRecord.TotalBreakHourCurrentDay;
+                        IsExisted.TotalOvertimeHours += newRecord.TotalOvertimeHourCurrentDay;
+
+                        IsExisted.PayrollDetailList.OrderBy(x => x.Date);
+                    }
+                    else
+                    {
+                        PayrollViewModel newItem = new PayrollViewModel();
+                        newItem.Id = item.EmployeeId;
+                        newItem.Name = item.Name;
+                        newItem.Rate = item.Rate;
+                        newItem.Department = item.Department;
+                        newItem.BonusRate = item.Rate;
+                        newItem.TotalWorkingHours = 0;
+                        newItem.TotalBreakHours = 0;
+                        newItem.TotalOvertimeHours = 0;
+                        newItem.TotalPay = 0;
+                        newItem.TotalBonusPay = 0;
+                        newItem.TotalOvertimePay = 0;
+                        newItem.TotalSickPay = 0;
+                        newItem.PayrollDetailList = new List<PayrollDetailViewModel>();
+
+
+                        newRecord.TotalSickPayCurrentDay = 0;
+
+                        newItem.TotalPay += newRecord.TotalPayCurrentDay;
+                        newItem.TotalOvertimePay += newRecord.TotalOvertimePayCurrentDay;
+                        newItem.TotalBonusPay = (decimal)(item.Rate * Query.Holidays.Sum(x => x.BonusHour));
+                        newItem.TotalSickPay += newRecord.TotalSickPayCurrentDay;
+
+                        newItem.TotalWorkingHours += newRecord.TotalWorkingHourCurrentDay;
+                        newItem.TotalBreakHours += newRecord.TotalBreakHourCurrentDay;
+                        newItem.TotalOvertimeHours += newRecord.TotalOvertimeHourCurrentDay;
+
+                        newItem.PayrollDetailList.Add(newRecord);
+
+                        result.Add(newItem);
+                    }
+                }
+
+                foreach (var item in Query.SickLeaves)
+                {
+                    var employee = result.FirstOrDefault(x => x.Name == item.Name && x.Department == item.Department);
+                    if (employee != null)
+                    {
+                        PayrollDetailViewModel sickLeaveRecord = new PayrollDetailViewModel();
+                        sickLeaveRecord.TotalWorkingHourCurrentDay = 0;
+                        sickLeaveRecord.TotalBreakHourCurrentDay = 0;
+                        sickLeaveRecord.TotalOvertimeHourCurrentDay = 0;
+                        sickLeaveRecord.TotalPayCurrentDay = 0;
+                        sickLeaveRecord.TotalOvertimePayCurrentDay = 0;
+                        sickLeaveRecord.TotalBonusPayCurrentDay = 0;
+                        sickLeaveRecord.TotalSickPayCurrentDay = (decimal)item.Hours * employee.Rate;
+                        sickLeaveRecord.Date = item.Date.ToString("MM/dd/yyyy");
+                        sickLeaveRecord.DayOfWeek = item.Date.DayOfWeek.ToString();
+
+                        employee.PayrollDetailList.Add(sickLeaveRecord);
+                        employee.PayrollDetailList.OrderBy(x => x.Date);
+                        employee.TotalSickPay += sickLeaveRecord.TotalSickPayCurrentDay;
+                    }
+                }
+            }
+
+
+            return result;
+        }
+
+        private bool IsBusinessDay(DateTime date)
+        {
+            return
+                date.DayOfWeek != DayOfWeek.Saturday &&
+                date.DayOfWeek != DayOfWeek.Sunday;
+        }
+
+        private List<Models.TimesheetDataExcelExport> QueryPayrollData(TimesheetDailyQuery Query)
+        {
             var data = _TimesheetRepository.GetAllEmployee_FaceRegEvent(Query);
 
             if (Query.Department != "All")
@@ -604,7 +743,6 @@ namespace Gearment.Timesheet.Controllers
 
                 }
             }
-
 
             return summary;
         }

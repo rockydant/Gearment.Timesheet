@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.JSInterop;
 
 namespace Oqtane.Modules
 {
@@ -68,6 +69,14 @@ namespace Oqtane.Modules
             return newImage;
 
         }
+    }
 
+    public static class FileUtils
+    {
+        public static ValueTask<object> SaveAs(this IJSRuntime js, string filename, byte[] data)
+            => js.InvokeAsync<object>(
+               "saveAsFile",
+               filename,
+               Convert.ToBase64String(data));
     }
 }

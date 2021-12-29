@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -81,7 +82,7 @@ namespace Oqtane
                     var navigationManager = s.GetRequiredService<NavigationManager>();
                     var httpContextAccessor = s.GetRequiredService<IHttpContextAccessor>();
                     var authToken = httpContextAccessor.HttpContext.Request.Cookies[".AspNetCore.Identity.Application"];
-                    var client = new HttpClient(new HttpClientHandler {UseCookies = false});
+                    var client = new HttpClient(new HttpClientHandler { UseCookies = false });
                     if (authToken != null)
                     {
                         client.DefaultRequestHeaders.Add("Cookie", ".AspNetCore.Identity.Application=" + authToken);
@@ -135,6 +136,8 @@ namespace Oqtane
             services.AddScoped<ISqlService, SqlService>();
             services.AddScoped<ISystemService, SystemService>();
             services.AddScoped<ILocalizationService, LocalizationService>();
+
+            services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -231,7 +234,7 @@ namespace Oqtane
 
             if (_useSwagger)
             {
-                services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Oqtane", Version = "v1"}); });
+                services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Oqtane", Version = "v1" }); });
             }
         }
 

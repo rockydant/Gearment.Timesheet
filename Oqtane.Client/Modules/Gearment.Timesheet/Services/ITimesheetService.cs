@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Gearment.Timesheet.Models;
 
@@ -37,7 +38,7 @@ namespace Gearment.Timesheet.Services
 
         Task<Models.Employee_FaceRegEventDetail> GetAttendanceDataAsync(int EventId, int ModuleId);
 
-        Task<List<Models.PayrollViewModel>> GetPayrollDataAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);
+        Task<List<Models.PayrollViewModel>> GetPayrollDataAsync(int ModuleId, TimesheetDailyQuery TimesheetDailyQuery);        
         Task<Models.Employee_FaceRegEventDetail> UpdateAttendanceDataAsync(Models.Employee_FaceRegEventDetail eventDetail, int ModuleId);
         Task<Models.Employee_FaceRegEvent> AddAttendanceDataAsync(Models.Employee_FaceRegEvent eventDetail, int ModuleId);        
         Task DeleteAttendanceDataAsync(int EventId, int ModuleId);

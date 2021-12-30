@@ -176,6 +176,8 @@ namespace Gearment.Timesheet.Models
         public decimal TotalWorkingHours { get; set; }
         public decimal TotalBreakHours { get; set; }
         public decimal TotalOvertimeHours { get; set; }
+        public decimal TotalBonusHours { get; set; }
+        public decimal TotalSickHours { get; set; }
         public decimal TotalPay { get; set; }
         public decimal TotalOvertimePay { get; set; }
         public decimal TotalBonusPay { get; set; }
@@ -189,7 +191,7 @@ namespace Gearment.Timesheet.Models
     public class PayrollDetailViewModel
     {
         public string DayOfWeek { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public string DailyStartTime { get; set; }
         public string DailyEndTime { get; set; }
         public string BreakStartTime { get; set; }
@@ -198,7 +200,8 @@ namespace Gearment.Timesheet.Models
         public string Status { get; set; }
         public decimal TotalBreakHourCurrentDay { get; set; }
         public decimal TotalOvertimeHourCurrentDay { get; set; }
-
+        public decimal TotalBonusHourCurrentDay { get; set; }
+        public decimal TotalSickHourCurrentDay { get; set; }
         public decimal TotalPayCurrentDay { get; set; }
         public decimal TotalOvertimePayCurrentDay { get; set; }
         public decimal TotalBonusPayCurrentDay { get; set; }

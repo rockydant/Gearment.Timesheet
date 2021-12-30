@@ -87,6 +87,7 @@
                             <GridColumn Field=@nameof(PayrollViewModel.TotalOvertimeHours) HeaderText="TotalOvertimeHours" Type="ColumnType.Number" TextAlign="TextAlign.Left" Width="50"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.TotalPay) HeaderText="TotalPay" Format="c2" TextAlign="TextAlign.Left" Width="50"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.TotalOvertimePay) HeaderText="TotalOvertimePay" Format="c2" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                            <GridColumn Field=@nameof(PayrollViewModel.TotalBonusHours) HeaderText="TotalBonusPay" Format="c2" TextAlign="TextAlign.Left" Width="50"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.TotalBonusPay) HeaderText="TotalBonusPay" Format="c2" TextAlign="TextAlign.Left" Width="50"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.TotalSickPay) HeaderText="TotalSickPay" Format="c2" TextAlign="TextAlign.Left" Width="100"></GridColumn>
                             <GridTemplates>
@@ -210,168 +211,205 @@
             using (ExcelEngine excelEngine = new ExcelEngine())
             {
                 IApplication application = excelEngine.Excel;
-                application.DefaultVersion = ExcelVersion.Excel2016;
+                application.DefaultVersion = ExcelVersion.Excel2013;
 
                 //Create a workbook
                 IWorkbook workbook = application.Workbooks.Create(1);
                 IWorksheet worksheet = workbook.Worksheets[0];
+                worksheet.EnableSheetCalculations();
 
-                //Disable gridlines in the worksheet
-                worksheet.IsGridLinesVisible = false;
+                worksheet.Range["A2"].Text = "Holidays: " + SelectedHolidays.Count().ToString();
+                worksheet.Range["A2"].CellStyle.Font.Bold = true;
 
-                //Enter values to the cells from A3 to A5
-                worksheet.Range["A3"].Text = "46036 Michigan Ave";
-                worksheet.Range["A4"].Text = "Canton, USA";
-                worksheet.Range["A5"].Text = "Phone: +1 231-231-2310";
+                worksheet.Range["A3"].Text = "Name";
+                worksheet.Range["A3"].CellStyle.Font.Bold = true;
+                worksheet.Range["B3"].Text = "Department";
+                worksheet.Range["B3"].CellStyle.Font.Bold = true;
+                worksheet.Range["C3"].Text = "DayOfWeek";
+                worksheet.Range["C3"].CellStyle.Font.Bold = true;
+                worksheet.Range["D3"].Text = "Date";
+                worksheet.Range["D3"].CellStyle.Font.Bold = true;
+                worksheet.Range["E3"].Text = "Start";
+                worksheet.Range["E3"].CellStyle.Font.Bold = true;
+                worksheet.Range["F3"].Text = "End";
+                worksheet.Range["F3"].CellStyle.Font.Bold = true;
+                worksheet.Range["G3"].Text = "Break Start";
+                worksheet.Range["G3"].CellStyle.Font.Bold = true;
+                worksheet.Range["H3"].Text = "Break End";
+                worksheet.Range["H3"].CellStyle.Font.Bold = true;
+                worksheet.Range["I3"].Text = "Total Rest Hrs";
+                worksheet.Range["I3"].CellStyle.Font.Bold = true;
+                worksheet.Range["J3"].Text = "Total Working Hrs";
+                worksheet.Range["J3"].CellStyle.Font.Bold = true;
+                worksheet.Range["K3"].Text = "Sick Leave Hrs";
+                worksheet.Range["K3"].CellStyle.Font.Bold = true;
+                worksheet.Range["L3"].Text = "Rate";
+                worksheet.Range["L3"].CellStyle.Font.Bold = true;
+                worksheet.Range["M3"].Text = "Normal Hrs";
+                worksheet.Range["M3"].CellStyle.Font.Bold = true;
+                worksheet.Range["N3"].Text = "Overtime";
+                worksheet.Range["N3"].CellStyle.Font.Bold = true;
+                worksheet.Range["O3"].Text = "Bonus Hrs";
+                worksheet.Range["O3"].CellStyle.Font.Bold = true;
+                worksheet.Range["p3"].Text = "Sick Leave Hrs";
+                worksheet.Range["P3"].CellStyle.Font.Bold = true;
+                worksheet.Range["Q3"].Text = "Normal Pay";
+                worksheet.Range["Q3"].CellStyle.Font.Bold = true;
+                worksheet.Range["R3"].Text = "OT Pay";
+                worksheet.Range["R3"].CellStyle.Font.Bold = true;
+                worksheet.Range["S3"].Text = "Bonus Pay";
+                worksheet.Range["S3"].CellStyle.Font.Bold = true;
+                worksheet.Range["T3"].Text = "Total";
+                worksheet.Range["T3"].CellStyle.Font.Bold = true;
 
-                //Make the text bold
-                worksheet.Range["A3:A5"].CellStyle.Font.Bold = true;
+                if (SelectedHolidays.Any())
+                {
+                    worksheet.Range["B2"].Text = string.Join(";", SelectedHolidays.Select(x => x.Date.ToString("MM/dd/yyyy")));
+                    worksheet.Range["B2"].CellStyle.Font.Bold = true;
+                }
 
-                //Merge cells
-                worksheet.Range["D1:E1"].Merge();
+                int dataStartRow = 4;
 
-                //Enter text to the cell B1 and apply formatting
-                worksheet.Range["B1"].Text = "INVOICE";
-                worksheet.Range["B1"].CellStyle.Font.Bold = true;
-                worksheet.Range["B1"].CellStyle.Font.RGBColor = Color.FromArgb(42, 118, 189);
-                worksheet.Range["B1"].CellStyle.Font.Size = 35;
+                foreach (var item in _attendance)
+                {
+                    for (int i = 0; i < item.PayrollDetailList.Count; i++)
+                    {
+                        int currentRow = dataStartRow + i;
+                        worksheet.Range["A" + currentRow].Text = item.Name;
+                        worksheet.Range["B" + currentRow].Text = item.Department;
+                        worksheet.Range["C" + currentRow].Text = item.PayrollDetailList[i].DayOfWeek;
+                        worksheet.Range["D" + currentRow].Value = item.PayrollDetailList[i].Date.ToString("MM/dd/yyyy");
+                        worksheet.Range["E" + currentRow].Text = item.PayrollDetailList[i].DailyStartTime;
+                        worksheet.Range["F" + currentRow].Text = item.PayrollDetailList[i].DailyEndTime;
+                        worksheet.Range["G" + currentRow].Text = item.PayrollDetailList[i].BreakStartTime;
+                        worksheet.Range["H" + currentRow].Text = item.PayrollDetailList[i].BreakEndTime;
+                        worksheet.Range["I" + currentRow].Number = (double)item.PayrollDetailList[i].TotalBreakHourCurrentDay;
+                        worksheet.Range["J" + currentRow].Formula = "=SUM(M" + currentRow + ",N" + currentRow + ")";
 
-                //Apply alignment in the cell B1
-                worksheet.Range["B1"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-                worksheet.Range["B1"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
+                        worksheet.Range["L" + currentRow].Number = (double)item.Rate;
+                        worksheet.Range["M" + currentRow].Number = (double)item.PayrollDetailList[i].TotalWorkingHourCurrentDay;
 
-                //Enter values to the cells from D5 to E8
-                worksheet.Range["D5"].Text = "INVOICE#";
-                worksheet.Range["E5"].Text = "DATE";
-                worksheet.Range["D6"].Number = 1028;
-                worksheet.Range["E6"].Value = "12/31/2018";
-                worksheet.Range["D7"].Text = "CUSTOMER ID";
-                worksheet.Range["E7"].Text = "TERMS";
-                worksheet.Range["D8"].Number = 564;
-                worksheet.Range["E8"].Text = "Due Upon Receipt";
+                        worksheet.Range["N" + currentRow].Number = (double)item.PayrollDetailList[i].TotalOvertimeHourCurrentDay;
+                        if (item.PayrollDetailList[i].TotalOvertimeHourCurrentDay != 0)
+                        {
+                            worksheet.Range["N" + currentRow].CellStyle.Font.Color = ExcelKnownColors.Red;
+                        }
 
-                //Apply RGB backcolor to the cells from D5 to E8
-                worksheet.Range["D5:E5"].CellStyle.Color = Color.FromArgb(42, 118, 189);
-                worksheet.Range["D7:E7"].CellStyle.Color = Color.FromArgb(42, 118, 189);
+                        worksheet.Range["Q" + currentRow].Number = (double)item.PayrollDetailList[i].TotalPayCurrentDay;
+                        worksheet.Range["Q" + currentRow].NumberFormat = "$.00";
+                        worksheet.Range["R" + currentRow].Number = (double)item.PayrollDetailList[i].TotalOvertimePayCurrentDay;
+                        worksheet.Range["R" + currentRow].NumberFormat = "$.00";
+                        worksheet.Range["S" + currentRow].Number = (double)item.PayrollDetailList[i].TotalBonusPayCurrentDay;
+                        worksheet.Range["S" + currentRow].NumberFormat = "$.00";
+                    }
 
-                //Apply known colors to the text in cells D5 to E8
-                worksheet.Range["D5:E5"].CellStyle.Font.Color = ExcelKnownColors.White;
-                worksheet.Range["D7:E7"].CellStyle.Font.Color = ExcelKnownColors.White;
+                    int totalRowindex = dataStartRow + item.PayrollDetailList.Count;
 
-                //Make the text as bold from D5 to E8
-                worksheet.Range["D5:E8"].CellStyle.Font.Bold = true;
+                    worksheet.Range["A" + totalRowindex].Text = item.Name;
+                    worksheet.Range["A" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["A" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["A" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["B" + totalRowindex].Text = item.Department;
+                    worksheet.Range["B" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["B" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["B" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
 
-                //Apply alignment to the cells from D5 to E8
-                worksheet.Range["D5:E8"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-                worksheet.Range["D5:E5"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignCenter;
-                worksheet.Range["D7:E7"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignCenter;
-                worksheet.Range["D6:E6"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignTop;
 
-                //Enter value and applying formatting in the cell A7
-                worksheet.Range["A7"].Text = "  BILL TO";
-                worksheet.Range["A7"].CellStyle.Color = Color.FromArgb(42, 118, 189);
-                worksheet.Range["A7"].CellStyle.Font.Bold = true;
-                worksheet.Range["A7"].CellStyle.Font.Color = ExcelKnownColors.White;
+                    worksheet.Range["J" + totalRowindex].Formula = SumFormulaString("J", dataStartRow, dataStartRow + item.PayrollDetailList.Count - 1);
+                    worksheet.Range["J" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["J" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["J" + totalRowindex].CellStyle.Font.Size = 13;
 
-                //Apply alignment
-                worksheet.Range["A7"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignLeft;
-                worksheet.Range["A7"].CellStyle.VerticalAlignment = ExcelVAlign.VAlignCenter;
+                    if (item.TotalSickPay != 0)
+                    {
+                        worksheet.Range["K" + totalRowindex].Number = (double)item.TotalSickHours;
+                        worksheet.Range["K" + totalRowindex].CellStyle.Font.Bold = true;
+                        worksheet.Range["K" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                        worksheet.Range["K" + totalRowindex].CellStyle.Font.Size = 13;
+                        worksheet.Range["K" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 235, 245);
 
-                //Enter values in the cells A8 to A12
-                worksheet.Range["A8"].Text = "Steyn";
-                worksheet.Range["A9"].Text = "Great Lakes Food Market";
-                worksheet.Range["A10"].Text = "20 Whitehall Rd";
-                worksheet.Range["A11"].Text = "North Muskegon,USA";
-                worksheet.Range["A12"].Text = "+1 231-654-0000";
+                        worksheet.Range["P" + totalRowindex].Formula = "=K" + totalRowindex + "*L" + totalRowindex;
+                        worksheet.Range["p" + totalRowindex].NumberFormat = "$.00";
+                        worksheet.Range["P" + totalRowindex].CellStyle.Font.Bold = true;
+                        worksheet.Range["P" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                        worksheet.Range["P" + totalRowindex].CellStyle.Font.Size = 13;
+                        worksheet.Range["P" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 235, 245);
+                    }
 
-                //Create a Hyperlink for e-mail in the cell A13
-                IHyperLink hyperlink = worksheet.HyperLinks.Add(worksheet.Range["A13"]);
-                hyperlink.Type = ExcelHyperLinkType.Url;
-                hyperlink.Address = "Steyn@greatlakes.com";
-                hyperlink.ScreenTip = "Send Mail";
+                    worksheet.Range["L" + totalRowindex].Number = (double)item.Rate;
+                    worksheet.Range["L" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["L" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["L" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["L" + totalRowindex].CellStyle.Font.Size = 13;
 
-                //Merge column A and B from row 15 to 22
-                worksheet.Range["A15:B15"].Merge();
-                worksheet.Range["A16:B16"].Merge();
-                worksheet.Range["A17:B17"].Merge();
-                worksheet.Range["A18:B18"].Merge();
-                worksheet.Range["A19:B19"].Merge();
-                worksheet.Range["A20:B20"].Merge();
-                worksheet.Range["A21:B21"].Merge();
-                worksheet.Range["A22:B22"].Merge();
+                    worksheet.Range["M" + totalRowindex].Formula = SumFormulaString("M", dataStartRow, dataStartRow + item.PayrollDetailList.Count - 1);
+                    worksheet.Range["M" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["M" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["M" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["M" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 215, 238);
 
-                //Enter details of products and prices
-                worksheet.Range["A15"].Text = "  DESCRIPTION";
-                worksheet.Range["C15"].Text = "QTY";
-                worksheet.Range["D15"].Text = "UNIT PRICE";
-                worksheet.Range["E15"].Text = "AMOUNT";
-                worksheet.Range["A16"].Text = "Cabrales Cheese";
-                worksheet.Range["A17"].Text = "Chocos";
-                worksheet.Range["A18"].Text = "Pasta";
-                worksheet.Range["A19"].Text = "Cereals";
-                worksheet.Range["A20"].Text = "Ice Cream";
-                worksheet.Range["C16"].Number = 3;
-                worksheet.Range["C17"].Number = 2;
-                worksheet.Range["C18"].Number = 1;
-                worksheet.Range["C19"].Number = 4;
-                worksheet.Range["C20"].Number = 3;
-                worksheet.Range["D16"].Number = 21;
-                worksheet.Range["D17"].Number = 54;
-                worksheet.Range["D18"].Number = 10;
-                worksheet.Range["D19"].Number = 20;
-                worksheet.Range["D20"].Number = 30;
-                worksheet.Range["D23"].Text = "Total";
+                    worksheet.Range["N" + totalRowindex].Formula = SumFormulaString("N", dataStartRow, dataStartRow + item.PayrollDetailList.Count - 1);
+                    worksheet.Range["N" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["N" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["N" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["N" + totalRowindex].CellStyle.Color = Color.FromArgb(248, 203, 173);
 
-                //Apply number format
-                worksheet.Range["D16:E22"].NumberFormat = "$.00";
-                worksheet.Range["E23"].NumberFormat = "$.00";
+                    worksheet.Range["O" + totalRowindex].Number = (double)item.TotalBonusHours;
+                    worksheet.Range["O" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["O" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["O" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["O" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 224, 180);
 
-                //Apply incremental formula for column Amount by multiplying Qty and UnitPrice
-                application.EnableIncrementalFormula = true;
-                worksheet.Range["E16:E20"].Formula = "=C16*D16";
+                    worksheet.Range["Q" + totalRowindex].Formula = "=L" + totalRowindex + "*M" + totalRowindex;
+                    worksheet.Range["Q" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["Q" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["Q" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["Q" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["Q" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 215, 238);
 
-                //Formula for Sum the total
-                worksheet.Range["E23"].Formula = "=SUM(E16:E22)";
+                    worksheet.Range["R" + totalRowindex].Formula = "=L" + totalRowindex + "*N" + totalRowindex + "*1.5";
+                    worksheet.Range["R" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["R" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["R" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["R" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["R" + totalRowindex].CellStyle.Color = Color.FromArgb(248, 203, 173);
 
-                //Apply borders
-                worksheet.Range["A16:E22"].CellStyle.Borders[ExcelBordersIndex.EdgeTop].LineStyle = ExcelLineStyle.Thin;
-                worksheet.Range["A16:E22"].CellStyle.Borders[ExcelBordersIndex.EdgeBottom].LineStyle = ExcelLineStyle.Thin;
-                worksheet.Range["A16:E22"].CellStyle.Borders[ExcelBordersIndex.EdgeTop].Color = ExcelKnownColors.Grey_25_percent;
-                worksheet.Range["A16:E22"].CellStyle.Borders[ExcelBordersIndex.EdgeBottom].Color = ExcelKnownColors.Grey_25_percent;
-                worksheet.Range["A23:E23"].CellStyle.Borders[ExcelBordersIndex.EdgeTop].LineStyle = ExcelLineStyle.Thin;
-                worksheet.Range["A23:E23"].CellStyle.Borders[ExcelBordersIndex.EdgeBottom].LineStyle = ExcelLineStyle.Thin;
-                worksheet.Range["A23:E23"].CellStyle.Borders[ExcelBordersIndex.EdgeTop].Color = ExcelKnownColors.Black;
-                worksheet.Range["A23:E23"].CellStyle.Borders[ExcelBordersIndex.EdgeBottom].Color = ExcelKnownColors.Black;
+                    worksheet.Range["S" + totalRowindex].Formula = "=O" + totalRowindex + "*L" + totalRowindex;
+                    worksheet.Range["S" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["S" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["S" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["S" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["S" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 224, 180);
 
-                //Apply font setting for cells with product details
-                worksheet.Range["A3:E23"].CellStyle.Font.FontName = "Arial";
-                worksheet.Range["A3:E23"].CellStyle.Font.Size = 10;
-                worksheet.Range["A15:E15"].CellStyle.Font.Color = ExcelKnownColors.White;
-                worksheet.Range["A15:E15"].CellStyle.Font.Bold = true;
-                worksheet.Range["D23:E23"].CellStyle.Font.Bold = true;
+                    worksheet.Range["T" + totalRowindex].Formula = "=SUM(P" + totalRowindex + ":S" + totalRowindex + ")";
+                    worksheet.Range["T" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["T" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["T" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["T" + totalRowindex].CellStyle.Font.Size = 13;
 
-                //Apply cell color
-                worksheet.Range["A15:E15"].CellStyle.Color = Color.FromArgb(42, 118, 189);
+                    dataStartRow += item.PayrollDetailList.Count() + 1;
+                }
 
-                //Apply alignment to cells with product details
-                worksheet.Range["A15"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignLeft;
-                worksheet.Range["C15:C22"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-                worksheet.Range["D15:E15"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-
-                //Apply row height and column width to look good
-                worksheet.Range["A1"].ColumnWidth = 36;
-                worksheet.Range["B1"].ColumnWidth = 11;
-                worksheet.Range["C1"].ColumnWidth = 8;
-                worksheet.Range["D1:E1"].ColumnWidth = 18;
-                worksheet.Range["A1"].RowHeight = 47;
-                worksheet.Range["A2"].RowHeight = 15;
-                worksheet.Range["A3:A4"].RowHeight = 15;
-                worksheet.Range["A5"].RowHeight = 18;
-                worksheet.Range["A6"].RowHeight = 29;
-                worksheet.Range["A7"].RowHeight = 18;
-                worksheet.Range["A8"].RowHeight = 15;
-                worksheet.Range["A9:A14"].RowHeight = 15;
-                worksheet.Range["A15:A23"].RowHeight = 18;
+                worksheet.Range["A1"].ColumnWidth = 28;
+                worksheet.Range["B1"].ColumnWidth = 22;
+                worksheet.Range["C1"].ColumnWidth = 12;
+                worksheet.Range["D1"].ColumnWidth = 12;
+                worksheet.Range["E1"].ColumnWidth = 10;
+                worksheet.Range["F1"].ColumnWidth = 10;
+                worksheet.Range["G1"].ColumnWidth = 10;
+                worksheet.Range["H1"].ColumnWidth = 10;
+                worksheet.Range["I1"].ColumnWidth = 13;
+                worksheet.Range["J1"].ColumnWidth = 17;
+                worksheet.Range["K1"].ColumnWidth = 16;
+                worksheet.Range["L1"].ColumnWidth = 12;
+                worksheet.Range["M1"].ColumnWidth = 12;
+                worksheet.Range["N1"].ColumnWidth = 12;
+                worksheet.Range["O1"].ColumnWidth = 12;
+                worksheet.Range["P1"].ColumnWidth = 13;
+                worksheet.Range["Q1"].ColumnWidth = 20;
+                worksheet.Range["R1"].ColumnWidth = 18;
+                worksheet.Range["S1"].ColumnWidth = 18;
+                worksheet.Range["T1"].ColumnWidth = 18;
 
                 //Save the document as a stream and retrun the stream.
                 using (MemoryStream stream = new MemoryStream())
@@ -380,12 +418,18 @@
                     workbook.SaveAs(stream);
 
                     //Download the excel file
-                    await JS.SaveAs("test.xlsx", stream.ToArray());
+                    await JS.SaveAs("Payroll-" + _fromDate.ToString("MMddyyyy") + "-" + _toDate.ToString("MMddyyyy") + ".xlsx", stream.ToArray());
                 }
             }
         }
 
         HideProgressIndicator();
+    }
+
+    private string SumFormulaString(string columnName, int startRow, int endRow)
+    {
+        string result = "SUM(" + columnName + startRow + ":" + columnName + endRow + ")";
+        return result;
     }
 
     private async Task Create()

@@ -216,6 +216,7 @@
                 //Create a workbook
                 IWorkbook workbook = application.Workbooks.Create(1);
                 IWorksheet worksheet = workbook.Worksheets[0];
+                worksheet.Name = "Summary";
                 worksheet.EnableSheetCalculations();
 
                 worksheet.Range["A2"].Text = "Holidays: " + SelectedHolidays.Count().ToString();
@@ -268,7 +269,20 @@
                     worksheet.Range["B2"].CellStyle.Font.Bold = true;
                 }
 
-                int dataStartRow = 4;
+                int headerRowIndex = 4;
+                worksheet.Range["B" + headerRowIndex].Text = "Total Amount";
+                worksheet.Range["C" + headerRowIndex].Number = (double)_TotalAmount;
+                worksheet.Range["C" + headerRowIndex].NumberFormat = "$.00";
+
+                int departmentCount = _department.Count();
+                for (int i = 0; i < departmentCount; i++)
+                {
+                    int currentRowIndex = i + headerRowIndex + 1;
+                    worksheet.Range["B" + currentRowIndex].Text = _department[i].ToString();
+                    worksheet.Range["C" + currentRowIndex].Number = (double)_attendance.Where(x => x.Department == _department[i].ToString()).Sum(x => x.TotalPay + x.TotalOvertimePay + x.TotalBonusPay);
+                }
+
+                int dataStartRow = headerRowIndex + departmentCount + 1;
 
                 foreach (var item in _attendance)
                 {

@@ -419,6 +419,8 @@ namespace Gearment.Timesheet.Controllers
 
             if (summary.Any())
             {
+                summary = summary.Where(x => x.Rate != -1).ToList();
+
                 foreach (var item in summary)
                 {
                     var IsExisted = result.FirstOrDefault(x => x.Name == item.Name && x.Department == item.Department);

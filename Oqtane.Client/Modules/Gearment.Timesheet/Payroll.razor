@@ -219,70 +219,82 @@
                 worksheet.Name = "Summary";
                 worksheet.EnableSheetCalculations();
 
-                worksheet.Range["A2"].Text = "Holidays: " + SelectedHolidays.Count().ToString();
-                worksheet.Range["A2"].CellStyle.Font.Bold = true;
-
-                worksheet.Range["A3"].Text = "Name";
-                worksheet.Range["A3"].CellStyle.Font.Bold = true;
-                worksheet.Range["B3"].Text = "Department";
-                worksheet.Range["B3"].CellStyle.Font.Bold = true;
-                worksheet.Range["C3"].Text = "DayOfWeek";
-                worksheet.Range["C3"].CellStyle.Font.Bold = true;
-                worksheet.Range["D3"].Text = "Date";
-                worksheet.Range["D3"].CellStyle.Font.Bold = true;
-                worksheet.Range["E3"].Text = "Start";
-                worksheet.Range["E3"].CellStyle.Font.Bold = true;
-                worksheet.Range["F3"].Text = "End";
-                worksheet.Range["F3"].CellStyle.Font.Bold = true;
-                worksheet.Range["G3"].Text = "Break Start";
-                worksheet.Range["G3"].CellStyle.Font.Bold = true;
-                worksheet.Range["H3"].Text = "Break End";
-                worksheet.Range["H3"].CellStyle.Font.Bold = true;
-                worksheet.Range["I3"].Text = "Total Rest Hrs";
-                worksheet.Range["I3"].CellStyle.Font.Bold = true;
-                worksheet.Range["J3"].Text = "Total Working Hrs";
-                worksheet.Range["J3"].CellStyle.Font.Bold = true;
-                worksheet.Range["K3"].Text = "Sick Leave Hrs";
-                worksheet.Range["K3"].CellStyle.Font.Bold = true;
-                worksheet.Range["L3"].Text = "Rate";
-                worksheet.Range["L3"].CellStyle.Font.Bold = true;
-                worksheet.Range["M3"].Text = "Normal Hrs";
-                worksheet.Range["M3"].CellStyle.Font.Bold = true;
-                worksheet.Range["N3"].Text = "Overtime";
-                worksheet.Range["N3"].CellStyle.Font.Bold = true;
-                worksheet.Range["O3"].Text = "Bonus Hrs";
-                worksheet.Range["O3"].CellStyle.Font.Bold = true;
-                worksheet.Range["p3"].Text = "Sick Leave Hrs";
-                worksheet.Range["P3"].CellStyle.Font.Bold = true;
-                worksheet.Range["Q3"].Text = "Normal Pay";
-                worksheet.Range["Q3"].CellStyle.Font.Bold = true;
-                worksheet.Range["R3"].Text = "OT Pay";
-                worksheet.Range["R3"].CellStyle.Font.Bold = true;
-                worksheet.Range["S3"].Text = "Bonus Pay";
-                worksheet.Range["S3"].CellStyle.Font.Bold = true;
-                worksheet.Range["T3"].Text = "Total";
-                worksheet.Range["T3"].CellStyle.Font.Bold = true;
+                worksheet.Range["A1"].Text = "Holidays: " + SelectedHolidays.Count().ToString();
+                worksheet.Range["A1"].CellStyle.Font.Bold = true;
 
                 if (SelectedHolidays.Any())
                 {
-                    worksheet.Range["B2"].Text = string.Join(";", SelectedHolidays.Select(x => x.Date.ToString("MM/dd/yyyy")));
-                    worksheet.Range["B2"].CellStyle.Font.Bold = true;
+                    worksheet.Range["A1"].Text = string.Join(";", SelectedHolidays.Select(x => x.Date.ToString("MM/dd/yyyy")));
+                    worksheet.Range["A1"].CellStyle.Font.Bold = true;
                 }
 
-                int headerRowIndex = 4;
-                worksheet.Range["B" + headerRowIndex].Text = "Total Amount";
-                worksheet.Range["C" + headerRowIndex].Number = (double)_TotalAmount;
-                worksheet.Range["C" + headerRowIndex].NumberFormat = "$.00";
+                worksheet.Range["A2"].Text = "Total Amount";
+                worksheet.Range["A2"].CellStyle.Font.Bold = true;
+                worksheet.Range["A2"].CellStyle.Font.Color = ExcelKnownColors.Red;
+                worksheet.Range["B2"].Number = (double)_TotalAmount;
+                worksheet.Range["B2"].NumberFormat = "$.00";
+                worksheet.Range["B2"].CellStyle.Font.Bold = true;
+                worksheet.Range["B2"].CellStyle.Font.Color = ExcelKnownColors.Red;
 
-                int departmentCount = _department.Count();
+                int startRowIndex = 3;
+                int departmentCount = departmentListFilter.Count();
+
                 for (int i = 0; i < departmentCount; i++)
                 {
-                    int currentRowIndex = i + headerRowIndex + 1;
-                    worksheet.Range["B" + currentRowIndex].Text = _department[i].ToString();
-                    worksheet.Range["C" + currentRowIndex].Number = (double)_attendance.Where(x => x.Department == _department[i].ToString()).Sum(x => x.TotalPay + x.TotalOvertimePay + x.TotalBonusPay);
+                    int currentRowIndex = i + startRowIndex;
+                    worksheet.Range["A" + currentRowIndex].Text = departmentListFilter[i].Name.ToString();
+                    worksheet.Range["A" + currentRowIndex].CellStyle.Font.Bold = true;
+
+                    worksheet.Range["B" + currentRowIndex].Number = (double)_attendance.Where(x => x.Department == departmentListFilter[i].Name.ToString()).Sum(x => x.TotalPay + x.TotalOvertimePay + x.TotalBonusPay);
+                    worksheet.Range["B" + currentRowIndex].CellStyle.Font.Color = ExcelKnownColors.Red;
+                    worksheet.Range["B" + currentRowIndex].CellStyle.Font.Bold = true;
+                    worksheet.Range["B" + currentRowIndex].NumberFormat = "$.00";
                 }
 
-                int dataStartRow = headerRowIndex + departmentCount + 1;
+                int headerRowIndex = startRowIndex + departmentCount + 1;
+
+                worksheet.Range["A" + headerRowIndex].Text = "Name";
+                worksheet.Range["A" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["B" + headerRowIndex].Text = "Department";
+                worksheet.Range["B" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["C" + headerRowIndex].Text = "DayOfWeek";
+                worksheet.Range["C" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["D" + headerRowIndex].Text = "Date";
+                worksheet.Range["D" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["E" + headerRowIndex].Text = "Start";
+                worksheet.Range["E" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["F" + headerRowIndex].Text = "End";
+                worksheet.Range["F" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["G" + headerRowIndex].Text = "Break Start";
+                worksheet.Range["G" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["H" + headerRowIndex].Text = "Break End";
+                worksheet.Range["H" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["I" + headerRowIndex].Text = "Total Rest Hrs";
+                worksheet.Range["I" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["J" + headerRowIndex].Text = "Total Working Hrs";
+                worksheet.Range["J" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["K" + headerRowIndex].Text = "Sick Leave Hrs";
+                worksheet.Range["K" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["L" + headerRowIndex].Text = "Rate";
+                worksheet.Range["L" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["M" + headerRowIndex].Text = "Normal Hrs";
+                worksheet.Range["M" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["N" + headerRowIndex].Text = "Overtime";
+                worksheet.Range["N" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["O" + headerRowIndex].Text = "Bonus Hrs";
+                worksheet.Range["O" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["p" + headerRowIndex].Text = "Sick Leave Hrs";
+                worksheet.Range["P" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["Q" + headerRowIndex].Text = "Normal Pay";
+                worksheet.Range["Q" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["R" + headerRowIndex].Text = "OT Pay";
+                worksheet.Range["R" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["S" + headerRowIndex].Text = "Bonus Pay";
+                worksheet.Range["S" + headerRowIndex].CellStyle.Font.Bold = true;
+                worksheet.Range["T" + headerRowIndex].Text = "Total";
+                worksheet.Range["T" + headerRowIndex].CellStyle.Font.Bold = true;
+
+                int dataStartRow = headerRowIndex + 1;
 
                 foreach (var item in _attendance)
                 {

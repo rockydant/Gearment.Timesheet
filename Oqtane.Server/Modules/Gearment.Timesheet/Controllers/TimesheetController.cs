@@ -417,6 +417,8 @@ namespace Gearment.Timesheet.Controllers
             List<TimesheetDataExcelExport> summary = new List<TimesheetDataExcelExport>();
             summary = QueryPayrollData(Query);
 
+            // summary = summary.Where(x => x.Name == "Dung Truong").ToList();
+
             if (summary.Any())
             {
                 summary = summary.Where(x => x.Rate != -1).ToList();
@@ -435,11 +437,6 @@ namespace Gearment.Timesheet.Controllers
                     newRecord.TotalBreakHourCurrentDay = item.TotalRestHour;
                     newRecord.TotalWorkingHourCurrentDay = item.TotalWorkingHour;
                     newRecord.TotalOvertimeHourCurrentDay = 0;
-
-                    //if (Query.Holidays.Any(x => x.Date == DateTime.Parse(newRecord.Date)))
-                    //{
-                    //    newRecord.TotalBonusHourCurrentDay = (decimal)Query.Holidays.FirstOrDefault(x => x.Date == DateTime.Parse(newRecord.Date)).BonusHour;
-                    //}
 
                     if (IsBusinessDay(newRecord.Date))
                     {
@@ -508,7 +505,12 @@ namespace Gearment.Timesheet.Controllers
 
                         result.Add(newItem);
                     }
-                }               
+                }
+
+                foreach (var item in result)
+                {
+                    item.PayrollDetailList = item.PayrollDetailList.OrderBy(x => x.Date).ToList();
+                }
 
                 foreach (var item in Query.SickLeaves)
                 {
@@ -520,8 +522,7 @@ namespace Gearment.Timesheet.Controllers
                         sickLeaveRecord.TotalBreakHourCurrentDay = 0;
                         sickLeaveRecord.TotalOvertimeHourCurrentDay = 0;
                         sickLeaveRecord.TotalPayCurrentDay = 0;
-                        sickLeaveRecord.TotalOvertimePayCurrentDay = 0;
-                        //sickLeaveRecord.TotalBonusPayCurrentDay = 0;
+                        sickLeaveRecord.TotalOvertimePayCurrentDay = 0;                        
                         sickLeaveRecord.TotalSickHourCurrentDay = (decimal)item.Hours;
                         sickLeaveRecord.TotalSickPayCurrentDay = (decimal)item.Hours * employee.Rate;
                         sickLeaveRecord.Date = item.Date;

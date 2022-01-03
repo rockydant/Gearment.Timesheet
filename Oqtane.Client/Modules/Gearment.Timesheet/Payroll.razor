@@ -224,8 +224,8 @@
 
                 if (SelectedHolidays.Any())
                 {
-                    worksheet.Range["A1"].Text = string.Join(";", SelectedHolidays.Select(x => x.Date.ToString("MM/dd/yyyy")));
-                    worksheet.Range["A1"].CellStyle.Font.Bold = true;
+                    worksheet.Range["A2"].Text = string.Join(";", SelectedHolidays.Select(x => x.Date.ToString("MM/dd/yyyy")));
+                    worksheet.Range["A2"].CellStyle.Font.Bold = true;
                 }
 
                 worksheet.Range["A2"].Text = "Total Amount";
@@ -426,16 +426,16 @@
                 worksheet.Range["H1"].ColumnWidth = 10;
                 worksheet.Range["I1"].ColumnWidth = 13;
                 worksheet.Range["J1"].ColumnWidth = 17;
-                worksheet.Range["K1"].ColumnWidth = 16;
-                worksheet.Range["L1"].ColumnWidth = 12;
+                worksheet.Range["K1"].ColumnWidth = 12;
+                worksheet.Range["L1"].ColumnWidth = 10;
                 worksheet.Range["M1"].ColumnWidth = 12;
                 worksheet.Range["N1"].ColumnWidth = 12;
                 worksheet.Range["O1"].ColumnWidth = 12;
                 worksheet.Range["P1"].ColumnWidth = 13;
-                worksheet.Range["Q1"].ColumnWidth = 20;
-                worksheet.Range["R1"].ColumnWidth = 18;
-                worksheet.Range["S1"].ColumnWidth = 18;
-                worksheet.Range["T1"].ColumnWidth = 18;
+                worksheet.Range["Q1"].ColumnWidth = 16;
+                worksheet.Range["R1"].ColumnWidth = 16;
+                worksheet.Range["S1"].ColumnWidth = 12;
+                worksheet.Range["T1"].ColumnWidth = 14;
 
                 //Save the document as a stream and retrun the stream.
                 using (MemoryStream stream = new MemoryStream())

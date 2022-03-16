@@ -1,6 +1,7 @@
 @using Gearment.Employee.Services
 @using Gearment.Employee.Models
 @using Gearment.Department.Models
+@using Gearment.GearmentSetting.Services
 @using Syncfusion.Blazor.Data
 
 @using Syncfusion.Blazor.Popups
@@ -12,6 +13,7 @@
 @namespace Gearment.Employee
 @inherits ModuleBase
 @inject IEmployeeService EmployeeService
+@inject IGearmentSettingService GearmentSettingService
 @inject NavigationManager NavigationManager
 
 <div class="form-group row">
@@ -148,6 +150,13 @@
             await RefreshGrid();
             departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
             departmentListFilter.AddRange(departmentList);
+
+            var settingConfig = await GearmentSettingService.GetGearmentSettingsAsync(ModuleState.ModuleId);
+            var minWage = settingConfig.FirstOrDefault(x => x.Name == "min-wage");
+            if (minWage != null)
+            {
+                _rate = double.Parse(minWage.Value);
+            }
 
         }
         catch (Exception ex)

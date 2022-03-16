@@ -4,6 +4,8 @@
 @using Gearment.Timesheet.Models;
 @using Gearment.Employee.Models
 @using Gearment.Department.Models
+@using Gearment.GearmentSetting.Services
+
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Inputs
@@ -15,6 +17,7 @@
 @inherits ModuleBase
 @inject IEmployeeService EmployeeService
 @inject ITimesheetService TimesheetService
+@inject IGearmentSettingService GearmentSettingService
 @inject NavigationManager NavigationManager
 
 <SfTab CssClass="default-tab">
@@ -258,6 +261,14 @@
     {
         departmentList = await EmployeeService.GetDepartmentsAsync(ModuleState.ModuleId);
         StateHasChanged();
+
+        var settingConfig = await GearmentSettingService.GetGearmentSettingsAsync(ModuleState.ModuleId);
+        var minWage = settingConfig.FirstOrDefault(x => x.Name == "min-wage");
+        if (minWage != null)
+        {
+            _rate = double.Parse(minWage.Value);
+        }
+
         HideProgressIndicator();
     }
 

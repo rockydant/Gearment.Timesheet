@@ -268,6 +268,7 @@ namespace Gearment.Timesheet.Repository
                     employeeDetail.Note = employee.Note;
                     employeeDetail.StartDate = employee.StartDate;
                     employeeDetail.IsWarning = item.IsWarning;
+                    employeeDetail.IsFixedSalary = employee.IsFixedSalary;
                     employeeDetail.ImageUrl = item.EventTime.Year + "-" + item.EventTime.ToString("MM") + "-" + item.EventTime.ToString("dd") + "/" + item.EventId + ".jpg";
 
                     result.Add(employeeDetail);

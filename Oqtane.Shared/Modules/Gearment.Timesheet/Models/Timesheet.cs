@@ -58,6 +58,8 @@ namespace Gearment.Timesheet.Models
         public string Note { get; set; }
         public DateTime StartDate { get; set; }
         public string ImageUrl { get; set; }
+
+        public int IsFixedSalary { get; set; }
     }
 
     public class Employee_FaceRegEventSummary
@@ -123,6 +125,7 @@ namespace Gearment.Timesheet.Models
         public decimal TotalBreakHour { get; set; }
         public string Notes { get; set; }
         public string Present { get; set; }
+        public int IsFixedSalary { get; set; }
 
         public List<Employee_FaceRegEventDetail> EventTimeLine { get; set; }
         public string CreatedBy { get; set; }
@@ -172,6 +175,7 @@ namespace Gearment.Timesheet.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal Rate { get; set; }
+        public int IsFixedSalary { get; set; }
         public List<string[]> WorkingDates { get; set; }
         public decimal TotalWorkingHours { get; set; }
         public decimal TotalBreakHours { get; set; }
@@ -198,6 +202,8 @@ namespace Gearment.Timesheet.Models
         public string BreakEndTime { get; set; }        
         public decimal TotalWorkingHourCurrentDay { get; set; }        
         public string Status { get; set; }
+        public int IsFixedSalary { get; set; }
+
         public decimal TotalBreakHourCurrentDay { get; set; }
         public decimal TotalOvertimeHourCurrentDay { get; set; }
         public decimal TotalBonusHourCurrentDay { get; set; }

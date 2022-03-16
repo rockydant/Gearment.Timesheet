@@ -105,6 +105,22 @@
                 <GridColumn Field=@nameof(Employee.StartDate) HeaderText="Start Date" Format="d" TextAlign="TextAlign.Left" Width="100"></GridColumn>
                 <GridColumn Field=@nameof(Employee.Status) HeaderText="Status" TextAlign="TextAlign.Left" Width="60"></GridColumn>
                 <GridColumn Field=@nameof(Employee.Note) HeaderText="Note" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn HeaderText="Fixed Salary" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+                        @{ var employee = (context as Employee);
+                            if (employee.IsFixedSalary == 1)
+                            {
+
+
+                                <input type="checkbox" disabled checked data-toggle="toggle">
+                            }
+                            else
+                            {
+                                <input type="checkbox" disabled data-toggle="toggle">
+                            }
+                        }
+                    </Template>
+                </GridColumn>
 
                 <GridColumn HeaderText="Action" TextAlign="TextAlign.Center" Width="120">
                     <Template>

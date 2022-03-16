@@ -437,6 +437,7 @@ namespace Gearment.Timesheet.Controllers
                     newRecord.TotalBreakHourCurrentDay = item.TotalRestHour;
                     newRecord.TotalWorkingHourCurrentDay = item.TotalWorkingHour;
                     newRecord.TotalOvertimeHourCurrentDay = 0;
+                    newRecord.IsFixedSalary = item.IsFixedSalary;
 
                     if (IsBusinessDay(newRecord.Date))
                     {
@@ -457,8 +458,16 @@ namespace Gearment.Timesheet.Controllers
                         newRecord.TotalWorkingHourCurrentDay = 0;
                     }
 
-                    newRecord.TotalOvertimePayCurrentDay = item.Rate * (decimal)1.5 * newRecord.TotalOvertimeHourCurrentDay;
-                    newRecord.TotalPayCurrentDay = item.Rate * newRecord.TotalWorkingHourCurrentDay;
+                    if (1 != newRecord.IsFixedSalary)
+                    {
+                        newRecord.TotalOvertimePayCurrentDay = item.Rate * (decimal)1.5 * newRecord.TotalOvertimeHourCurrentDay;
+                        newRecord.TotalPayCurrentDay = item.Rate * newRecord.TotalWorkingHourCurrentDay;
+                    }
+                    else
+                    {
+                        newRecord.TotalOvertimePayCurrentDay = 0;
+                        newRecord.TotalPayCurrentDay = 0;
+                    }                    
 
                     if (IsExisted != null)
                     {
@@ -480,6 +489,7 @@ namespace Gearment.Timesheet.Controllers
                         newItem.Id = item.EmployeeId;
                         newItem.Name = item.Name;
                         newItem.Rate = item.Rate;
+                        newItem.IsFixedSalary = item.IsFixedSalary;
                         newItem.Department = item.Department;
                         newItem.BonusRate = item.Rate;
                         newItem.TotalWorkingHours = 0;
@@ -522,7 +532,7 @@ namespace Gearment.Timesheet.Controllers
                         sickLeaveRecord.TotalBreakHourCurrentDay = 0;
                         sickLeaveRecord.TotalOvertimeHourCurrentDay = 0;
                         sickLeaveRecord.TotalPayCurrentDay = 0;
-                        sickLeaveRecord.TotalOvertimePayCurrentDay = 0;                        
+                        sickLeaveRecord.TotalOvertimePayCurrentDay = 0;
                         sickLeaveRecord.TotalSickHourCurrentDay = (decimal)item.Hours;
                         sickLeaveRecord.TotalSickPayCurrentDay = (decimal)item.Hours * employee.Rate;
                         sickLeaveRecord.Date = item.Date;
@@ -572,6 +582,14 @@ namespace Gearment.Timesheet.Controllers
                             item.TotalBonusHours += (decimal)holiday.BonusHour;
                         }
                     }
+
+                    if (item.IsFixedSalary == 1)
+                    {
+                        item.TotalPay = item.Rate;
+                        item.TotalBonusPay = 0;
+                        item.TotalOvertimePay = 0;
+                    }
+
                 }
             }
 
@@ -615,6 +633,7 @@ namespace Gearment.Timesheet.Controllers
                     newItem.DayOfWeek = item.EventTime.DayOfWeek.ToString();
                     newItem.Rate = item.Rate;
                     newItem.PayrollID = item.PayrollID.ToString();
+                    newItem.IsFixedSalary = item.IsFixedSalary;
 
                     summary.Add(newItem);
                 }

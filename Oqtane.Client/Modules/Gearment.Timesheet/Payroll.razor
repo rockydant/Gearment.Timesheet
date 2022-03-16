@@ -69,7 +69,7 @@
                 <div class="form-group row">
                     <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
                         <div class="alert alert-primary" role="alert">
-                            Total Payment Amount <a href="#" class="alert-link"> $@_TotalAmount</a>
+                            Total Payment Amount <a href="#" class="alert-link">@_TotalAmount.ToString("C")</a>
                         </div>
                     </div>
                 </div>
@@ -232,7 +232,7 @@
                 worksheet.Range["A2"].CellStyle.Font.Bold = true;
                 worksheet.Range["A2"].CellStyle.Font.Color = ExcelKnownColors.Red;
                 worksheet.Range["B2"].Number = (double)_TotalAmount;
-                worksheet.Range["B2"].NumberFormat = "$.00";
+                worksheet.Range["B2"].NumberFormat = "$#,###.00";
                 worksheet.Range["B2"].CellStyle.Font.Bold = true;
                 worksheet.Range["B2"].CellStyle.Font.Color = ExcelKnownColors.Red;
 
@@ -248,7 +248,7 @@
                     worksheet.Range["B" + currentRowIndex].Number = (double)_attendance.Where(x => x.Department == departmentListFilter[i].Name.ToString()).Sum(x => x.TotalPay + x.TotalOvertimePay + x.TotalBonusPay);
                     worksheet.Range["B" + currentRowIndex].CellStyle.Font.Color = ExcelKnownColors.Red;
                     worksheet.Range["B" + currentRowIndex].CellStyle.Font.Bold = true;
-                    worksheet.Range["B" + currentRowIndex].NumberFormat = "$.00";
+                    worksheet.Range["B" + currentRowIndex].NumberFormat = "$#,###.00";
                 }
 
                 int headerRowIndex = startRowIndex + departmentCount + 1;
@@ -322,11 +322,11 @@
                         }
 
                         worksheet.Range["Q" + currentRow].Number = (double)item.PayrollDetailList[i].TotalPayCurrentDay;
-                        worksheet.Range["Q" + currentRow].NumberFormat = "$.00";
+                        worksheet.Range["Q" + currentRow].NumberFormat = "$#,###.00";
                         worksheet.Range["R" + currentRow].Number = (double)item.PayrollDetailList[i].TotalOvertimePayCurrentDay;
-                        worksheet.Range["R" + currentRow].NumberFormat = "$.00";
+                        worksheet.Range["R" + currentRow].NumberFormat = "$#,###.00";
                         worksheet.Range["S" + currentRow].Number = (double)item.PayrollDetailList[i].TotalBonusPayCurrentDay;
-                        worksheet.Range["S" + currentRow].NumberFormat = "$.00";
+                        worksheet.Range["S" + currentRow].NumberFormat = "$#,###.00";
                     }
 
                     int totalRowindex = dataStartRow + item.PayrollDetailList.Count;
@@ -355,7 +355,7 @@
                         worksheet.Range["K" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 235, 245);
 
                         worksheet.Range["P" + totalRowindex].Formula = "=K" + totalRowindex + "*L" + totalRowindex;
-                        worksheet.Range["p" + totalRowindex].NumberFormat = "$.00";
+                        worksheet.Range["p" + totalRowindex].NumberFormat = "$#,###.00";
                         worksheet.Range["P" + totalRowindex].CellStyle.Font.Bold = true;
                         worksheet.Range["P" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
                         worksheet.Range["P" + totalRowindex].CellStyle.Font.Size = 13;
@@ -363,7 +363,7 @@
                     }
 
                     worksheet.Range["L" + totalRowindex].Number = (double)item.Rate;
-                    worksheet.Range["L" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["L" + totalRowindex].NumberFormat = "$#,###.00";
                     worksheet.Range["L" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["L" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
                     worksheet.Range["L" + totalRowindex].CellStyle.Font.Size = 13;
@@ -386,29 +386,53 @@
                     worksheet.Range["O" + totalRowindex].CellStyle.Font.Size = 13;
                     worksheet.Range["O" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 224, 180);
 
-                    worksheet.Range["Q" + totalRowindex].Formula = "=L" + totalRowindex + "*M" + totalRowindex;
-                    worksheet.Range["Q" + totalRowindex].NumberFormat = "$.00";
+                    if (item.IsFixedSalary == 1)
+                    {
+                        worksheet.Range["Q" + totalRowindex].Formula = "=L" + totalRowindex;
+                    }
+                    else
+                    {
+                        worksheet.Range["Q" + totalRowindex].Formula = "=L" + totalRowindex + "*M" + totalRowindex;
+                    }
+
+                    worksheet.Range["Q" + totalRowindex].NumberFormat = "$#,###.00";
                     worksheet.Range["Q" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["Q" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
                     worksheet.Range["Q" + totalRowindex].CellStyle.Font.Size = 13;
                     worksheet.Range["Q" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 215, 238);
 
-                    worksheet.Range["R" + totalRowindex].Formula = "=L" + totalRowindex + "*N" + totalRowindex + "*1.5";
-                    worksheet.Range["R" + totalRowindex].NumberFormat = "$.00";
+                    if (item.IsFixedSalary == 1)
+                    {
+                        worksheet.Range["R" + totalRowindex].Number = 0;
+                    }
+                    else
+                    {
+                        worksheet.Range["R" + totalRowindex].Formula = "=L" + totalRowindex + "*N" + totalRowindex + "*1.5";
+                    }
+
+                    worksheet.Range["R" + totalRowindex].NumberFormat = "$#,###.00";
                     worksheet.Range["R" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["R" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
                     worksheet.Range["R" + totalRowindex].CellStyle.Font.Size = 13;
                     worksheet.Range["R" + totalRowindex].CellStyle.Color = Color.FromArgb(248, 203, 173);
 
-                    worksheet.Range["S" + totalRowindex].Formula = "=O" + totalRowindex + "*L" + totalRowindex;
-                    worksheet.Range["S" + totalRowindex].NumberFormat = "$.00";
+                    if (item.IsFixedSalary == 1)
+                    {
+                        worksheet.Range["S" + totalRowindex].Number = 0;
+                    }
+                    else
+                    {
+                        worksheet.Range["S" + totalRowindex].Formula = "=O" + totalRowindex + "*L" + totalRowindex;
+                    }
+
+                    worksheet.Range["S" + totalRowindex].NumberFormat = "$#,###.00";
                     worksheet.Range["S" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["S" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
                     worksheet.Range["S" + totalRowindex].CellStyle.Font.Size = 13;
                     worksheet.Range["S" + totalRowindex].CellStyle.Color = Color.FromArgb(198, 224, 180);
 
                     worksheet.Range["T" + totalRowindex].Formula = "=SUM(P" + totalRowindex + ":S" + totalRowindex + ")";
-                    worksheet.Range["T" + totalRowindex].NumberFormat = "$.00";
+                    worksheet.Range["T" + totalRowindex].NumberFormat = "$#,###.00";
                     worksheet.Range["T" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["T" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
                     worksheet.Range["T" + totalRowindex].CellStyle.Font.Size = 13;

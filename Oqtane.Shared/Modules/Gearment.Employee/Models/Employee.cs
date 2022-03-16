@@ -15,6 +15,8 @@ namespace Gearment.Employee.Models
         public decimal Rate { get; set; }
         public string Department { get; set; }
         public string Status { get; set; }
+
+        public int IsFixedSalary { get; set; }
         public string Note { get; set; }
         public DateTime StartDate { get; set; }
         public string CreatedBy { get; set; }

@@ -2,7 +2,7 @@
 @using Gearment.Employee.Services
 @using Gearment.Employee.Models
 @using Gearment.Department.Models
-@using Gearment.GearmentSetting.Services 
+@using Gearment.GearmentSetting.Services
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Inputs
@@ -31,9 +31,15 @@
 </div>
 <div class="form-group row">
     <label for="text" class="col-2 col-form-label">Rate</label>
-    <div class="col-10">
+    <div class="col-7">
         <div class="input-group">
             <SfNumericTextBox TValue="double" @bind-Value="@_rate" Format="c2" Step="0.5" FloatLabelType="@FloatLabelType.Never"></SfNumericTextBox>
+        </div>
+    </div>
+    <label for="text" class="col-1 col-form-label">Fixed Salary</label>
+    <div class="col-2">
+        <div class="input-group">
+            <Syncfusion.Blazor.Buttons.SfCheckBox @bind-Checked="_isFixedSalary"></Syncfusion.Blazor.Buttons.SfCheckBox>
         </div>
     </div>
 </div>
@@ -104,6 +110,7 @@
     string _status = "active";
     string _note = string.Empty;
     DateTime _startDate = DateTime.Now.Date;
+    bool _isFixedSalary = false;
 
     List<string> statusList = new List<string> { "Active", "InActive" };
     List<DepartmentViewModel> departmentList = new List<DepartmentViewModel>();
@@ -128,6 +135,7 @@
                     _status = Employee.Status;
                     _note = Employee.Note;
                     _startDate = Employee.StartDate;
+                    _isFixedSalary = Employee.IsFixedSalary == 1 ? true : false;
 
                     _createdby = Employee.CreatedBy;
                     _createdon = Employee.CreatedOn;
@@ -171,6 +179,7 @@
                 Employee.Status = _status;
                 Employee.Note = _note;
                 Employee.StartDate = _startDate;
+                Employee.IsFixedSalary = _isFixedSalary ? 1 : 0;
 
                 Employee = await EmployeeService.AddEmployeeAsync(Employee);
                 await logger.LogInformation("Employee Added {Employee}", Employee);
@@ -185,6 +194,7 @@
                 Employee.Status = _status;
                 Employee.Note = _note;
                 Employee.StartDate = _startDate;
+                Employee.IsFixedSalary = _isFixedSalary ? 1 : 0;
 
                 await EmployeeService.UpdateEmployeeAsync(Employee);
                 await logger.LogInformation("Employee Updated {Employee}", Employee);

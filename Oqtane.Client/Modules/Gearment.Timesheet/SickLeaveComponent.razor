@@ -101,7 +101,7 @@
             SelectedDates = new List<SickLeave>();
         }
 
-        if (SelectedDates.Any(x => x.Date == _selectedDate) && SelectedDates.Any(x => x.Name == _employeeId))
+        if (SelectedDates.Any(x => x.Date == _selectedDate && x.Name == _employeeId))
         {
             return;
         }

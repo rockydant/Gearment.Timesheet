@@ -438,6 +438,7 @@ namespace Gearment.Timesheet.Controllers
                     newRecord.TotalWorkingHourCurrentDay = item.TotalWorkingHour;
                     newRecord.TotalOvertimeHourCurrentDay = 0;
                     newRecord.IsFixedSalary = item.IsFixedSalary;
+                    newRecord.PayrollID = item.PayrollID;
 
                     if (IsBusinessDay(newRecord.Date))
                     {
@@ -467,7 +468,7 @@ namespace Gearment.Timesheet.Controllers
                     {
                         newRecord.TotalOvertimePayCurrentDay = 0;
                         newRecord.TotalPayCurrentDay = 0;
-                    }                    
+                    }
 
                     if (IsExisted != null)
                     {
@@ -488,6 +489,7 @@ namespace Gearment.Timesheet.Controllers
                         PayrollViewModel newItem = new PayrollViewModel();
                         newItem.Id = item.EmployeeId;
                         newItem.Name = item.Name;
+                        newItem.PayrollID = item.PayrollID;
                         newItem.Rate = item.Rate;
                         newItem.IsFixedSalary = item.IsFixedSalary;
                         newItem.Department = item.Department;

@@ -80,6 +80,7 @@
                         <GridColumns>
                             <GridColumn Field=@nameof(PayrollViewModel.Id) HeaderText="ID" TextAlign="TextAlign.Left" Width="60"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.Name) HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                            <GridColumn Field=@nameof(PayrollViewModel.PayrollID) HeaderText="PayrollID" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.Department) HeaderText="Department" TextAlign="TextAlign.Left" Width="60"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.Rate) HeaderText="Rate" Format="c2" TextAlign="TextAlign.Left" Width="50"></GridColumn>
                             <GridColumn Field=@nameof(PayrollViewModel.BonusRate) HeaderText="Bonus Rate" Format="c2" TextAlign="TextAlign.Left" Width="50"></GridColumn>
@@ -205,6 +206,7 @@
     private async Task Export()
     {
         ShowProgressIndicator();
+
         if (_attendance != null)
         {
             //MemoryStream excelStream = await TimesheetService.ExportPayrollDataAsync(ModuleState.ModuleId, _attendance);
@@ -335,11 +337,16 @@
                     worksheet.Range["A" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["A" + totalRowindex].CellStyle.Font.Size = 13;
                     worksheet.Range["A" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
+
                     worksheet.Range["B" + totalRowindex].Text = item.Department;
                     worksheet.Range["B" + totalRowindex].CellStyle.Font.Size = 13;
                     worksheet.Range["B" + totalRowindex].CellStyle.Font.Bold = true;
                     worksheet.Range["B" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
 
+                    worksheet.Range["C" + totalRowindex].Text = item.PayrollID;
+                    worksheet.Range["C" + totalRowindex].CellStyle.Font.Size = 13;
+                    worksheet.Range["C" + totalRowindex].CellStyle.Font.Bold = true;
+                    worksheet.Range["C" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;
 
                     worksheet.Range["J" + totalRowindex].Formula = SumFormulaString("J", dataStartRow, dataStartRow + item.PayrollDetailList.Count - 1);
                     worksheet.Range["J" + totalRowindex].CellStyle.Font.Color = ExcelKnownColors.Red;

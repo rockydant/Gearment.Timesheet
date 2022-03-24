@@ -175,6 +175,7 @@ namespace Gearment.Timesheet.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal Rate { get; set; }
+        public string PayrollID { get; set; }
         public int IsFixedSalary { get; set; }
         public List<string[]> WorkingDates { get; set; }
         public decimal TotalWorkingHours { get; set; }
@@ -203,6 +204,7 @@ namespace Gearment.Timesheet.Models
         public decimal TotalWorkingHourCurrentDay { get; set; }        
         public string Status { get; set; }
         public int IsFixedSalary { get; set; }
+        public string PayrollID { get; set; }
 
         public decimal TotalBreakHourCurrentDay { get; set; }
         public decimal TotalOvertimeHourCurrentDay { get; set; }

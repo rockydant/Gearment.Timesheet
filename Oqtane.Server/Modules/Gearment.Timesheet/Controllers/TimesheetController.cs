@@ -454,7 +454,7 @@ namespace Gearment.Timesheet.Controllers
                         newRecord.TotalWorkingHourCurrentDay = 0;
                     }
 
-                    if (Query.SickLeaves.Any(x => x.Name == item.Name && x.Department == item.Department && x.Date == newRecord.Date))
+                    if (Query.SickLeaves.Any(x => x.Name == item.Name && x.Date == newRecord.Date))
                     {
                         newRecord.TotalWorkingHourCurrentDay = 0;
                     }
@@ -526,7 +526,7 @@ namespace Gearment.Timesheet.Controllers
 
                 foreach (var item in Query.SickLeaves)
                 {
-                    var employee = result.FirstOrDefault(x => x.Name == item.Name && x.Department == item.Department);
+                    var employee = result.FirstOrDefault(x => x.Name == item.Name);
                     if (employee != null)
                     {
                         PayrollDetailViewModel sickLeaveRecord = new PayrollDetailViewModel();
